@@ -44,7 +44,6 @@ const scrapperLeadSchema = new mongoose.Schema({
 });
 
 // Index for faster queries
-scrapperLeadSchema.index({ phone: 1 });
 scrapperLeadSchema.index({ status: 1 });
 
 const ScrapperLead = mongoose.model('ScrapperLead', scrapperLeadSchema);

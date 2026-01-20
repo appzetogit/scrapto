@@ -15,8 +15,7 @@ const orderSchema = new mongoose.Schema({
   orderType: {
     type: String,
     enum: Object.values(ORDER_TYPES),
-    default: ORDER_TYPES.SCRAP_SELL,
-    index: true
+    default: ORDER_TYPES.SCRAP_SELL
   },
   serviceDetails: {
     serviceType: String,

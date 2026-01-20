@@ -15,7 +15,9 @@ let io = null;
 export const initializeSocket = (server) => {
   io = new Server(server, {
     cors: {
-      origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+      origin: (process.env.FRONTEND_URL || 'http://localhost:5173')
+        .split(',')
+        .map(o => o.trim().replace(/\/$/, "")),
       methods: ['GET', 'POST'],
       credentials: true
     },

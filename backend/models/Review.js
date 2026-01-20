@@ -10,21 +10,18 @@ const reviewSchema = new mongoose.Schema({
   user: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
-    required: true,
-    index: true
+    required: true
   },
   scrapper: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Scrapper',
-    required: true,
-    index: true
+    required: true
   },
   rating: {
     type: Number,
     required: true,
     min: 1,
-    max: 5,
-    index: true
+    max: 5
   },
   title: {
     type: String,
@@ -55,8 +52,7 @@ const reviewSchema = new mongoose.Schema({
   status: {
     type: String,
     enum: ['pending', 'approved', 'rejected', 'flagged'],
-    default: 'pending',
-    index: true
+    default: 'pending'
   },
   moderationNotes: {
     type: String,

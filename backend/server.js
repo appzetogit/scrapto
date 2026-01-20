@@ -60,8 +60,11 @@ app.use(
       // Check against allowed origins
       const allowedOrigins = (
         process.env.FRONTEND_URL || "http://localhost:5173"
-      ).split(",");
-      if (allowedOrigins.indexOf(origin) !== -1) {
+      ).split(",").map(o => o.trim().replace(/\/$/, ""));
+
+      const normalizedOrigin = origin.replace(/\/$/, "");
+
+      if (allowedOrigins.indexOf(normalizedOrigin) !== -1) {
         callback(null, true);
       } else {
         callback(new Error("Not allowed by CORS"));

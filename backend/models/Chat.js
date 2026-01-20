@@ -67,20 +67,19 @@ const chatSchema = new mongoose.Schema({
 // Indexes for better query performance
 chatSchema.index({ user: 1, lastMessageAt: -1 });
 chatSchema.index({ scrapper: 1, lastMessageAt: -1 });
-chatSchema.index({ orderId: 1 }, { unique: true });
 chatSchema.index({ status: 1, lastMessageAt: -1 });
 
 // Method to update last message
-chatSchema.methods.updateLastMessage = function(messageText) {
-  this.lastMessage = messageText.length > 100 
-    ? messageText.substring(0, 100) + '...' 
+chatSchema.methods.updateLastMessage = function (messageText) {
+  this.lastMessage = messageText.length > 100
+    ? messageText.substring(0, 100) + '...'
     : messageText;
   this.lastMessageAt = new Date();
   return this.save();
 };
 
 // Method to increment unread count
-chatSchema.methods.incrementUnread = function(userType) {
+chatSchema.methods.incrementUnread = function (userType) {
   if (userType === 'user') {
     this.unreadCount.user += 1;
   } else if (userType === 'scrapper') {
@@ -90,7 +89,7 @@ chatSchema.methods.incrementUnread = function(userType) {
 };
 
 // Method to reset unread count
-chatSchema.methods.resetUnread = function(userType) {
+chatSchema.methods.resetUnread = function (userType) {
   if (userType === 'user') {
     this.unreadCount.user = 0;
   } else if (userType === 'scrapper') {

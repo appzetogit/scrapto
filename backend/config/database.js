@@ -3,13 +3,10 @@ import logger from '../utils/logger.js';
 
 const connectDB = async () => {
   try {
-    const conn = await mongoose.connect(process.env.MONGODB_URI || process.env.MONGODB_URI_PROD, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
+    const conn = await mongoose.connect(process.env.MONGODB_URI || process.env.MONGODB_URI_PROD);
 
-    logger.info(`MongoDB Connected: ${conn.connection.host}`);
-    
+    logger.info(`✅ MongoDB Connected: ${conn.connection.host}`);
+
     // Handle connection events
     mongoose.connection.on('error', (err) => {
       logger.error('MongoDB connection error:', err);

@@ -7,8 +7,7 @@ const scrapperSchema = new mongoose.Schema({
     type: String,
     required: [true, 'Please provide a phone number'],
     unique: true,
-    trim: true,
-    index: true
+    trim: true
   },
   name: {
     type: String,
@@ -195,8 +194,7 @@ const scrapperSchema = new mongoose.Schema({
   }],
   isOnline: {
     type: Boolean,
-    default: false,
-    index: true
+    default: false
   },
   rating: {
     average: {
@@ -295,7 +293,6 @@ const scrapperSchema = new mongoose.Schema({
 // Geospatial index for location queries
 scrapperSchema.index({ liveLocation: '2dsphere' });
 scrapperSchema.index({ isOnline: 1, 'kyc.status': 1, 'subscription.status': 1, 'marketSubscription.status': 1 });
-scrapperSchema.index({ phone: 1 }, { unique: true });
 
 // Hash password before saving
 scrapperSchema.pre('save', async function (next) {
