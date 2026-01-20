@@ -1,0 +1,173 @@
+@import "tailwindcss";
+
+/* Custom utilities */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Smooth scrolling - handled by Lenis */
+html {
+  scroll-behavior: auto;
+  /* Let Lenis handle smooth scrolling */
+}
+
+/* Global styles - prevent blur and color override */
+* {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #f4ebe2;
+  color: #2d3748;
+  /* Prevent zoom on mobile - allow panning but prevent pinch zoom */
+  touch-action: pan-x pan-y;
+  -ms-touch-action: pan-x pan-y;
+}
+
+/* Prevent backdrop blur effects on all elements except modals */
+body>*:not([class*="modal"]):not([class*="Modal"]) {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  filter: none !important;
+}
+
+/* Ensure proper color rendering */
+img,
+svg {
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+}
+
+/* Ensure bottom nav stays at viewport bottom */
+@media (max-width: 767px) {
+
+  /* Ensure navbar is fixed to viewport, not page */
+  body {
+    padding-bottom: 0;
+    margin: 0;
+  }
+
+  /* Allow vertical scrolling on mobile */
+  html,
+  body {
+    min-height: 100%;
+    height: auto;
+    overflow-x: hidden;
+    overflow-y: auto;
+    position: relative;
+  }
+
+  /* Ensure fixed elements stay in viewport */
+  [style*="position: fixed"] {
+    position: fixed !important;
+  }
+}
+
+/* React Calendar Customization */
+.react-calendar {
+  width: 100% !important;
+  border: none !important;
+  background: white !important;
+  font-family: inherit !important;
+  border-radius: 1rem !important;
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1) !important;
+  padding: 1rem !important;
+}
+
+.react-calendar__tile {
+  padding: 1rem 0.5rem !important;
+  border-radius: 0.5rem !important;
+}
+
+.react-calendar__tile:enabled:hover,
+.react-calendar__tile:enabled:focus {
+  background-color: #f0fdf4 !important;
+  /* green-50 */
+  color: #16a34a !important;
+  /* green-600 */
+}
+
+.react-calendar__tile--now {
+  background: #dcfce7 !important;
+  /* green-100 */
+  color: #15803d !important;
+  /* green-700 */
+}
+
+.react-calendar__tile--active {
+  background: #16a34a !important;
+  /* green-600 */
+  color: white !important;
+}
+
+.react-calendar__tile--active:enabled:hover,
+.react-calendar__tile--active:enabled:focus {
+  background: #15803d !important;
+  /* green-700 */
+}
+
+.react-calendar__navigation button {
+  color: #166534 !important;
+  /* green-800 */
+  font-size: 1.1rem !important;
+  font-weight: 600 !important;
+}
+
+.react-calendar__navigation button:enabled:hover,
+.react-calendar__navigation button:enabled:focus {
+  background-color: #f0fdf4 !important;
+}
+
+/* React Time Picker Customization */
+.react-time-picker {
+  width: 100% !important;
+}
+
+.react-time-picker__wrapper {
+  border: 2px solid #e5e7eb !important;
+  border-radius: 0.75rem !important;
+  padding: 0.5rem !important;
+  background: white !important;
+  transition: all 0.2s !important;
+}
+
+.react-time-picker__wrapper:focus-within {
+  border-color: #16a34a !important;
+  box-shadow: 0 0 0 2px #dcfce7 !important;
+}
+
+.react-time-picker__inputGroup__input {
+  font-weight: 600 !important;
+  color: #374151 !important;
+}
+
+.react-clock {
+  background-color: white !important;
+  border-radius: 50% !important;
+  border: 4px solid #16a34a !important;
+}
+
+.react-clock__face {
+  background-color: white !important;
+}
+
+.react-clock__hand__body {
+  background-color: #16a34a !important;
+}
+
+.react-clock__mark__body {
+  background-color: #d1d5db !important;
+}

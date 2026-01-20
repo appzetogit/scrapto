@@ -1,0 +1,629 @@
+# MERN Scrap Pickup App — Detailed Specification & AI Design Prompt
+
+## 1. Project Summary
+
+**Project Name (suggestion):** Scrapto
+
+**Goal:** Build a mobile-first web app (progressive web app) using the MERN stack (MongoDB, Express.js, React, Node.js) that connects everyday users who want to sell scrap materials with registered scrappers (collectors). The platform orchestrates requests, real-time pricing, scheduling, KYC, subscription management, push/real-time notifications, and smooth animated UI using GSAP, Framer Motion and Lenis for scroll/transition smoothness.
+
+---
+
+## 2. High-level User Roles & Panels
+
+1. **User (Customer)** — creates pickup requests by uploading photos, providing weight/description, sees live market price per scrap type, tracks request status, chats with scrapper, receives notifications and OTP-based login.
+2. **Scrapper (Collector)** — registers with mandatory KYC (Aadhaar photo/number, selfie/photo, phone), subscribes to a paid plan (₹99/month), receives incoming pickup requests (with alarm ringtone & timeout), accepts/declines, sees user location on map, chooses time slots, updates status & price collected.
+3. **Admin** — manages users & scrappers, verifies KYC, adjusts market pricing feeds, manages subscription plans, monitors transactions, handles dispute/resolution and app content.
+
+---
+
+## 3. Core Product Features (Detailed)
+
+### 3.1 Request Flow (User)
+
+* User opens app → selects scrap type (plastic, copper, aluminium, paper, electronics, etc.) → uploads image(s) and enters approximate weight, condition and any notes.
+* App displays **real-time market price** per kg for the selected scrap type (fetched from admin-managed feed; updated daily).
+* User taps **Request Pickup** → system finds nearby available scrappers and sends the request to the first scrapper.
+* If scrapper does not accept within **90 seconds** (configurable: 60–120s), the request automatically moves to the next available scrapper.
+* When a scrapper accepts, user receives a confirmation with scrapper details and estimated arrival time. A live map shows scrapper route and ETA.
+
+### 3.2 Scrapper Experience
+
+* Scrapper receives **push + in-app notification** with an alarm ringtone and vibration when a request arrives.
+* Scrapper sees request details: user photos, weight estimate, pickup time window, and user rating.
+* Scrapper can **Accept** or **Decline**. If accepted, they see accurate location and can navigate to user using the map (Google Maps/Mapbox deep link or embedded map).
+* Scrapper can **select/offer time slots** for recurring pickups and update status: `on-the-way` → `arrived` → `picked` → `completed`.
+* Scrapper must subscribe to pro plan (₹99/month) to receive requests (or view higher-priority requests). KYC validation is mandatory during/onboarding.
+
+### 3.3 Pricing & Market Feed
+
+* Admin maintains price feed for each scrap category (₹/kg). Prices updated daily.
+* Users see **estimated payout** per item (weight * price/kg). Admin can set price multipliers for region/time.
+
+### 3.4 Authentication & Security
+
+* **OTP-based login/signup** for users and scrappers (mobile number as primary ID). Additional password optional.
+* Scrapper KYC: Aadhaar number (masked in display), photo of Aadhaar, selfie, phone. Admin verifies and marks scrapper as verified.
+* Sensitive data encrypted at rest; use HTTPS and environment-protected secrets.
+
+### 3.5 Notifications & Retry Logic
+
+* Use Web Push / Firebase Cloud Messaging (FCM) for push notifications.
+* Request routing logic: try the nearest/highest-rated online scrapper → wait `T` seconds → move to next. Play alarm ringtone + vibration on device when new request arrives.
+
+### 3.6 Chat & Communication
+
+* In-app chat between user & scrapper (instant messages). Option for bot-assisted responses for FAQs.
+* Store conversation logs for admin moderation.
+
+### 3.7 Admin Features
+
+* Dashboard: active requests, KYC queue, scrapper stats, revenue, complaints.
+* Manually edit price feed, manage subscription payments/refunds and block/unblock accounts.
+* Export reports (CSV) for transactions and pickups.
+
+---
+
+## 4. Detailed User Stories & Acceptance Criteria
+
+### User Stories (Key)
+
+1. **As a User**, I want to upload a photo and weight of my scrap so I can request pickup. *Acceptance:* Photo + weight accepted; estimated payout shown.
+2. **As a User**, I want to see live market price per scrap to know the expected payout. *Acceptance:* Price shows and updates daily.
+3. **As a Scrapper**, I want to receive a request with an alarm tone so I don’t miss jobs. *Acceptance:* Push + ringtone + in-app notification displayed.
+4. **As a Scrapper**, I want to pick my working time slots so I only get requests when I’m available. *Acceptance:* Scrapper can set slots and only receives requests for those times.
+5. **As an Admin**, I want to verify scrapper KYC before they can receive requests. *Acceptance:* KYC queue with accept/reject actions.
+
+---
+
+## 5. Data Models (MongoDB Collections)
+
+**Users**
+
+```json
+{
+  _id, name, phone, isVerified, profilePic, createdAt, devices:[{fcmToken}], savedAddresses:[{label, coords}], walletBalance
+}
+```
+
+**Scrappers**
+
+```json
+{
+  _id, name, phone, kyc:{aadhaarNumberMasked, aadhaarPhotoUrl, selfieUrl, verified(Boolean), verifiedAt}, subscription:{status, expiryDate}, rating, availableSlots, vehicleInfo, liveLocation:{lat, lng, updatedAt}
+}
+```
+
+**Requests**
+
+```json
+{
+  _id, userId, scrapperId (nullable), scrapItems:[{type, photoUrl, weightKg, estimatePrice}], status, route:[events], createdAt, acceptedAt, completedAt
+}
+```
+
+**Prices**
+
+```json
+{_id, scrapType, pricePerKg, regionCode, effectiveDate}
+```
+
+**Notifications / Chats**
+
+```json
+{_id, fromId, toId, type, message, timestamp, requestId}
+```
+
+```
+
+---
+
+## 6. API Endpoints (Suggested)
+**Auth**
+- `POST /api/auth/send-otp` — send OTP
+- `POST /api/auth/verify-otp` — verify OTP & issue JWT
+
+**Users**
+- `GET /api/users/:id` — get user
+- `POST /api/users/:id/requests` — create request (multipart/form-data for images)
+- `GET /api/users/:id/requests` — list
+
+**Scrappers**
+- `POST /api/scrappers/register` — complete registration + KYC upload
+- `POST /api/scrappers/subscribe` — subscription payment webhook
+- `GET /api/scrappers/requests/nearby` — get incoming requests (real-time)
+- `POST /api/scrappers/:id/requests/:requestId/accept` — accept
+- `POST /api/scrappers/:id/requests/:requestId/status` — update status
+
+**Admin**
+- `GET /api/admin/kyc-queue`
+- `PATCH /api/admin/kyc/:scrapperId/verify`
+- `PATCH /api/admin/prices` — bulk update
+
+**Realtime (WebSocket / Socket.io)**
+- `socket.on('new-request', payload)` — for scrapper
+- `socket.emit('request-accepted', payload)` — to user
+
+---
+
+## 7. Architecture & Tech Choices
+- **Frontend:** React (Vite or Create React App). Mobile-first PWA, React Router, Redux/Context for state, Tailwind CSS for utility styles.
+- **Animations:** Framer Motion for React component transitions; GSAP for timeline-heavy, sequence animations; Lenis for smooth scrolling & inertia.
+- **Realtime:** Socket.io (Node.js) or Firebase Realtime/Cloud Firestore with listeners for status updates.
+- **Backend:** Node.js + Express.js, REST APIs + WebSocket (socket.io).
+- **DB:** MongoDB (Atlas) with proper indexes for geospatial queries (2dsphere for scrapper live locations).
+- **Push & Notifications:** Firebase Cloud Messaging (FCM) + Web Push + device ringtone handling on mobile.
+- **Payment & Subscriptions:** Razorpay or Stripe (India-focused: Razorpay recommended) for ₹99/month subscriptions.
+- **Maps:** Google Maps or Mapbox for route/ETA; store lat/lng for user addresses and scrapper live location.
+- **File Storage:** Cloudinary or S3 for images (Aadhaar photos, scrap images).
+- **Hosting:** Backend on Render/Heroku/AWS; Frontend on Vercel/Netlify; MongoDB Atlas.
+
+---
+
+## 8. UX / UI: Screens & Components
+1. **Landing / Splash** — logo, tagline, quick login buttons (User / Scrapper)
+2. **Auth (OTP)** — phone input, OTP input, resend timer
+3. **User Home (Dashboard)** — quick "Create Pickup" CTA, live price ticker, previous pickups
+4. **Create Pickup Flow**
+   - Select scrap category
+   - Upload image(s) (preview + compress client-side)
+   - Input weight (kg) and notes
+   - Show price calculation & `Request Pickup` button
+5. **Request Pending** — waiting state with an animated finder showing request traveling to scrappers (use GSAP looping micro-animations)
+6. **Request Matched** — show scrapper card, ETA, live map with route, `Cancel` option
+7. **Scrapper Home** — earnings summary, availability toggle, subscription status, time-slot selector
+8. **Incoming Request Modal** — full-screen ringing modal with Accept / Decline; dismiss action after `T` seconds.
+9. **Live Chat** — messages, media sharing, quick replies (bot suggested)
+10. **Profile / KYC** — upload Aadhaar image, selfie, status
+11. **Admin Dashboard** — tables, filters, KYC actions, price feed editor
+
+---
+
+## 9. Animation & Motion System (GSAP + Framer Motion + Lenis)
+**Principles:** smoothness, minimal cognitive load, strong affordances on CTAs, micro-interactions that confirm actions.
+
+**Lenis**
+- Use Lenis for smooth scrolling and subtle inertia across the PWA, particularly on long admin dashboards and user history pages.
+
+**Framer Motion**
+- Use for component-level transitions (page mount/unmounts, modal animations, list reordering).
+- Examples: page route transitions (fade+slide), notification toasts (slide-from-top + pop), scrapper card flip/expand on match.
+
+**GSAP**
+- Use GSAP timelines for sequence-heavy UI: the Request Pending animation that shows the ‘searching for scrappers’ path, or animating maps/route progress.
+- GSAP is also great for onboarding hero animation and complex micro-interactions that require precise control.
+
+**Animation Suggestions by Screen**
+- **Splash:** subtle parallax hero using GSAP; logo morph + easing in.
+- **Create Pickup:** micro-animations on image upload (scale + shadow), animate weight input increments.
+- **Request Pending:** looping GSAP timeline with dots or icons moving between nodes (representing scrappers) — when accepted, transform the timeline into a success check animation.
+- **Incoming Request Modal:** high-priority modal with quick scale + bounce effect (Framer Motion) and a GSAP-driven alarm pulse on the Accept button while ringing.
+- **Map & ETA:** animate scrapper marker along polyline with GSAP tweening position updates as live locations come in.
+
+**Performance Tips**
+- Animate transform and opacity only (avoid layout-triggering properties); use `will-change` where needed.
+- Debounce heavy animations on low-end devices.
+- Use requestAnimationFrame-compatible libraries (GSAP is rAF-friendly).
+
+---
+
+## 10. Offline/Edge Cases & Reliability
+- Handle network loss: queued requests local-first and sync when online.
+- For missed push notifications, fall back to in-app polling for short periods.
+- Rate-limit OTP sends and scrapper acceptance attempts to avoid spam.
+
+---
+
+## 11. Security & Compliance
+- Mask Aadhaar and sensitive fields in UI.
+- Use server-side validation for KYC documents and store original images securely (S3 with restricted ACLs + encryption).
+- Comply with local laws for identity verification and data retention.
+
+---
+
+## 12. QA & Testing Plan
+- Unit tests for backend controllers and frontend components (Jest + React Testing Library).
+- End-to-end tests (Cypress) for core flows: auth (OTP), request creation, scrapper accept, map tracking.
+- Load testing for real-time request routing logic.
+
+---
+
+## 13. AI Editor Prompt (Detailed) — Use this to instruct a UI/UX AI editor or designer tool
+> **Task:** Design a mobile-first PWA (React) mockup and high-fidelity prototype for *Scrapto*, a scrap pickup marketplace connecting users (who want to sell scrap) with registered scrappers. Produce screens, transitions, and an animation plan suitable for handoff to frontend engineers (React + Tailwind). Provide export-ready assets and a design system.
+>
+> **Deliverables:**
+> 1. High-fidelity screens for: Splash, OTP Auth, User Home, Create Pickup flow (3 steps), Request Pending, Request Matched (live map + ETA), Scrapper Home, Incoming Request modal, Chat, Profile/KYC, Admin Dashboard (compact).
+> 2. A 60–90 second clickable prototype demonstrating: a user creating a pickup, request routing timeout (animated), scrapper accepting, live tracking & completion.
+> 3. A clear animation spec: which screens use Framer Motion vs GSAP vs Lenis and for what purpose (example: use Framer Motion for modal & route transitions, GSAP for request-search timeline animation, Lenis for scroll smoothing).
+> 4. Export assets: icons (SVG), PNGs for social previews, and optimized images at 1x/2x. Provide Tailwind tokens (colors, spacing, font sizes) and component states (hover, active, disabled).
+> 5. Developer handoff notes: component breakdown, CSS classes (Tailwind), animation snippets (Framer Motion variants & GSAP timeline pseudocode), accessible color contrast checks, and responsive breakpoints.
+>
+> **Design constraints & guidance:**
+> - Mobile-first PWA with a responsive break at 768px and 1024px.
+> - Use modern, trust-invoking color palette (e.g., deep teal / navy primary, energetic accent like amber/green, neutral backgrounds). Keep contrast accessible.
+> - Micro-interactions should be quick (80–300ms) and meaningful. Avoid long blocking animations.
+> - Prioritize clarity for the ringing incoming request (full-screen modal on mobile) so scrappers don't miss jobs.
+> - Provide two theme variants: Light and Dark.
+>
+> **Animation specifics (examples to include):**
+> - **Request Pending:** GSAP timeline showing request dot traveling from user to scrapper nodes; when accepted, morph timeline into progress bar and animate scrapper marker moving on map.
+> - **Incoming Request:** Framer Motion modal with a subtle pop + pulse on Accept; play an audio file (configurable) on incoming.
+> - **Page Transitions:** use Framer Motion `AnimatePresence` with quick fade + y-axis slide. Use Lenis for scroll smoothing across pages.
+>
+> **Acceptance Criteria for AI Editor output:**
+> - All screens available in Figma/Adobe XD with component library and tokens exported.
+> - Animation timeline and sample code snippets for Framer Motion and GSAP included.
+> - Prototype demonstrates the full happy path and a fallback path (no scrappers accept within timeout).
+
+---
+
+## 14. Implementation Roadmap (MVP → v1 → v2)
+**MVP (4–6 weeks)**
+- Auth (OTP), create pickup (image upload, weight), basic scrapper registration (no KYC verification), simple request routing, scrapper accept, map direction link, basic chat, price feed CRUD for admin.
+
+**v1 (6–12 weeks)**
+- KYC verification, subscription integration, robust push notifications, live tracking via socket.io, admin dashboard, payment flows, better animations and PWA features (offline caching).
+
+**v2 (post-launch)**
+- Automated pricing integrations, AI image recognition to auto-classify scrap type & estimate weight, advanced analytics, loyalty/ratings, referral program.
+
+---
+
+## 15. Handoff Checklist for Developers
+- Design tokens & Tailwind config
+- Component list and props definitions
+- Sample Framer Motion variants & GSAP timeline pseudocode
+- API Swagger / Postman collection
+- Database schema & indexes
+- Deployment scripts & environment variable list
+
+---
+
+## 16. Next Steps (recommended immediate tasks)
+1. Create Figma/Design file with the screens in the AI prompt above.
+2. Build backend skeleton: auth + request model + socket.io.
+3. Create React PWA skeleton with Tailwind and page routes.
+4. Implement OTP flow & image upload endpoint.
+
+---
+
+## 17. Notes & Considerations
+- Aadhaar handling: consult legal/compliance before storing Aadhaar numbers. Consider only storing masked numbers and retain minimal personally identifying information.
+- Performance: compress images on client side before upload.
+
+
+---
+
+*If you want, I can also generate:*
+- A concise Figma brief for designers, or
+- A set of React component stubs (Tailwind + Framer Motion) ready to paste into a codebase, or
+- API route implementations (Express controllers & Mongoose models) for the MVP.
+
+
+---
+
+*End of document.*
+
+---
+
+# A–Z End-to-End Development Plan (Pages-wise, Centralized Architecture, Reusable Components, and Deep Hero Page Research)
+
+> नीचे दिया गया पूरा प्लान ऐसा है कि किसी भी डेवलपर/टीम को फ़ॉलो करके यह प्रोडक्ट end-to-end डिलीवर करना आसान हो — पृष्ठ (pages) लेवल से लेकर reusable components, folder structure, API contracts, QA, security, deployment और launch तक।
+
+## 1) Goal of this document
+- एक practical, action-ready blueprint दें जिससे आप या आपकी टीम बिना confusion के ऐप बना सके।
+- हर चीज centralised हो — reusable components, shared services, design tokens, और API contracts।
+
+---
+
+## 2) High level architecture (One place centralization)
+- **Frontend**: React (Vite) + TypeScript + Tailwind (design tokens) + Zustand/Redux Toolkit (state) + React Query (server state) + Framer Motion + GSAP + Lenis.
+- **Backend**: Node.js + Express + TypeScript + Socket.io + REST + Webhooks.
+- **DB**: MongoDB Atlas (collections & indexes) with geo queries (2dsphere index) and Redis for short-lived counters/locks.
+- **File Storage**: AWS S3 or Cloudinary (images, KYC docs).
+- **Push/Realtime**: FCM + Socket.io for live events.
+- **Payments**: Razorpay for subscriptions.
+- **CI/CD**: GitHub Actions -> Vercel (frontend) + Render/AWS ECS/Heroku (backend) + MongoDB Atlas.
+- **Monitoring**: Sentry (errors) + Prometheus/Grafana or hosted alternatives.
+
+All shared configs (env vars, feature flags) stored in central repo `.env.example` and secrets in provider vault.
+
+---
+
+## 3) Monorepo & Folder Structure (recommended)
+Use a monorepo (pnpm/workspaces) so frontend, backend, and shared code (types, validation schemas) stay in one place.
+
+```
+
+/scrapto-monorepo
+├─ apps/
+│  ├─ web/             # React Vite app (PWA)
+│  └─ admin/           # Admin web app (could share components with web)
+├─ services/
+│  └─ api/             # Express backend
+├─ packages/
+│  ├─ ui/              # Reusable React components (buttons, cards, modals)
+│  ├─ db/              # shared mongoose types & utils
+│  ├─ types/           # shared TS types (User, Scrapper, Request)
+│  └─ hooks/           # shared react hooks (useAuth, useSocket)
+├─ infra/              # infra as code, k8s or render configs
+└─ .github/workflows
+
+```
+
+Benefits: single source for UI tokens, types, validations and consistent releases.
+
+---
+
+## 4) Pages (User, Scrapper, Admin) — Complete list (wireframe level)
+
+### User (public + authenticated)
+1. Landing / Hero (public)
+2. Auth (OTP) (phone input, OTP verification)
+3. Onboarding (profile, saved addresses)
+4. Home / Dashboard (live price ticker, quick Create Pickup CTA, history)
+5. Create Pickup (multi-step: select scrap type → upload image(s) → weight & notes → price calc → confirm)
+6. Request Pending (animation that searches scrappers)
+7. Request Matched (live map + scrapper card + ETA + chat)
+8. My Requests (list & detail with timeline)
+9. Wallet / Payments (transactions, payouts)
+10. Profile & Settings (addresses, notifications, support)
+11. Chat (inbox style)
+12. FAQ / Help
+
+### Scrapper
+1. Auth (OTP & KYC upload)
+2. Profile & KYC status
+3. Home (earnings summary, availability toggle, subscription status)
+4. Incoming Request Modal (full-screen with accept/decline + alarm)
+5. Active Request (map, navigation, status updates)
+6. Time Slot Scheduler (availability management)
+7. Earnings & History
+8. Support / KYC verification results
+
+### Admin
+1. Admin Login
+2. Dashboard (KPIs, active requests)
+3. KYC Queue (approve / reject)
+4. Price Feed Editor (bulk upload CSV & region rules)
+5. User Management
+6. Scrapper Management & Subscription view
+7. Transactions & Reports
+8. App Settings & Feature Flags
+
+---
+
+## 5) Reusable Components (central `packages/ui`)
+Design each component with accessibility and variants in mind. Every component should have well-defined props and story in Storybook.
+
+Core components:
+- `Button` (variants: primary, secondary, icon, ghost)
+- `Input`, `NumberInput`, `MaskedInput` (for Aadhaar masking)
+- `OTPInput` (with auto-focus)
+- `FileUploader` (image compression + preview)
+- `Card` (scrapper card, request card)
+- `Modal` (full-screen variant for incoming request)
+- `Toast` / `Snackbar`
+- `MapView` (wrapper around Mapbox/Google Maps)
+- `PriceTicker` (marquee showing live prices)
+- `Timeline` (request status timeline)
+- `Loader` and `Skeleton` components
+- `Avatar`, `RatingStars`
+- `Form` primitives (Label, HelpText, ErrorText)
+- `Icon` system (SVG sprite)
+
+Each component must accept `className` and `style` overrides and export TypeScript prop types.
+
+---
+
+## 6) Component Patterns & Best Practices
+- Use atomic components (Button, Input) then compose molecules (LoginForm, PickupForm) and organisms (DashboardPanel).
+- Props-driven styling + Tailwind tokens for colors & spacing.
+- Decouple UI and business logic: components receive handlers via props and don't call APIs directly.
+- Provide unit tests for components (Jest + React Testing Library) and visual regression test cases where needed.
+
+---
+
+## 7) State Management Strategy
+- **Local UI state**: component state (useState) for ephemeral data.
+- **Server state**: React Query for API fetching, caching, invalidation (requests list, price feed).
+- **Global auth & socket**: Zustand or Redux Toolkit (auth token, user info, current socket connection, subscription status).
+- **Form handling**: React Hook Form + Zod for validation (shared schemas in `packages/types`).
+
+---
+
+## 8) API Contract (Core Endpoints) — Exact request/response shapes
+Provide OpenAPI/Swagger from the start. Example core routes:
+
+**Auth**
+- `POST /api/auth/send-otp` { phone }
+- `POST /api/auth/verify-otp` { phone, otp } → returns `{ token, user }`
+
+**Requests**
+- `POST /api/requests` multipart/form-data { userId, items:[{type, weight, notes}], images[] } → returns `{ requestId, status:"pending" }`
+- `GET /api/requests/:id` → returns request object with timeline
+
+**Scrapper**
+- `POST /api/scrappers/register` { name, phone, vehicle, kyc: files } → returns `{ scrapperId, kycStatus }`
+- `POST /api/scrappers/:id/accept` { requestId } → returns `{ success }` (also emits socket event)
+
+**Realtime (Socket.io events)**
+- `server -> scrapper` new-request `{ requestId, items, userLocation, images }`
+- `scrapper -> server` accept/decline `{ requestId }`
+- `server -> user` request-accepted `{ scrapperInfo, eta }`
+
+Make sure to version APIs `/v1/`.
+
+---
+
+## 9) Database Schema (concise)
+- Users
+- Scrappers (with KYC subdocument)
+- Requests (with geo points and timeline array)
+- Prices (scrapType, pricePerKg, region)
+- Chats
+- Subscriptions
+
+Include `2dsphere` index on `users.savedAddresses.coords` and `scrappers.liveLocation` for geospatial queries.
+
+---
+
+## 10) Request Routing Logic (detailed)
+1. When user creates a request, server finds **candidate scrappers** within N km who are online, verified, and subscribed, and within their selected time slot.
+2. Server sorts candidates by `proximity, rating, lastAcceptedAt`.
+3. Server sends `new-request` socket event to the first candidate and marks request `waiting` with timestamp.
+4. Candidate device plays ringtone. Server starts a short TTL (configurable, e.g., 90s) for that candidate.
+5. If candidate accepts within TTL → server assigns and emits `request-accepted` to user and cancels other pending attempts.
+6. If candidate declines or TTL expires → server sends to next candidate.
+7. If no candidate accepts → server notifies user and offers options (reduce radius, extend time window).
+
+**Implementation notes:** use Redis to track TTL and atomic locks to avoid race conditions (two scrappers accepting at same millisecond).
+
+---
+
+## 11) Hero Page — Deep Research & Exact Content Plan
+Hero is the most critical first impression. Mobile-first design must communicate trust and immediate value.
+
+**Hero goals:**
+- Convey what the app does in 2–3 words
+- Primary CTA: "Request Pickup" or "Get Started" (OTP)
+- Secondary CTA: "How it works" or "Become a Scrapper"
+- Show live price snapshot + short trust signals
+
+**Hero components (mobile first)**
+1. **Headline** (clear & benefit-driven)
+   - Example: "Sell your scrap — we’ll pick it up from your door." (Hindi variant: "Apna scrap bechein — hum aapke ghar se le jayenge")
+2. **Subheadline** (one sentence) — pricing transparency + safety
+   - Example: "Real-time market prices. Verified scrappers. Cash on pickup."
+3. **Primary CTA (OTP flow)** — phone input (one-field) + button
+4. **Visual / Micro-demo**
+   - Small interactive carousel: 3-step micro-flow visuals — (Upload photo → Request sent → Scrapper arrives). Use GSAP for looped micro-animation.
+   - Map snapshot section showing scrapper en route (tiny map preview) — not full map but an illustrative SVG if on landing page.
+5. **Price Ticker**
+   - compact horizontal ticker of top scrap prices (auto-updates via React Query polling every X minutes) — shows trust & value.
+6. **Trust signals**
+   - KYC verified scrappers badge, Secure payments, 24/7 Support, user ratings (stars)
+7. **Secondary elements**
+   - Short social proof: 3 testimonials with initials & rating.
+   - Quick stats: "50,000+ pickups", "4.8 avg rating"
+
+**Hero accessibility & performance**
+- Phone input must be an accessible input with numeric keyboard on mobile.
+- Keep hero SVGs optimized (<50KB) and lazy-load heavy assets.
+
+**Animation plan for hero**
+- Use GSAP for micro-demo timeline (looping, but pause on hover/interaction).
+- Use Framer Motion for CTA entrance and subtle bounce.
+- Use Lenis to ensure smooth scrolling from hero to the rest of page.
+
+---
+
+## 12) UI/UX Research Notes (Hero-specific)
+- Users trust real-time pricing; show timestamp of last price update.
+- KYC mention should be prominent for scrapper trust ("Only verified collectors").
+- CTA friction: reduce steps—OTP entry inline in hero is best for conversion.
+- Persuasion: show clear payout example — e.g., "5 kg copper → ₹X" clickable to calculator.
+
+---
+
+## 13) Security & Compliance Checklist
+- Mask Aadhaar display; never show full number in UI.
+- Use server-side validation for KYC files and audit trail for approvals.
+- Encrypt sensitive fields at rest; TLS everywhere.
+- Rate-limit OTP endpoints; captcha for repeated attempts.
+- Audit logs for admin actions.
+
+---
+
+## 14) Testing Strategy
+- Unit tests for backend controllers; mock DB with mongodb-memory-server.
+- Component tests for UI.
+- E2E happy-paths in Cypress: create request → scrapper accept → complete.
+- Integration tests for socket flows (simulate multiple scrappers).
+- Load test request routing (k6 or artillery) — ensure Redis locks prevent double assignment.
+
+---
+
+## 15) CI/CD & Deployment
+- PR → run lint, tests, build.
+- On merge to `main`: frontend deploy to Vercel, backend to Render or ECS.
+- Use environment branches: staging and production with separate DB instances.
+- Health check endpoints and smoke tests post-deploy.
+
+---
+
+## 16) Analytics & Monitoring
+- Integrate Google Analytics / Mixpanel for user funnels (hero CTA conversions, pickup completions).
+- Sentry for runtime errors.
+- Custom KPIs for Admin: daily pickups, acceptance rate, average ETA, cancellations.
+
+---
+
+## 17) Launch Plan (MVP-first)
+1. Build MVP: OTP auth + create pickup + request routing + scrapper accept + map links + price feed CRUD.
+2. QA + internal pilot in one city/area.
+3. Gather feedback & iterate KYC + subscription.
+4. Expand region coverage and marketing.
+
+(具体 implementation steps and checklist are in the Developer Handoff section below.)
+
+---
+
+## 18) Developer Handoff Checklist (task-by-task for sprints)
+**Repository setup**
+- Initialize monorepo, set up workspace scripts, linting, husky pre-commit hooks.
+
+**Sprint A — Core infra**
+- Setup backend skeleton + auth endpoints (OTP)
+- Setup frontend skeleton + routing + Tailwind + auth context
+- Setup shared `packages/types` and stories
+
+**Sprint B — Requests flow**
+- Implement Request model & create endpoint
+- Implement socket flow basic (server emits to one scrapper) and scrapper accept
+- Build Create Pickup UI with image upload
+
+**Sprint C — Scrapper onboarding**
+- KYC upload endpoints and admin KYC queue
+- Scrapper availability, time-slot selection
+- Incoming request modal UI with ringtone
+
+**Sprint D — Pricing & Admin**
+- Price feed CRUD, price ticker UI
+- Admin dashboard basic
+
+**Sprint E — Payments & Subscription**
+- Razorpay integration & webhook handling
+- Subscription checks for scrappers
+
+**Sprint F — Polish**
+- Chat, push notifications via FCM, map live tracking
+- Animations & performance optimizations
+
+Each sprint should have clear PR templates and acceptance criteria.
+
+---
+
+## 19) Non-functional Requirements
+- App must be mobile-first and PWA-enabled (installable).
+- Offline resilience for creating request (queue & sync).
+- Response times: API average < 300ms for critical endpoints.
+
+---
+
+## 20) Post-launch & Growth Ideas
+- Referral program for users & scrappers
+- AI auto-classification of scrap from image (later)
+- Dynamic pricing based on demand & supply
+
+---
+
+## 21) Final Notes & Next Steps
+- I updated the main spec with this end-to-end plan in this document.
+- If you want, I can now:
+  1. Generate an explicit **sprint-by-sprint task list** (Jira-style) with exact issue titles and acceptance criteria, or
+  2. Create the **monorepo starter** with basic files (Vite app + Express skeleton) scaffolding, or
+  3. Produce **React component stubs** for the Hero, Create Pickup, and Incoming Request Modal (with Framer Motion + GSAP pseudocode).
+
+Which of the three should I do next?"
+
+```
