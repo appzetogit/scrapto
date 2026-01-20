@@ -665,7 +665,6 @@ const ActiveRequestDetailsPage = () => {
                   });
                 }
               }}
-              }}
               disabled={currentRequestIndex <= 0}
               className="w-9 h-9 rounded-full flex items-center justify-center shadow-md transition-opacity disabled:opacity-30 bg-zinc-900"
             >
@@ -692,388 +691,388 @@ const ActiveRequestDetailsPage = () => {
             </button>
           </div>
         )}
-    </div>
+      </div>
 
-      {/* Map Container - Full Screen */ }
-  <div className="w-full h-screen">
-    <ScrapperMap
-      stage="pickup"
-      orderId={requestData?.id || requestData?._id}
-      scrapperLocation={scrapperLocation}
-      userLocation={userLiveLocation}
-      userName={requestData?.userName}
-    />
-  </div>
+      {/* Map Container - Full Screen */}
+      <div className="w-full h-screen">
+        <ScrapperMap
+          stage="pickup"
+          orderId={requestData?.id || requestData?._id}
+          scrapperLocation={scrapperLocation}
+          userLocation={userLiveLocation}
+          userName={requestData?.userName}
+        />
+      </div>
 
-  {/* Payment Page - Full Screen (when payment pending) */ }
-  {
-    isPickedUp && paymentStatus === 'pending' ? (
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.3 }}
-        className="absolute inset-0 z-40 flex flex-col"
-        style={{ backgroundColor: '#020617' }}
-      >
-        {/* Header */}
-        <div
-          className="p-4 flex items-center gap-4 border-b"
-          style={{ borderColor: 'rgba(31, 41, 55, 0.9)', backgroundColor: '#020617' }}
-        >
-          <button
-            onClick={() => {
-              setShowPaymentInput(false);
-              setIsPickedUp(false);
-              setPaymentStatus('pending');
-            }}
-            className="w-10 h-10 rounded-full flex items-center justify-center shadow-md"
-            style={{ backgroundColor: 'rgba(15, 23, 42, 0.9)' }}
+      {/* Payment Page - Full Screen (when payment pending) */}
+      {
+        isPickedUp && paymentStatus === 'pending' ? (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.3 }}
+            className="absolute inset-0 z-40 flex flex-col"
+            style={{ backgroundColor: '#020617' }}
           >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" style={{ color: '#2d3748' }}>
-              <path d="M19 12H5M12 19l-7-7 7-7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </button>
-          <h1 className="text-xl font-bold" style={{ color: '#e5e7eb' }}>
-            {requestData.orderType === 'cleaning_service' ? getTranslatedText('Collect Payment') : getTranslatedText('Make Payment')}
-          </h1>
-        </div>
-
-        {/* Payment Content */}
-        <div className="flex-1 overflow-y-auto p-6">
-          <div className="max-w-md mx-auto">
-            {/* Customer Info */}
-            <div className="mb-6 p-4 rounded-xl" style={{ backgroundColor: '#0b1120' }}>
-              <div className="flex items-center gap-3 mb-3">
-                <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{ backgroundColor: 'rgba(16, 185, 129, 0.2)' }}>
-                  <span className="text-lg font-bold" style={{ color: '#bbf7d0' }}>
-                    {requestData.userName[0]}
-                  </span>
-                </div>
-                <div className="flex-1">
-                  <p className="text-base font-semibold" style={{ color: '#f9fafb' }}>{requestData.userName}</p>
-                  <p className="text-sm" style={{ color: '#9ca3af' }}>{requestData.scrapType}</p>
-                </div>
-              </div>
-              <div className="p-3 rounded-lg" style={{ backgroundColor: 'rgba(31, 41, 55, 0.9)' }}>
-                <p className="text-xs mb-1" style={{ color: '#9ca3af' }}>{getTranslatedText("Estimated Amount")}</p>
-                <p className="text-xl font-bold" style={{ color: '#4ade80' }}>{finalAmount || requestData?.estimatedEarnings || '₹450'}</p>
-              </div>
+            {/* Header */}
+            <div
+              className="p-4 flex items-center gap-4 border-b"
+              style={{ borderColor: 'rgba(31, 41, 55, 0.9)', backgroundColor: '#020617' }}
+            >
+              <button
+                onClick={() => {
+                  setShowPaymentInput(false);
+                  setIsPickedUp(false);
+                  setPaymentStatus('pending');
+                }}
+                className="w-10 h-10 rounded-full flex items-center justify-center shadow-md"
+                style={{ backgroundColor: 'rgba(15, 23, 42, 0.9)' }}
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" style={{ color: '#2d3748' }}>
+                  <path d="M19 12H5M12 19l-7-7 7-7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </button>
+              <h1 className="text-xl font-bold" style={{ color: '#e5e7eb' }}>
+                {requestData.orderType === 'cleaning_service' ? getTranslatedText('Collect Payment') : getTranslatedText('Make Payment')}
+              </h1>
             </div>
 
-            {/* Payment Input */}
-            <div className="mb-6 p-6 rounded-2xl shadow-lg" style={{ backgroundColor: '#020617' }}>
-              <h2 className="text-lg font-bold mb-4" style={{ color: '#e5e7eb' }}>
-                {requestData.orderType === 'cleaning_service' ? getTranslatedText('Enter Amount Received') : getTranslatedText('Enter Amount Paid')}
-              </h2>
-
-              {/* Payment Mode Selection for Scrap Pickup */}
-              {requestData.orderType !== 'cleaning_service' && (
-                <div className="mb-6 p-3 rounded-xl bg-gray-800 border border-gray-700">
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="text-gray-400 text-sm">Wallet Balance</span>
-                    <span className="text-white font-bold">₹{walletBalance}</span>
+            {/* Payment Content */}
+            <div className="flex-1 overflow-y-auto p-6">
+              <div className="max-w-md mx-auto">
+                {/* Customer Info */}
+                <div className="mb-6 p-4 rounded-xl" style={{ backgroundColor: '#0b1120' }}>
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{ backgroundColor: 'rgba(16, 185, 129, 0.2)' }}>
+                      <span className="text-lg font-bold" style={{ color: '#bbf7d0' }}>
+                        {requestData.userName[0]}
+                      </span>
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-base font-semibold" style={{ color: '#f9fafb' }}>{requestData.userName}</p>
+                      <p className="text-sm" style={{ color: '#9ca3af' }}>{requestData.scrapType}</p>
+                    </div>
                   </div>
+                  <div className="p-3 rounded-lg" style={{ backgroundColor: 'rgba(31, 41, 55, 0.9)' }}>
+                    <p className="text-xs mb-1" style={{ color: '#9ca3af' }}>{getTranslatedText("Estimated Amount")}</p>
+                    <p className="text-xl font-bold" style={{ color: '#4ade80' }}>{finalAmount || requestData?.estimatedEarnings || '₹450'}</p>
+                  </div>
+                </div>
 
-                  {paidAmount && Number(paidAmount) > walletBalance && (
-                    <p className="text-red-400 text-xs mb-2">Insufficient Balance. Pay online.</p>
+                {/* Payment Input */}
+                <div className="mb-6 p-6 rounded-2xl shadow-lg" style={{ backgroundColor: '#020617' }}>
+                  <h2 className="text-lg font-bold mb-4" style={{ color: '#e5e7eb' }}>
+                    {requestData.orderType === 'cleaning_service' ? getTranslatedText('Enter Amount Received') : getTranslatedText('Enter Amount Paid')}
+                  </h2>
+
+                  {/* Payment Mode Selection for Scrap Pickup */}
+                  {requestData.orderType !== 'cleaning_service' && (
+                    <div className="mb-6 p-3 rounded-xl bg-gray-800 border border-gray-700">
+                      <div className="flex justify-between items-center mb-2">
+                        <span className="text-gray-400 text-sm">Wallet Balance</span>
+                        <span className="text-white font-bold">₹{walletBalance}</span>
+                      </div>
+
+                      {paidAmount && Number(paidAmount) > walletBalance && (
+                        <p className="text-red-400 text-xs mb-2">Insufficient Balance. Pay online.</p>
+                      )}
+
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => setUseWallet(true)}
+                          className={`flex-1 py-2 rounded-lg text-sm transition-all ${useWallet ? 'bg-green-600 text-white' : 'bg-gray-700 text-gray-400'}`}
+                        >
+                          Wallet
+                        </button>
+                        <button
+                          onClick={() => setUseWallet(false)}
+                          className={`flex-1 py-2 rounded-lg text-sm transition-all ${!useWallet ? 'bg-green-600 text-white' : 'bg-gray-700 text-gray-400'}`}
+                        >
+                          Online
+                        </button>
+                      </div>
+                    </div>
                   )}
 
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => setUseWallet(true)}
-                      className={`flex-1 py-2 rounded-lg text-sm transition-all ${useWallet ? 'bg-green-600 text-white' : 'bg-gray-700 text-gray-400'}`}
-                    >
-                      Wallet
-                    </button>
-                    <button
-                      onClick={() => setUseWallet(false)}
-                      className={`flex-1 py-2 rounded-lg text-sm transition-all ${!useWallet ? 'bg-green-600 text-white' : 'bg-gray-700 text-gray-400'}`}
-                    >
-                      Online
-                    </button>
+                  <div className="mb-4">
+                    <label className="block text-sm font-semibold mb-2" style={{ color: '#d1d5db' }}>
+                      {getTranslatedText("Amount (₹)")}
+                    </label>
+                    <input
+                      type="number"
+                      inputMode="decimal"
+                      value={paidAmount}
+                      onChange={(e) => setPaidAmount(e.target.value)}
+                      placeholder="0.00"
+                      className="w-full px-4 py-4 rounded-xl border-2 focus:outline-none focus:ring-2 transition-all text-2xl font-bold text-center bg-transparent"
+                      style={{
+                        borderColor: paidAmount ? '#22c55e' : 'rgba(148, 163, 184, 0.5)',
+                        color: '#f9fafb'
+                      }}
+                      min="0"
+                      step="0.01"
+                      autoFocus
+                    />
+                    {paidAmount && (
+                      <p className="text-sm mt-2 text-center" style={{ color: '#9ca3af' }}>
+                        {requestData.orderType === 'cleaning_service'
+                          ? getTranslatedText("You collected ₹{amount} from the customer", { amount: parseFloat(paidAmount) || 0 })
+                          : getTranslatedText("You will pay ₹{amount} to the customer", { amount: parseFloat(paidAmount) || 0 })
+                        }
+                      </p>
+                    )}
                   </div>
-                </div>
-              )}
 
-              <div className="mb-4">
-                <label className="block text-sm font-semibold mb-2" style={{ color: '#d1d5db' }}>
-                  {getTranslatedText("Amount (₹)")}
-                </label>
-                <input
-                  type="number"
-                  inputMode="decimal"
-                  value={paidAmount}
-                  onChange={(e) => setPaidAmount(e.target.value)}
-                  placeholder="0.00"
-                  className="w-full px-4 py-4 rounded-xl border-2 focus:outline-none focus:ring-2 transition-all text-2xl font-bold text-center bg-transparent"
-                  style={{
-                    borderColor: paidAmount ? '#22c55e' : 'rgba(148, 163, 184, 0.5)',
-                    color: '#f9fafb'
-                  }}
-                  min="0"
-                  step="0.01"
-                  autoFocus
-                />
-                {paidAmount && (
-                  <p className="text-sm mt-2 text-center" style={{ color: '#9ca3af' }}>
-                    {requestData.orderType === 'cleaning_service'
-                      ? getTranslatedText("You collected ₹{amount} from the customer", { amount: parseFloat(paidAmount) || 0 })
-                      : getTranslatedText("You will pay ₹{amount} to the customer", { amount: parseFloat(paidAmount) || 0 })
-                    }
-                  </p>
-                )}
-              </div>
-
-              {/* Quick Amount Buttons */}
-              <div className="grid grid-cols-3 gap-2 mb-4">
-                {[100, 200, 300, 400, 500, 1000].map((amount) => (
-                  <motion.button
-                    key={amount}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={() => setPaidAmount(amount.toString())}
-                    className="py-2 rounded-lg font-semibold text-sm"
-                    style={{
-                      backgroundColor: paidAmount === amount.toString() ? '#22c55e' : 'rgba(31, 41, 55, 1)',
-                      color: paidAmount === amount.toString() ? '#0f172a' : '#e5e7eb'
-                    }}
-                  >
-                    ₹{amount}
-                  </motion.button>
-                ))}
-              </div>
-
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={handlePaymentMade}
-                disabled={!paidAmount || parseFloat(paidAmount) <= 0 || isProcessingPayment}
-                className="w-full py-4 rounded-xl font-bold text-base shadow-lg flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                style={{ backgroundColor: '#22c55e', color: '#0f172a' }}
-              >
-                {isProcessingPayment ? (
-                  <span>{getTranslatedText("Processing...")}</span>
-                ) : (
-                  <>
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" fill="currentColor" />
-                    </svg>
-                    {getTranslatedText("Confirm Payment")}
-                  </>
-                )}
-              </motion.button>
-            </div>
-          </div>
-        </div>
-      </motion.div>
-    ) : (
-      <>
-        {/* Request Details & Contact Info - Bottom Slide (when payment not pending) */}
-        <motion.div
-          initial={{ y: '100%' }}
-          animate={{ y: 0 }}
-          transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-          className="absolute bottom-0 left-0 right-0 z-30 rounded-t-2xl shadow-2xl flex flex-col bg-slate-900 border-t border-slate-800"
-          style={{ maxHeight: '65vh', overflow: 'hidden' }}
-        >
-          {/* Slide Handle */}
-          <div className="w-12 h-1.5 mx-auto mt-2 rounded-full flex-shrink-0 bg-slate-700" />
-
-          {/* Request Content - Compact - Scrollable */}
-          <div className="p-4 pb-2 overflow-y-auto flex-1" style={{ minHeight: 0, WebkitOverflowScrolling: 'touch' }}>
-            <div className="flex items-center justify-between mb-3">
-              <h2 className="text-lg font-bold text-slate-100">{getTranslatedText("Pickup Details")}</h2>
-            </div>
-
-            {/* Request Details - Compact */}
-            <div className="space-y-2 mb-4">
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 bg-emerald-500/20">
-                  <span className="text-sm font-bold text-emerald-300">
-                    {requestData.userName[0]}
-                  </span>
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold truncate text-slate-50">{requestData.userName}</p>
-                  <p className="text-xs truncate text-slate-400">{requestData.scrapType}</p>
-                </div>
-                <div className="text-right">
-                  <p className="text-sm font-bold text-emerald-400">{requestData.estimatedEarnings}</p>
-                </div>
-              </div>
-
-              {renderPickupSlot()}
-
-              {/* Scrap Images */}
-              {requestData.images && requestData.images.length > 0 && (
-                <div className="mt-3">
-                  <p className="text-xs font-semibold mb-2" style={{ color: '#e5e7eb' }}>
-                    {requestData.orderType === 'cleaning_service' ? getTranslatedText('Area Images') : getTranslatedText('Scrap Images')}
-                  </p>
-                  <div className="grid grid-cols-3 gap-2">
-                    {requestData.images.slice(0, 6).map((image, idx) => (
-                      <motion.div
-                        key={image.id || idx}
+                  {/* Quick Amount Buttons */}
+                  <div className="grid grid-cols-3 gap-2 mb-4">
+                    {[100, 200, 300, 400, 500, 1000].map((amount) => (
+                      <motion.button
+                        key={amount}
                         whileHover={{ scale: 1.05 }}
-                        className="relative aspect-square rounded-lg overflow-hidden"
-                        style={{ backgroundColor: 'rgba(15, 23, 42, 1)' }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => setPaidAmount(amount.toString())}
+                        className="py-2 rounded-lg font-semibold text-sm"
+                        style={{
+                          backgroundColor: paidAmount === amount.toString() ? '#22c55e' : 'rgba(31, 41, 55, 1)',
+                          color: paidAmount === amount.toString() ? '#0f172a' : '#e5e7eb'
+                        }}
                       >
-                        <img
-                          src={image.preview || image}
-                          alt={`Scrap ${idx + 1}`}
-                          className="w-full h-full object-cover"
-                          onError={(e) => {
-                            // Fallback to placeholder if image fails to load
-                            e.target.src = 'https://via.placeholder.com/150?text=Scrap';
-                          }}
-                        />
-                        {requestData.images.length > 6 && idx === 5 && (
-                          <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-                            <span className="text-white text-xs font-bold">
-                              +{requestData.images.length - 6}
-                            </span>
-                          </div>
-                        )}
-                      </motion.div>
+                        ₹{amount}
+                      </motion.button>
                     ))}
                   </div>
+
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={handlePaymentMade}
+                    disabled={!paidAmount || parseFloat(paidAmount) <= 0 || isProcessingPayment}
+                    className="w-full py-4 rounded-xl font-bold text-base shadow-lg flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                    style={{ backgroundColor: '#22c55e', color: '#0f172a' }}
+                  >
+                    {isProcessingPayment ? (
+                      <span>{getTranslatedText("Processing...")}</span>
+                    ) : (
+                      <>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" fill="currentColor" />
+                        </svg>
+                        {getTranslatedText("Confirm Payment")}
+                      </>
+                    )}
+                  </motion.button>
                 </div>
-              )}
+              </div>
             </div>
+          </motion.div>
+        ) : (
+          <>
+            {/* Request Details & Contact Info - Bottom Slide (when payment not pending) */}
+            <motion.div
+              initial={{ y: '100%' }}
+              animate={{ y: 0 }}
+              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+              className="absolute bottom-0 left-0 right-0 z-30 rounded-t-2xl shadow-2xl flex flex-col bg-slate-900 border-t border-slate-800"
+              style={{ maxHeight: '65vh', overflow: 'hidden' }}
+            >
+              {/* Slide Handle */}
+              <div className="w-12 h-1.5 mx-auto mt-2 rounded-full flex-shrink-0 bg-slate-700" />
 
-            {/* Payment Made Status */}
-            {(paymentStatus === 'paid' || paymentStatus === 'completed') && requestData?.status !== 'completed' && (
-              <div className="mb-3 p-4 rounded-xl" style={{ backgroundColor: 'rgba(22, 163, 74, 0.15)' }}>
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm font-semibold" style={{ color: '#bbf7d0' }}>{getTranslatedText("Payment Status")}</span>
-                  <span className="text-sm font-bold" style={{ color: '#4ade80' }}>
-                    {requestData.orderType === 'cleaning_service' ? getTranslatedText('Collected ✓') : getTranslatedText('Paid ✓')}
-                  </span>
+              {/* Request Content - Compact - Scrollable */}
+              <div className="p-4 pb-2 overflow-y-auto flex-1" style={{ minHeight: 0, WebkitOverflowScrolling: 'touch' }}>
+                <div className="flex items-center justify-between mb-3">
+                  <h2 className="text-lg font-bold text-slate-100">{getTranslatedText("Pickup Details")}</h2>
                 </div>
-                <p className="text-xs mb-3" style={{ color: '#e5e7eb' }}>
-                  {requestData.orderType === 'cleaning_service'
-                    ? getTranslatedText("Payment of ₹{amount} collected successfully", { amount: paidAmount || requestData?.paidAmount || '0' })
-                    : getTranslatedText("Payment of ₹{amount} made successfully to customer", { amount: paidAmount || requestData?.paidAmount || '0' })
-                  }
-                </p>
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={handleCompleteOrder}
-                  className="w-full py-3 rounded-xl font-bold text-base shadow-lg flex items-center justify-center gap-2"
-                  style={{ backgroundColor: '#22c55e', color: '#0f172a' }}
-                >
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                  {getTranslatedText("Complete Order")}
-                </motion.button>
-              </div>
-            )}
 
-            {/* Order Completed Status */}
-            {requestData?.status === 'completed' && (
-              <div className="mb-3 p-4 rounded-xl text-center" style={{ backgroundColor: 'rgba(22, 163, 74, 0.15)' }}>
-                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" className="mx-auto mb-2" style={{ color: '#4ade80' }}>
-                  <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-                <p className="text-sm font-bold mb-1" style={{ color: '#bbf7d0' }}>{getTranslatedText("Order Completed!")}</p>
-                <p className="text-xs" style={{ color: '#e5e7eb' }}>{getTranslatedText("Redirecting to dashboard...")}</p>
-              </div>
-            )}
-          </div>
+                {/* Request Details - Compact */}
+                <div className="space-y-2 mb-4">
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 bg-emerald-500/20">
+                      <span className="text-sm font-bold text-emerald-300">
+                        {requestData.userName[0]}
+                      </span>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold truncate text-slate-50">{requestData.userName}</p>
+                      <p className="text-xs truncate text-slate-400">{requestData.scrapType}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm font-bold text-emerald-400">{requestData.estimatedEarnings}</p>
+                    </div>
+                  </div>
 
-          {/* Contact Buttons - Fixed at Bottom */}
-          <div
-            className="px-4 pb-4 pt-2 border-t border-slate-800 flex-shrink-0 bg-slate-900"
+                  {renderPickupSlot()}
+
+                  {/* Scrap Images */}
+                  {requestData.images && requestData.images.length > 0 && (
+                    <div className="mt-3">
+                      <p className="text-xs font-semibold mb-2" style={{ color: '#e5e7eb' }}>
+                        {requestData.orderType === 'cleaning_service' ? getTranslatedText('Area Images') : getTranslatedText('Scrap Images')}
+                      </p>
+                      <div className="grid grid-cols-3 gap-2">
+                        {requestData.images.slice(0, 6).map((image, idx) => (
+                          <motion.div
+                            key={image.id || idx}
+                            whileHover={{ scale: 1.05 }}
+                            className="relative aspect-square rounded-lg overflow-hidden"
+                            style={{ backgroundColor: 'rgba(15, 23, 42, 1)' }}
+                          >
+                            <img
+                              src={image.preview || image}
+                              alt={`Scrap ${idx + 1}`}
+                              className="w-full h-full object-cover"
+                              onError={(e) => {
+                                // Fallback to placeholder if image fails to load
+                                e.target.src = 'https://via.placeholder.com/150?text=Scrap';
+                              }}
+                            />
+                            {requestData.images.length > 6 && idx === 5 && (
+                              <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+                                <span className="text-white text-xs font-bold">
+                                  +{requestData.images.length - 6}
+                                </span>
+                              </div>
+                            )}
+                          </motion.div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Payment Made Status */}
+                {(paymentStatus === 'paid' || paymentStatus === 'completed') && requestData?.status !== 'completed' && (
+                  <div className="mb-3 p-4 rounded-xl" style={{ backgroundColor: 'rgba(22, 163, 74, 0.15)' }}>
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm font-semibold" style={{ color: '#bbf7d0' }}>{getTranslatedText("Payment Status")}</span>
+                      <span className="text-sm font-bold" style={{ color: '#4ade80' }}>
+                        {requestData.orderType === 'cleaning_service' ? getTranslatedText('Collected ✓') : getTranslatedText('Paid ✓')}
+                      </span>
+                    </div>
+                    <p className="text-xs mb-3" style={{ color: '#e5e7eb' }}>
+                      {requestData.orderType === 'cleaning_service'
+                        ? getTranslatedText("Payment of ₹{amount} collected successfully", { amount: paidAmount || requestData?.paidAmount || '0' })
+                        : getTranslatedText("Payment of ₹{amount} made successfully to customer", { amount: paidAmount || requestData?.paidAmount || '0' })
+                      }
+                    </p>
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={handleCompleteOrder}
+                      className="w-full py-3 rounded-xl font-bold text-base shadow-lg flex items-center justify-center gap-2"
+                      style={{ backgroundColor: '#22c55e', color: '#0f172a' }}
+                    >
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                      {getTranslatedText("Complete Order")}
+                    </motion.button>
+                  </div>
+                )}
+
+                {/* Order Completed Status */}
+                {requestData?.status === 'completed' && (
+                  <div className="mb-3 p-4 rounded-xl text-center" style={{ backgroundColor: 'rgba(22, 163, 74, 0.15)' }}>
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" className="mx-auto mb-2" style={{ color: '#4ade80' }}>
+                      <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                    <p className="text-sm font-bold mb-1" style={{ color: '#bbf7d0' }}>{getTranslatedText("Order Completed!")}</p>
+                    <p className="text-xs" style={{ color: '#e5e7eb' }}>{getTranslatedText("Redirecting to dashboard...")}</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Contact Buttons - Fixed at Bottom */}
+              <div
+                className="px-4 pb-4 pt-2 border-t border-slate-800 flex-shrink-0 bg-slate-900"
+              >
+                {/* Scrap Picked Up Button - Primary Action */}
+                {!isPickedUp ? (
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={handleScrapPickedUp}
+                    className="w-full mb-3 py-3 rounded-xl font-bold text-base shadow-lg flex items-center justify-center gap-2 bg-emerald-600 text-white hover:bg-emerald-700 transition-colors"
+                  >
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" style={{ color: '#ffffff' }}>
+                      <path d="M5 13l4 4L19 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                    {requestData.orderType === 'cleaning_service' ? getTranslatedText('Start Service') : getTranslatedText('Pickup Scrap')}
+                  </motion.button>
+                ) : null}
+
+                <div className="grid grid-cols-2 gap-3">
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={handleCall}
+                    className="py-3 rounded-xl font-semibold text-sm shadow-md flex items-center justify-center gap-2"
+                    style={{ backgroundColor: 'rgba(31, 41, 55, 1)', color: '#f9fafb' }}
+                  >
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" style={{ color: '#4ade80' }}>
+                      <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                    {getTranslatedText("Call")}
+                  </motion.button>
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={handleChat}
+                    className="py-3 rounded-xl font-semibold text-sm shadow-md flex items-center justify-center gap-2"
+                    style={{ backgroundColor: 'rgba(31, 41, 55, 1)', color: '#f9fafb' }}
+                  >
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" style={{ color: '#60a5fa' }}>
+                      <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                    {getTranslatedText("Chat")}
+                  </motion.button>
+                </div>
+              </div>
+            </motion.div>
+          </>
+        )
+      }
+
+      {/* Confirmation Modal */}
+      <AnimatePresence>
+        {showConfirmModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-70"
           >
-            {/* Scrap Picked Up Button - Primary Action */}
-            {!isPickedUp ? (
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={handleScrapPickedUp}
-                className="w-full mb-3 py-3 rounded-xl font-bold text-base shadow-lg flex items-center justify-center gap-2 bg-emerald-600 text-white hover:bg-emerald-700 transition-colors"
-              >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" style={{ color: '#ffffff' }}>
-                  <path d="M5 13l4 4L19 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-                {requestData.orderType === 'cleaning_service' ? getTranslatedText('Start Service') : getTranslatedText('Pickup Scrap')}
-              </motion.button>
-            ) : null}
-
-            <div className="grid grid-cols-2 gap-3">
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={handleCall}
-                className="py-3 rounded-xl font-semibold text-sm shadow-md flex items-center justify-center gap-2"
-                style={{ backgroundColor: 'rgba(31, 41, 55, 1)', color: '#f9fafb' }}
-              >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" style={{ color: '#4ade80' }}>
-                  <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-                {getTranslatedText("Call")}
-              </motion.button>
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={handleChat}
-                className="py-3 rounded-xl font-semibold text-sm shadow-md flex items-center justify-center gap-2"
-                style={{ backgroundColor: 'rgba(31, 41, 55, 1)', color: '#f9fafb' }}
-              >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" style={{ color: '#60a5fa' }}>
-                  <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-                {getTranslatedText("Chat")}
-              </motion.button>
-            </div>
-          </div>
-        </motion.div>
-      </>
-    )
-  }
-
-  {/* Confirmation Modal */ }
-  <AnimatePresence>
-    {showConfirmModal && (
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-70"
-      >
-        <motion.div
-          initial={{ scale: 0.9, y: 20 }}
-          animate={{ scale: 1, y: 0 }}
-          exit={{ scale: 0.9, y: 20 }}
-          className="w-full max-w-sm rounded-2xl p-6"
-          style={{ backgroundColor: '#1f2937' }}
-        >
-          <h3 className="text-xl font-bold mb-4" style={{ color: '#f9fafb' }}>
-            {getTranslatedText("Confirm Action")}
-          </h3>
-          <p className="mb-6 text-base" style={{ color: '#d1d5db' }}>
-            {confirmMessage}
-          </p>
-          <div className="flex gap-3">
-            <button
-              onClick={handleCancel}
-              className="flex-1 py-3 rounded-xl font-semibold bg-gray-700 text-white"
+            <motion.div
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 20 }}
+              className="w-full max-w-sm rounded-2xl p-6"
+              style={{ backgroundColor: '#1f2937' }}
             >
-              {getTranslatedText("Cancel")}
-            </button>
-            <button
-              onClick={handleConfirm}
-              className="flex-1 py-3 rounded-xl font-bold bg-green-500 text-gray-900"
-            >
-              {getTranslatedText("Yes, Confirm")}
-            </button>
-          </div>
-        </motion.div>
-      </motion.div>
-    )}
-  </AnimatePresence>
+              <h3 className="text-xl font-bold mb-4" style={{ color: '#f9fafb' }}>
+                {getTranslatedText("Confirm Action")}
+              </h3>
+              <p className="mb-6 text-base" style={{ color: '#d1d5db' }}>
+                {confirmMessage}
+              </p>
+              <div className="flex gap-3">
+                <button
+                  onClick={handleCancel}
+                  className="flex-1 py-3 rounded-xl font-semibold bg-gray-700 text-white"
+                >
+                  {getTranslatedText("Cancel")}
+                </button>
+                <button
+                  onClick={handleConfirm}
+                  className="flex-1 py-3 rounded-xl font-bold bg-green-500 text-gray-900"
+                >
+                  {getTranslatedText("Yes, Confirm")}
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.div >
   );
 };

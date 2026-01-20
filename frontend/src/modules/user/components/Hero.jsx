@@ -556,8 +556,7 @@ const Hero = () => {
                 transition={{ duration: 0.5, delay: 0.1 }}
                 className="relative">
                 <div
-                  className={`flex items-center rounded-full px-4 py-3 md:py-4 border transition-all ${isEditingLocation ? "" : "cursor-pointer"
-                    }`}
+                  className={`flex items-center rounded-full px-4 py-3 md:py-4 border transition-all ${isEditingLocation ? "" : "cursor-pointer"}`}
                   style={{
                     backgroundColor: "#ffffff",
                     borderColor: isEditingLocation ? "#64946e" : "#e5ddd4",
@@ -1133,7 +1132,6 @@ const Hero = () => {
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
                 <polyline points="9 22 9 12 15 12 15 22"></polyline>
-
               </svg>
             </div>
             <span className={`text-[10px] font-semibold tracking-wide ${!showProfile ? 'text-emerald-600' : 'text-gray-500'}`}>Home</span>
@@ -1159,7 +1157,6 @@ const Hero = () => {
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
                 <circle cx="12" cy="7" r="4"></circle>
-
               </svg>
             </div>
             <span className={`text-[10px] font-semibold tracking-wide ${showProfile ? 'text-emerald-600' : 'text-gray-500'}`}>Profile</span>
