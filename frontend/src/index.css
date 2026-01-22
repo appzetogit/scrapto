@@ -30,7 +30,7 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: #f4ebe2;
+  background-color: #72c688;
   color: #2d3748;
   /* Prevent zoom on mobile - allow panning but prevent pinch zoom */
   touch-action: pan-x pan-y;

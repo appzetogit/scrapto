@@ -1119,8 +1119,8 @@ const Hero = () => {
       {/* Bottom Navigation (Mobile Only - Fixed to Viewport) - Always visible */}
       {/* Bottom Navigation (Mobile Only - Fixed to Viewport) */}
       <div className="fixed md:hidden bottom-0 left-0 right-0 z-[9999]">
-        {/* Glassmorphism Background Container */}
-        <div className="absolute inset-0 bg-white/90 backdrop-blur-lg border-t border-gray-200 shadow-[0_-4px_20px_rgba(0,0,0,0.05)]"></div>
+        {/* Background Container - Black */}
+        <div className="absolute inset-0 bg-black border-t border-gray-800 shadow-[0_-4px_20px_rgba(0,0,0,0.5)]"></div>
 
         <div className="relative flex justify-around items-end pb-2 pt-2 px-2">
           {/* Home Tab */}
@@ -1128,24 +1128,24 @@ const Hero = () => {
             className="flex-1 flex flex-col items-center justify-center gap-1 cursor-pointer active:scale-95 transition-transform duration-200 py-2"
             onClick={() => setShowProfile(false)}
           >
-            <div className={`p-1.5 rounded-xl transition-colors duration-300 ${!showProfile ? 'bg-emerald-100 text-emerald-600' : 'text-gray-400 hover:text-emerald-600'}`}>
+            <div className={`p-1.5 rounded-xl transition-colors duration-300 ${!showProfile ? 'bg-gray-800 text-emerald-400' : 'text-gray-400 hover:text-emerald-400'}`}>
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
                 <polyline points="9 22 9 12 15 12 15 22"></polyline>
               </svg>
             </div>
-            <span className={`text-[10px] font-semibold tracking-wide ${!showProfile ? 'text-emerald-600' : 'text-gray-500'}`}>Home</span>
+            <span className={`text-[10px] font-semibold tracking-wide ${!showProfile ? 'text-emerald-400' : 'text-gray-400'}`}>Home</span>
           </div>
           {/* Center Action Button (Floating) */}
           <div className="flex-1 flex flex-col items-center justify-end relative z-10 -top-5 group"
             onClick={() => navigate('/add-scrap/category')}>
-            <div className="w-14 h-14 rounded-full bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center shadow-lg shadow-emerald-500/30 transform group-active:scale-95 transition-all duration-300 border-4 border-[#f4ebe2]">
+            <div className="w-14 h-14 rounded-full bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center shadow-lg shadow-emerald-500/30 transform group-active:scale-95 transition-all duration-300 border-4 border-black">
               <svg width="28" height="28" viewBox="0 0 24 24" fill="none" className="text-white transform group-hover:rotate-180 transition-transform duration-500">
                 <path d="M12 5v14M5 12h14" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
 
               </svg>
             </div>
-            <span className="text-[10px] font-bold text-emerald-700 mt-1 tracking-wide">Sell Scrap</span>
+            <span className="text-[10px] font-bold text-emerald-400 mt-1 tracking-wide">Sell Scrap</span>
           </div>
 
           {/* Profile Tab */}
@@ -1153,13 +1153,13 @@ const Hero = () => {
             className="flex-1 flex flex-col items-center justify-center gap-1 cursor-pointer active:scale-95 transition-transform duration-200 py-2"
             onClick={() => setShowProfile(true)}
           >
-            <div className={`p-1.5 rounded-xl transition-colors duration-300 ${showProfile ? 'bg-emerald-100 text-emerald-600' : 'text-gray-400 hover:text-emerald-600'}`}>
+            <div className={`p-1.5 rounded-xl transition-colors duration-300 ${showProfile ? 'bg-gray-800 text-emerald-400' : 'text-gray-400 hover:text-emerald-400'}`}>
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
                 <circle cx="12" cy="7" r="4"></circle>
               </svg>
             </div>
-            <span className={`text-[10px] font-semibold tracking-wide ${showProfile ? 'text-emerald-600' : 'text-gray-500'}`}>Profile</span>
+            <span className={`text-[10px] font-semibold tracking-wide ${showProfile ? 'text-emerald-400' : 'text-gray-400'}`}>Profile</span>
           </div>
         </div>
       </div>
