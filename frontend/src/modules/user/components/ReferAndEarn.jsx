@@ -331,64 +331,15 @@ const ReferAndEarn = () => {
         </div>
 
         {/* Share Buttons */}
-        <div className="grid grid-cols-3 gap-2">
+        <div className="grid grid-cols-1 gap-2">
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => handleShare("whatsapp")}
-            className="p-3 rounded-xl font-semibold text-sm flex flex-col items-center gap-2 transition-all"
+            className="p-3 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 transition-all"
             style={{ backgroundColor: "#25D366", color: "#ffffff" }}>
             <FaWhatsapp className="text-xl" />
-            <span className="text-xs">{getTranslatedText("WhatsApp")}</span>
-          </motion.button>
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => handleShare("sms")}
-            className="p-3 rounded-xl font-semibold text-sm flex flex-col items-center gap-2 transition-all"
-            style={{ backgroundColor: "#f7fafc", color: "#2d3748" }}>
-            <FaShareAlt className="text-xl" />
-            <span className="text-xs">{getTranslatedText("SMS")}</span>
-          </motion.button>
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => handleShare("email")}
-            className="p-3 rounded-xl font-semibold text-sm flex flex-col items-center gap-2 transition-all"
-            style={{ backgroundColor: "#f7fafc", color: "#2d3748" }}>
-            <FaEnvelope className="text-xl" />
-            <span className="text-xs">{getTranslatedText("Email")}</span>
-          </motion.button>
-        </div>
-
-        {/* Social Media Share */}
-        <div className="grid grid-cols-3 gap-2 mt-2">
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => handleShare("facebook")}
-            className="p-3 rounded-xl font-semibold text-sm flex flex-col items-center gap-2 transition-all"
-            style={{ backgroundColor: "#1877F2", color: "#ffffff" }}>
-            <FaFacebook className="text-xl" />
-            <span className="text-xs">{getTranslatedText("Facebook")}</span>
-          </motion.button>
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => handleShare("twitter")}
-            className="p-3 rounded-xl font-semibold text-sm flex flex-col items-center gap-2 transition-all"
-            style={{ backgroundColor: "#1DA1F2", color: "#ffffff" }}>
-            <FaTwitter className="text-xl" />
-            <span className="text-xs">{getTranslatedText("Twitter")}</span>
-          </motion.button>
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => handleShare("instagram")}
-            className="p-3 rounded-xl font-semibold text-sm flex flex-col items-center gap-2 transition-all"
-            style={{ backgroundColor: "#E4405F", color: "#ffffff" }}>
-            <FaInstagram className="text-xl" />
-            <span className="text-xs">{getTranslatedText("Instagram")}</span>
+            <span className="text-sm">{getTranslatedText("WhatsApp")}</span>
           </motion.button>
         </div>
       </motion.div>
@@ -676,8 +627,8 @@ const ReferAndEarn = () => {
                       <div className="flex items-center gap-2">
                         <div
                           className={`w-2 h-2 rounded-full ${milestones.refereeRegistered
-                              ? "bg-green-500"
-                              : "bg-gray-300"
+                            ? "bg-green-500"
+                            : "bg-gray-300"
                             }`}
                         />
                         <span className="text-xs" style={{ color: "#718096" }}>
@@ -687,8 +638,8 @@ const ReferAndEarn = () => {
                       <div className="flex items-center gap-2">
                         <div
                           className={`w-2 h-2 rounded-full ${milestones.refereeFirstRequest
-                              ? "bg-green-500"
-                              : "bg-gray-300"
+                            ? "bg-green-500"
+                            : "bg-gray-300"
                             }`}
                         />
                         <span className="text-xs" style={{ color: "#718096" }}>
@@ -699,8 +650,8 @@ const ReferAndEarn = () => {
                       <div className="flex items-center gap-2">
                         <div
                           className={`w-2 h-2 rounded-full ${milestones.refereeFirstCompletion
-                              ? "bg-green-500"
-                              : "bg-gray-300"
+                            ? "bg-green-500"
+                            : "bg-gray-300"
                             }`}
                         />
                         <span className="text-xs" style={{ color: "#718096" }}>

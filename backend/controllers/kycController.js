@@ -47,6 +47,13 @@ export const submitKyc = async (req, res) => {
 
     const { aadhaarNumber } = req.body;
 
+    logger.info('KYC Submit Request:', {
+      userId,
+      hasFiles: !!req.files,
+      fileKeys: req.files ? Object.keys(req.files) : [],
+      body: req.body
+    });
+
     // Collect uploaded file objects from Multer
     const files = req.files || {};
     const getFirst = (field) => (files[field]?.[0] ? files[field][0] : null);
@@ -54,6 +61,11 @@ export const submitKyc = async (req, res) => {
     const aadhaarFile = getFirst('aadhaar');
     const selfieFile = getFirst('selfie');
     const licenseFile = getFirst('license');
+
+    if (!aadhaarFile || !selfieFile) {
+      logger.warn('KYC submission missing files', { filesKeys: Object.keys(files) });
+      return sendError(res, 'Missing required documents (Aadhaar or Selfie)', 400);
+    }
 
     // Update KYC fields
     if (aadhaarNumber) scrapper.kyc.aadhaarNumber = aadhaarNumber;

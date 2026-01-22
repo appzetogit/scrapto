@@ -53,18 +53,27 @@ const KYCDetailModal = ({ kyc, onClose, onApprove, onReject }) => {
   };
 
   const handleReject = () => {
+    console.log('Reject button clicked', { rejectionReason, scrapperId: kyc.scrapperId || kyc.id });
     if (!rejectionReason.trim()) {
       alert(getTranslatedText('Please provide a reason for rejection'));
       return;
     }
-    if (window.confirm(getTranslatedText('Are you sure you want to reject this KYC?'))) {
-      setIsProcessing(true);
-      // Use scrapperId if available, otherwise fallback to id
-      const scrapperId = kyc.scrapperId || kyc.id;
-      onReject(scrapperId, rejectionReason).finally(() => {
-        setIsProcessing(false);
-      });
-    }
+
+    setIsProcessing(true);
+    // Use scrapperId if available, otherwise fallback to id
+    const scrapperId = kyc.scrapperId || kyc.id;
+    onReject(scrapperId, rejectionReason).finally(() => {
+      setIsProcessing(false);
+    });
+  };
+
+  const getImageUrl = (url) => {
+    if (!url) return null;
+    if (url.startsWith('http')) return url;
+    // Remove leading slash if present to avoid double slashes
+    const cleanUrl = url.startsWith('/') ? url.slice(1) : url;
+    // Use localhost:7000 as base for local dev
+    return `http://localhost:7000/${cleanUrl}`;
   };
 
   return (
@@ -161,7 +170,7 @@ const KYCDetailModal = ({ kyc, onClose, onApprove, onReject }) => {
                   </label>
                   <div className="relative rounded-xl overflow-hidden border-2" style={{ borderColor: '#e2e8f0' }}>
                     <img
-                      src={kyc.aadhaarPhotoUrl}
+                      src={getImageUrl(kyc.aadhaarPhotoUrl)}
                       alt="Aadhaar Card"
                       className="w-full h-64 object-contain bg-gray-50"
                       onError={(e) => {
@@ -178,7 +187,7 @@ const KYCDetailModal = ({ kyc, onClose, onApprove, onReject }) => {
                   </label>
                   <div className="relative rounded-xl overflow-hidden border-2" style={{ borderColor: '#e2e8f0' }}>
                     <img
-                      src={kyc.selfieUrl}
+                      src={getImageUrl(kyc.selfieUrl)}
                       alt="Selfie"
                       className="w-full h-64 object-contain bg-gray-50"
                       onError={(e) => {
@@ -191,32 +200,26 @@ const KYCDetailModal = ({ kyc, onClose, onApprove, onReject }) => {
             </div>
 
             {/* Rejection Reason Form */}
-            <AnimatePresence>
-              {showRejectForm && (
-                <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: 'auto' }}
-                  exit={{ opacity: 0, height: 0 }}
-                  className="space-y-2"
-                >
-                  <label className="block text-sm font-semibold" style={{ color: '#2d3748' }}>
-                    {getTranslatedText("Rejection Reason *")}
-                  </label>
-                  <textarea
-                    value={rejectionReason}
-                    onChange={(e) => setRejectionReason(e.target.value)}
-                    placeholder={getTranslatedText("Please provide a reason for rejection...")}
-                    rows={3}
-                    className="w-full px-4 py-3 rounded-xl border-2 focus:outline-none focus:ring-2 transition-all"
-                    style={{
-                      borderColor: '#e2e8f0',
-                      focusBorderColor: '#64946e',
-                      focusRingColor: '#64946e'
-                    }}
-                  />
-                </motion.div>
-              )}
-            </AnimatePresence>
+            {showRejectForm && (
+              <div className="space-y-2 animate-fadeIn">
+                <label className="block text-sm font-semibold" style={{ color: '#2d3748' }}>
+                  {getTranslatedText("Rejection Reason *")}
+                </label>
+                <textarea
+                  value={rejectionReason}
+                  onChange={(e) => setRejectionReason(e.target.value)}
+                  placeholder={getTranslatedText("Please provide a reason for rejection...")}
+                  rows={3}
+                  className="w-full px-4 py-3 rounded-xl border-2 focus:outline-none focus:ring-2 transition-all"
+                  style={{
+                    borderColor: '#e2e8f0',
+                    focusBorderColor: '#64946e',
+                    focusRingColor: '#64946e'
+                  }}
+                  autoFocus
+                />
+              </div>
+            )}
 
             {/* Status History */}
             {kyc.verifiedAt && (
@@ -288,7 +291,7 @@ const KYCDetailModal = ({ kyc, onClose, onApprove, onReject }) => {
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
                       onClick={handleReject}
-                      className="px-6 py-3 rounded-xl font-semibold flex items-center gap-2 transition-all"
+                      className="px-6 py-3 rounded-xl font-semibold flex items-center gap-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                       style={{ backgroundColor: '#dc2626', color: '#ffffff' }}
                       disabled={isProcessing || !rejectionReason.trim()}
                     >

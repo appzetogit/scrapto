@@ -32,6 +32,8 @@ export const apiRequest = async (endpoint, options = {}) => {
     const data = await response.json();
 
     if (!response.ok) {
+      // Log response for debugging
+      console.error(`API Error Response: ${response.status} ${response.statusText}`, data);
       const apiError = new Error(data.error || data.message || 'Something went wrong');
       apiError.status = response.status;
       apiError.data = data;

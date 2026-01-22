@@ -12,7 +12,7 @@ const isBypassEnabled = process.env.ENABLE_BYPASS_OTP !== 'false' && process.env
 // User test numbers
 const userBypassList = new Set(['9685974247', '9876543210', '9999999999', '7610416911', '6260491554']);
 // Scrapper test numbers (dedicated for scrapper testing)
-const scrapperBypassList = new Set(['8888888888', '7777777777', '6666666666', '5555555555']);
+const scrapperBypassList = new Set(['8888888888', '7777777777', '6666666666', '5555555555', '1234512345']);
 // Combined bypass list
 const bypassList = new Set([...userBypassList, ...scrapperBypassList]);
 const isBypassOtpNumber = (phone) => isBypassEnabled && bypassList.has(phone);

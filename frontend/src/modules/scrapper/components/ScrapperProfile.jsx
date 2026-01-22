@@ -424,9 +424,7 @@ const ScrapperProfile = () => {
 
             <button
               type="button"
-              onClick={() => {
-                alert(getTranslatedText('Terms & Conditions screen will be added later.'));
-              }}
+              onClick={() => navigate('/scrapper/terms')}
               className="w-full flex items-center justify-between px-3 md:px-4 py-3 md:py-3.5 text-left"
             >
               <div>

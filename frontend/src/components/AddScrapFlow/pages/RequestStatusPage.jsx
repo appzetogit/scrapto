@@ -443,7 +443,7 @@ const RequestStatusPage = () => {
                 onClick={handlePay}
                 disabled={isPaying || !['confirmed', 'in_progress'].includes(requestData.status)}
                 className="px-4 py-2 rounded-full text-sm font-semibold shadow-md transition-all duration-300 disabled:opacity-50"
-                style={{ backgroundColor: '#64946e', color: '#ffffff' }}
+                style={{ backgroundColor: '#64946e', color: '#ffffff', display: requestData?.orderType === 'cleaning_service' ? 'block' : 'none' }}
               >
                 {isPaying ? getTranslatedText('Processing...') : getTranslatedText('Pay Now')}
               </button>

@@ -12,6 +12,7 @@ import MyActiveRequestsPage from './components/MyActiveRequestsPage';
 import ReferAndEarn from './components/ReferAndEarn';
 import ScrapperHelpSupport from './components/ScrapperHelpSupport';
 import ScrapperProfile from './components/ScrapperProfile';
+import ScrapperTerms from './components/ScrapperTerms';
 import ChatPage from './components/ChatPage';
 import ChatListPage from './components/ChatListPage';
 import ScrapperWallet from './components/ScrapperWallet';
@@ -246,6 +247,7 @@ const ScrapperModule = () => {
 
         {/* Profile */}
         <Route path="/profile" element={<ScrapperProfile />} />
+  <Route path="/terms" element={<ScrapperTerms />} />
 
         {/* Refer & Earn Route */}
         <Route path="/refer" element={<ReferAndEarn />} />

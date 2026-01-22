@@ -38,7 +38,8 @@ const KYCUploadPage = () => {
     "KYC Submitted Successfully!",
     "Your KYC documents have been submitted for verification.",
     "Verification Time:",
-    "Usually takes 24-48 hours. You'll be notified once verification is complete."
+    "Usually takes 24-48 hours. You'll be notified once verification is complete.",
+    "File is too large (Max 5MB)"
   ];
   const { getTranslatedText } = usePageTranslation(staticTexts);
   const navigate = useNavigate();
@@ -93,6 +94,10 @@ const KYCUploadPage = () => {
   const handleAadhaarPhotoChange = (e) => {
     const file = e.target.files[0];
     if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        alert(getTranslatedText('File is too large (Max 5MB)'));
+        return;
+      }
       setAadhaarPhoto(file);
       const reader = new FileReader();
       reader.onloadend = () => {
@@ -105,6 +110,10 @@ const KYCUploadPage = () => {
   const handleSelfiePhotoChange = (e) => {
     const file = e.target.files[0];
     if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        alert(getTranslatedText('File is too large (Max 5MB)'));
+        return;
+      }
       setSelfiePhoto(file);
       const reader = new FileReader();
       reader.onloadend = () => {
@@ -117,6 +126,10 @@ const KYCUploadPage = () => {
   const handleLicensePhotoChange = (e) => {
     const file = e.target.files[0];
     if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        alert(getTranslatedText('File is too large (Max 5MB)'));
+        return;
+      }
       setLicenseFile(file);
       const reader = new FileReader();
       reader.onloadend = () => {

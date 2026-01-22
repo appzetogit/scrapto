@@ -45,31 +45,7 @@ const PORT = process.env.PORT || 7000;
 app.use(helmet());
 app.use(
   cors({
-    origin: (origin, callback) => {
-      // Allow requests with no origin (like mobile apps or curl requests)
-      if (!origin) return callback(null, true);
-
-      // Allow any localhost origin in development
-      if (
-        process.env.NODE_ENV !== "production" &&
-        origin.includes("localhost")
-      ) {
-        return callback(null, true);
-      }
-
-      // Check against allowed origins
-      const allowedOrigins = (
-        process.env.FRONTEND_URL || "http://localhost:5173"
-      ).split(",").map(o => o.trim().replace(/\/$/, ""));
-
-      const normalizedOrigin = origin.replace(/\/$/, "");
-
-      if (allowedOrigins.indexOf(normalizedOrigin) !== -1) {
-        callback(null, true);
-      } else {
-        callback(new Error("Not allowed by CORS"));
-      }
-    },
+    origin: true, // Allow all origins for dev/testing
     credentials: true,
   })
 );
@@ -105,6 +81,16 @@ if (process.env.NODE_ENV === "development") {
 } else {
   app.use(morgan("combined"));
 }
+
+// Global Request Logger for Debugging
+app.use((req, res, next) => {
+  logger.info(`📥 Request: ${req.method} ${req.url}`, {
+    contentType: req.headers['content-type'],
+    contentLength: req.headers['content-length'],
+    origin: req.headers['origin']
+  });
+  next();
+});
 
 // Rate limiting
 app.use(rateLimiter);

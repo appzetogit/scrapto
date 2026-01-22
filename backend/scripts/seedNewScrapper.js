@@ -18,9 +18,9 @@ const seedNewScrapper = async () => {
         console.log('✅ Connected to MongoDB');
 
         // New Scrapper credentials
-        const phone = '8888888888';
-        const email = 'scrapper88@test.com';
-        const name = 'Test Scrapper 88';
+        const phone = '1234512345';
+        const email = 'scrapper12345@test.com';
+        const name = 'Test Scrapper 123';
         const password = 'scrapto@123';
         const role = 'scrapper';
 

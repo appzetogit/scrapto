@@ -16,6 +16,8 @@ import RequestStatusPage from "../../components/AddScrapFlow/pages/RequestStatus
 import ChatPage from "./components/ChatPage";
 import ChatListPage from "./components/ChatListPage";
 import AllCategoriesPage from "./components/AllCategoriesPage";
+import ReferAndEarnPage from "./components/ReferAndEarnPage";
+import PriceListPage from "./components/PriceListPage";
 import ReviewOrderPage from "./components/ReviewOrderPage";
 import ReviewListPage from "./components/ReviewListPage";
 import ServiceDetailsPage from "./components/ServiceBookingFlow/ServiceDetailsPage";
@@ -27,6 +29,7 @@ import TrackOrderPage from "./components/TrackOrderPage";
 
 import { FaHome, FaList, FaRegComments, FaUser } from "react-icons/fa";
 import WebViewHeader from "../shared/components/WebViewHeader";
+import TermsAndConditions from "./components/TermsAndConditions";
 
 const UserModule = () => {
   const { isAuthenticated } = useAuth();
@@ -56,6 +59,8 @@ const UserModule = () => {
       <Routes>
         <Route path="/" element={<Hero />} />
         <Route path="/categories" element={<AllCategoriesPage />} />
+        <Route path="/prices" element={<PriceListPage />} />
+        <Route path="/refer-earn" element={<ReferAndEarnPage />} />
         <Route path="/add-scrap/category" element={<CategorySelectionPage />} />
         <Route path="/add-scrap/upload" element={<ImageUploadPage />} />
         <Route path="/add-scrap/weight" element={<WeightInputPage />} />
@@ -85,6 +90,7 @@ const UserModule = () => {
         <Route path="/my-reviews" element={<ReviewListPage />} />
         <Route path="/track-order/:orderId" element={<TrackOrderPage />} />
         <Route path="/help" element={<HelpSupport />} />
+        <Route path="/terms" element={<TermsAndConditions />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </div>

@@ -765,7 +765,7 @@ const ActiveRequestDetailsPage = () => {
                     {requestData.orderType === 'cleaning_service' ? getTranslatedText('Enter Amount Received') : getTranslatedText('Enter Amount Paid')}
                   </h2>
 
-                  {/* Payment Mode Selection for Scrap Pickup */}
+                  {/* Payment Mode Selection for Scrap Pickup - Hidden for Cleaning Service */}
                   {requestData.orderType !== 'cleaning_service' && (
                     <div className="mb-6 p-3 rounded-xl bg-gray-800 border border-gray-700">
                       <div className="flex justify-between items-center mb-2">

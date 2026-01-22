@@ -12,15 +12,24 @@ const __dirname = path.dirname(__filename);
 // Temporary storage for files before Cloudinary upload
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    const uploadDir = path.join(__dirname, '../uploads/temp');
+    console.log('Multer processing file:', file.fieldname);
+    // Use process.cwd() to ensure we point to backend root
+    const uploadDir = path.join(process.cwd(), 'uploads/temp');
     if (!fs.existsSync(uploadDir)) {
-      fs.mkdirSync(uploadDir, { recursive: true });
+      try {
+        fs.mkdirSync(uploadDir, { recursive: true });
+      } catch (err) {
+        console.error('Failed to create upload directory:', err);
+      }
     }
     cb(null, uploadDir);
   },
   filename: (req, file, cb) => {
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
+    // Sanitize filename
+    const safeName = file.originalname.replace(/[^a-zA-Z0-9.]/g, '_');
+    console.log('Multer saving as:', safeName);
+    cb(null, file.fieldname + '-' + uniqueSuffix + '-' + safeName);
   }
 });
 

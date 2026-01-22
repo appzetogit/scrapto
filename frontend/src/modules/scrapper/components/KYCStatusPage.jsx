@@ -48,7 +48,6 @@ const KYCStatusPage = () => {
   const { user } = useAuth();
   const [kycData, setKycData] = useState(null);
   const [kycStatus, setKycStatus] = useState('pending');
-  const [countdown, setCountdown] = useState(10); // For testing: countdown timer
 
   useEffect(() => {
 
@@ -238,34 +237,6 @@ const KYCStatusPage = () => {
               {statusConfig.description}
             </p>
 
-            {/* Testing: Auto-verification countdown */}
-            {kycStatus === 'pending' && countdown > 0 && (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                className="p-4 rounded-xl mb-4"
-                style={{ backgroundColor: 'rgba(100, 148, 110, 0.1)' }}
-              >
-                <div className="flex items-center gap-2 mb-2">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" style={{ color: '#64946e' }}>
-                    <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" fill="none" />
-                    <path d="M12 6v6l4 2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                  <p className="text-sm font-semibold" style={{ color: '#64946e' }}>
-                    {getTranslatedText("Testing Mode: Auto-verification in {countdown} seconds", { countdown })}
-                  </p>
-                </div>
-                <div className="w-full h-2 rounded-full overflow-hidden" style={{ backgroundColor: 'rgba(100, 148, 110, 0.2)' }}>
-                  <motion.div
-                    initial={{ width: '100%' }}
-                    animate={{ width: '0%' }}
-                    transition={{ duration: 10, ease: 'linear' }}
-                    className="h-full rounded-full"
-                    style={{ backgroundColor: '#64946e' }}
-                  />
-                </div>
-              </motion.div>
-            )}
 
             {/* Estimated Time */}
             <div className="p-4 rounded-xl" style={{ backgroundColor: 'rgba(100, 148, 110, 0.1)' }}>

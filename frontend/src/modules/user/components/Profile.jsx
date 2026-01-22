@@ -27,6 +27,8 @@ const Profile = ({ onClose }) => {
     "Help & Support",
     "FAQ, contact support",
     "Settings",
+  "Terms & Conditions",
+  "Read platform terms & conditions",
     "App preferences & privacy",
     "Verified",
     "Full Name",
@@ -211,6 +213,27 @@ const Profile = ({ onClose }) => {
       title: getTranslatedText("Settings"),
       desc: getTranslatedText("App preferences & privacy"),
       action: () => setActiveSection("settings"),
+    },
+    {
+      icon: (
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2">
+          <path d="M3 7v10a2 2 0 0 0 2 2h14" />
+          <path d="M21 7a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v0" />
+          <path d="M7 11h10M7 15h6" />
+        </svg>
+      ),
+      title: getTranslatedText("Terms & Conditions"),
+      desc: getTranslatedText("Read platform terms & conditions"),
+      action: () => {
+        navigate("/terms");
+        if (onClose) onClose();
+      },
     },
   ];
 
