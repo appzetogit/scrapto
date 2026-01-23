@@ -17,7 +17,7 @@ This script creates/updates an admin user in MongoDB with predefined credentials
 ```bash
 cd backend
 npm run seed:admin
-```
+```fdfdhfhfhf
 
 Or directly:
 ```bash
