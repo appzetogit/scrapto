@@ -205,6 +205,12 @@ export const walletAPI = {
       method: 'POST',
       body: JSON.stringify({ amount, bankDetails }),
     });
+  },
+  applyCoupon: async (code) => {
+    return apiRequest('/wallet/apply-coupon', {
+      method: 'POST',
+      body: JSON.stringify({ code }),
+    });
   }
 };
 

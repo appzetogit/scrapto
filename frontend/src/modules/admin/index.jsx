@@ -27,6 +27,7 @@ import ReferralAnalytics from './components/ReferralAnalytics';
 import CampaignManagement from './components/CampaignManagement';
 import HelpSupport from './components/HelpSupport';
 import BannerManagement from './components/BannerManagement';
+import CouponsList from './components/CouponsList';
 import { usePageTranslation } from '../../hooks/usePageTranslation';
 
 // Protected Route Component
@@ -96,6 +97,8 @@ const AdminModuleRoutes = () => {
         <Route path="earnings" element={<Earnings />} />
         {/* Banner Management */}
         <Route path="banners" element={<BannerManagement />} />
+        {/* Coupons */}
+        <Route path="coupons" element={<CouponsList />} />
         {/* Help & Support */}
         <Route path="support" element={<HelpSupport />} />
         {/* Profile */}

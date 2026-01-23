@@ -148,4 +148,19 @@ router.delete('/leads/:id', deleteLead);
 router.put('/finance/bank-details', updateAdminBankDetails);
 router.post('/finance/withdraw', withdrawFunds);
 
+// ============================================
+// COUPON MANAGEMENT
+// ============================================
+import {
+  createCoupon,
+  getAllCoupons,
+  toggleCouponStatus,
+  deleteCoupon
+} from '../controllers/couponController.js';
+
+router.post('/coupons', createCoupon);
+router.get('/coupons', getAllCoupons);
+router.patch('/coupons/:id/status', toggleCouponStatus);
+router.delete('/coupons/:id', deleteCoupon);
+
 export default router;

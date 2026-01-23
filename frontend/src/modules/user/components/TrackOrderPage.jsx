@@ -145,12 +145,85 @@ const TrackOrderPage = () => {
         }
     }, [orderId]);
 
+    // Animated location for smooth marker movement
+    const [animatedPosition, setAnimatedPosition] = useState(null);
+    const lastPositionRef = useRef(null);
+
+    // Initial load handling
+    useEffect(() => {
+        if (scrapperLocation && !animatedPosition) {
+            setAnimatedPosition(scrapperLocation);
+            lastPositionRef.current = scrapperLocation;
+        }
+    }, [scrapperLocation]);
+
+    // Smooth animation effect
+    useEffect(() => {
+        if (!scrapperLocation) return;
+
+        // If no previous position, just snap
+        if (!lastPositionRef.current) {
+            setAnimatedPosition(scrapperLocation);
+            lastPositionRef.current = scrapperLocation;
+            return;
+        }
+
+        const startPos = animatedPosition || lastPositionRef.current;
+        const targetPos = scrapperLocation;
+
+        // Calculate distance to check if we should just snap (e.g. initial load or large jump)
+        const latDiff = targetPos.lat - startPos.lat;
+        const lngDiff = targetPos.lng - startPos.lng;
+        const distance = Math.sqrt(latDiff * latDiff + lngDiff * lngDiff);
+
+        if (distance > 0.1) { // Large jump (~10km), just snap
+            setAnimatedPosition(targetPos);
+            lastPositionRef.current = targetPos;
+            return;
+        }
+
+        // Animation loop
+        const startTime = performance.now();
+        const duration = 1000; // Interpolate over 1 second (approx socket interval)
+
+        const animate = (currentTime) => {
+            const elapsed = currentTime - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+
+            // Ease out cubic
+            const ease = 1 - Math.pow(1 - progress, 3);
+
+            const currentLat = startPos.lat + (targetPos.lat - startPos.lat) * ease;
+            const currentLng = startPos.lng + (targetPos.lng - startPos.lng) * ease;
+
+            const newPos = { lat: currentLat, lng: currentLng };
+            setAnimatedPosition(newPos);
+
+            if (progress < 1) {
+                animationRef.current = requestAnimationFrame(animate);
+            } else {
+                lastPositionRef.current = targetPos;
+            }
+        };
+
+        if (animationRef.current) {
+            cancelAnimationFrame(animationRef.current);
+        }
+        animationRef.current = requestAnimationFrame(animate);
+
+        return () => {
+            if (animationRef.current) {
+                cancelAnimationFrame(animationRef.current);
+            }
+        };
+    }, [scrapperLocation]);
+
     // Calculate Route
     useEffect(() => {
         if (isLoaded && scrapperLocation && userLocation && scrapperLocation.lat && userLocation.lat) {
             const directionsService = new window.google.maps.DirectionsService();
             directionsService.route({
-                origin: scrapperLocation,
+                origin: scrapperLocation, // Use actual location for route
                 destination: userLocation,
                 travelMode: window.google.maps.TravelMode.DRIVING
             }, (result, status) => {
@@ -231,9 +304,9 @@ const TrackOrderPage = () => {
                     />
 
                     {/* Scrapper Truck Marker */}
-                    {scrapperLocation && (
+                    {animatedPosition && (
                         <Marker
-                            position={scrapperLocation}
+                            position={animatedPosition}
                             icon={{
                                 url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
                                     <svg width="48" height="48" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">

@@ -45,7 +45,8 @@ const walletTransactionSchema = new mongoose.Schema({
             'COMMISSION',         // Admin Fee Deduction
             'WITHDRAWAL',         // Withdrawal to Bank
             'REFUND',             // Refund
-            'REFERRAL_BONUS'      // Referral Earnings
+            'REFERRAL_BONUS',     // Referral Earnings
+            'COUPON_CREDIT'       // Coupon Earnings
         ],
         required: true
     },
@@ -53,6 +54,11 @@ const walletTransactionSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Order',
         default: null
+    },
+    couponCode: {
+        type: String,
+        default: null,
+        index: true
     },
 
     // Payment Gateway Metadata (for Recharges & Hybrid Payments)

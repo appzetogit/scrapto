@@ -1,4 +1,5 @@
 import { v2 as cloudinary } from 'cloudinary';
+import streamifier from 'streamifier';
 import logger from '../utils/logger.js';
 
 /**
@@ -76,6 +77,66 @@ export const uploadToCloudinary = async (filePathOrDataUri, options = {}) => {
     logger.error('Cloudinary upload error:', error);
     throw new Error(`Failed to upload file to Cloudinary: ${error.message}`);
   }
+};
+
+/**
+ * Upload buffer to Cloudinary (using streamifier)
+ * @param {Buffer} buffer - File buffer
+ * @param {Object} options - Upload options
+ * @returns {Promise<Object>} - Upload result
+ */
+export const uploadBufferToCloudinary = (buffer, options = {}) => {
+  return new Promise((resolve, reject) => {
+    const {
+      folder = 'scrapto',
+      resource_type = 'image',
+      public_id = null,
+      transformation = []
+    } = options;
+
+    const uploadOptions = {
+      folder: `scrapto/${folder}`,
+      resource_type: resource_type,
+      use_filename: true,
+      unique_filename: true,
+      overwrite: false
+    };
+
+    if (resource_type === 'image' && transformation.length > 0) {
+      uploadOptions.transformation = transformation;
+    } else if (resource_type === 'image') {
+      uploadOptions.transformation = [
+        { width: 1200, height: 1200, crop: 'limit' },
+        { quality: 'auto' },
+        { format: 'auto' }
+      ];
+    }
+
+    if (public_id) {
+      uploadOptions.public_id = public_id;
+    }
+
+    const stream = cloudinary.uploader.upload_stream(uploadOptions, (error, result) => {
+      if (error) {
+        logger.error('Cloudinary stream upload error:', error);
+        reject(new Error(`Failed to upload buffer to Cloudinary: ${error.message}`));
+      } else {
+        resolve({
+          success: true,
+          secure_url: result.secure_url,
+          url: result.secure_url,
+          publicId: result.public_id,
+          format: result.format,
+          width: result.width,
+          height: result.height,
+          bytes: result.bytes,
+          resource_type: result.resource_type
+        });
+      }
+    });
+
+    streamifier.createReadStream(buffer).pipe(stream);
+  });
 };
 
 /**

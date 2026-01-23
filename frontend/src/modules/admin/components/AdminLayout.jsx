@@ -96,6 +96,7 @@ const AdminLayout = () => {
         { label: getTranslatedText('Campaigns'), path: '/admin/referrals/campaigns' }
       ]
     },
+    { icon: FaGift, label: getTranslatedText('Coupons'), path: '/admin/coupons' },
     { icon: FaChartBar, label: getTranslatedText('Reports'), path: '/admin/reports' },
     { icon: FaBullhorn, label: getTranslatedText('Ad Banners'), path: '/admin/banners' },
     { icon: FaCog, label: getTranslatedText('Settings'), path: '/admin/settings' }

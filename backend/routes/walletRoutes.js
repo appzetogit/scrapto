@@ -22,6 +22,11 @@ router.post('/recharge/verify', protect, verifyRecharge);
 router.post('/pay-order', protect, payOrderViaWallet);
 
 // Withdrawals
+// Withdrawals
 router.post('/withdraw', protect, requestWithdrawal);
+
+// Coupons
+import { applyCoupon } from '../controllers/walletController.js';
+router.post('/apply-coupon', protect, applyCoupon);
 
 export default router;

@@ -24,5 +24,10 @@ export const walletService = {
   // Pay for an order using Wallet Balance
   payOrderViaWallet: async (orderId, amount) => {
     return await walletAPI.payOrderViaWallet(orderId, amount);
+  },
+
+  // Apply coupon code to wallet
+  applyCoupon: async (code) => {
+    return await walletAPI.applyCoupon(code);
   }
 };

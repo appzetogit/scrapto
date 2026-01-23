@@ -2,36 +2,15 @@ import multer from 'multer';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import fs from 'fs';
-import { uploadToCloudinary, deleteFromCloudinary } from '../config/cloudinary.js';
+import { uploadToCloudinary, deleteFromCloudinary, uploadBufferToCloudinary } from '../config/cloudinary.js';
 import { MAX_FILE_SIZE, FILE_TYPES } from '../config/constants.js';
 import logger from '../utils/logger.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Temporary storage for files before Cloudinary upload
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    console.log('Multer processing file:', file.fieldname);
-    // Use process.cwd() to ensure we point to backend root
-    const uploadDir = path.join(process.cwd(), 'uploads/temp');
-    if (!fs.existsSync(uploadDir)) {
-      try {
-        fs.mkdirSync(uploadDir, { recursive: true });
-      } catch (err) {
-        console.error('Failed to create upload directory:', err);
-      }
-    }
-    cb(null, uploadDir);
-  },
-  filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    // Sanitize filename
-    const safeName = file.originalname.replace(/[^a-zA-Z0-9.]/g, '_');
-    console.log('Multer saving as:', safeName);
-    cb(null, file.fieldname + '-' + uniqueSuffix + '-' + safeName);
-  }
-});
+// Use Memory Storage for better reliability (especially in production/serverless)
+const storage = multer.memoryStorage();
 
 // File filter
 const fileFilter = (req, file, cb) => {
@@ -63,7 +42,6 @@ export const uploadFile = async (file, options = {}) => {
       throw new Error('No file provided');
     }
 
-    const filePath = file.path;
     const folder = options.folder || 'general';
 
     // Check for Cloudinary credentials
@@ -73,24 +51,39 @@ export const uploadFile = async (file, options = {}) => {
 
     // Upload to Cloudinary
     logger.info(`Starting Cloudinary upload for ${file.originalname} to folder ${folder}`);
-    const result = await uploadToCloudinary(filePath, {
-      folder: folder,
-      resource_type: options.resource_type || 'image',
-      public_id: options.public_id || null
-    });
+
+    let result;
+
+    if (file.buffer) {
+      // Memory Storage path
+      result = await uploadBufferToCloudinary(file.buffer, {
+        folder: folder,
+        resource_type: options.resource_type || 'image',
+        public_id: options.public_id || null
+      });
+    } else if (file.path) {
+      // Disk Storage path (Legacy/Fallback)
+      result = await uploadToCloudinary(file.path, {
+        folder: folder,
+        resource_type: options.resource_type || 'image',
+        public_id: options.public_id || null
+      });
+
+      // Delete temporary file
+      if (fs.existsSync(file.path)) {
+        fs.unlinkSync(file.path);
+      }
+    } else {
+      throw new Error('Invalid file object: no buffer or path');
+    }
 
     logger.info(`Cloudinary upload success: ${result.secure_url}`);
-
-    // Delete temporary file only if Cloudinary upload succeeded
-    if (fs.existsSync(filePath)) {
-      fs.unlinkSync(filePath);
-    }
 
     return result;
   } catch (error) {
     logger.error('File upload error:', error);
 
-    // Clean up temp file on error
+    // Clean up temp file on error (if disk storage was used)
     if (file && file.path && fs.existsSync(file.path)) {
       try {
         fs.unlinkSync(file.path);

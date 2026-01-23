@@ -4,6 +4,8 @@ import User from '../models/User.js';
 import Scrapper from '../models/Scrapper.js';
 import WalletTransaction from '../models/WalletTransaction.js';
 import Order from '../models/Order.js';
+import Coupon from '../models/CouponModel.js';
+import CouponUsage from '../models/CouponUsageModel.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 import { sendSuccess, sendError } from '../utils/responseHandler.js';
 import { getRazorpayClient } from '../services/paymentService.js';
@@ -130,7 +132,7 @@ export const verifyRecharge = asyncHandler(async (req, res) => {
         const user = await Model.findById(userId).session(session);
         if (!user) throw new Error('User not found');
 
-        // Initialize wallet if missing
+        // Initialize wallet if missing or partial
         if (!user.wallet) {
             user.wallet = {
                 balance: 0,
@@ -139,11 +141,20 @@ export const verifyRecharge = asyncHandler(async (req, res) => {
             };
         }
 
+        // Ensure balance is a number
+        if (typeof user.wallet.balance !== 'number') {
+            user.wallet.balance = 0;
+        }
+
         const previousBalance = user.wallet.balance;
         const creditAmount = Number(amount);
 
+        if (isNaN(creditAmount) || creditAmount <= 0) {
+            throw new Error('Invalid recharge amount received');
+        }
+
         // Safety Update
-        user.wallet.balance += creditAmount;
+        user.wallet.balance = previousBalance + creditAmount;
         await user.save({ session });
 
         // 4. Create Transaction Record
@@ -175,8 +186,16 @@ export const verifyRecharge = asyncHandler(async (req, res) => {
 
     } catch (error) {
         await session.abortTransaction();
-        logger.error('[Wallet] Recharge verification failed', error);
-        sendError(res, 'Recharge Failed', 500);
+        logger.error('[Wallet] Recharge verification failed', {
+            error: error.message,
+            stack: error.stack,
+            userId,
+            role,
+            amount,
+            razorpay_payment_id,
+            razorpay_order_id
+        });
+        sendError(res, error.message || 'Recharge Failed', 500);
     } finally {
         session.endSession();
     }
@@ -202,9 +221,6 @@ export const getWalletTransactions = asyncHandler(async (req, res) => {
     });
 });
 
-// @desc    Pay for order using wallet (Scrapper -> User)
-// @route   POST /api/wallet/pay-order
-// @access  Private (Scrappers)
 // @desc    Pay for order using wallet (Handles both Scrap Sell and Cleaning Service)
 // @route   POST /api/wallet/pay-order
 // @access  Private (User or Scrapper)
@@ -271,8 +287,16 @@ export const payOrderViaWallet = asyncHandler(async (req, res) => {
         if (!payer.wallet) payer.wallet = { balance: 0, currency: 'INR', status: 'ACTIVE' };
         if (!payee.wallet) payee.wallet = { balance: 0, currency: 'INR', status: 'ACTIVE' };
 
+        // Ensure balances are numbers
+        if (typeof payer.wallet.balance !== 'number') payer.wallet.balance = 0;
+        if (typeof payee.wallet.balance !== 'number') payee.wallet.balance = 0;
+
         // 6. Check Balance
         const transferAmount = Number(amount);
+        if (isNaN(transferAmount) || transferAmount <= 0) {
+            throw new Error('Invalid transfer amount');
+        }
+
         if (payer.wallet.balance < transferAmount) {
             throw new Error(`Insufficient wallet balance. Please recharge.`);
         }
@@ -345,6 +369,7 @@ export const payOrderViaWallet = asyncHandler(async (req, res) => {
         session.endSession();
     }
 });
+
 // @desc    Request withdrawal
 // @route   POST /api/wallet/withdraw
 // @access  Private
@@ -421,6 +446,142 @@ export const requestWithdrawal = asyncHandler(async (req, res) => {
         await session.abortTransaction();
         logger.error('[Wallet] Withdrawal Request Failed', error);
         sendError(res, error.message || 'Withdrawal request failed', 500);
+    } finally {
+        session.endSession();
+    }
+});
+
+// @desc    Apply coupon to add balance
+// @route   POST /api/wallet/apply-coupon
+// @access  Private (User or Scrapper)
+export const applyCoupon = asyncHandler(async (req, res) => {
+    const { code } = req.body;
+    const userId = req.user.id;
+    const role = req.user.role; // 'user' or 'scrapper' (lowercase from middleware)
+
+    // Convert role to Match Enum standard (User/Scrapper) if needed
+    // The middleware usually sets req.user.role as 'user' or 'scrapper' (lowercase)
+    // Our DB enums use 'User' / 'Scrapper' (Title Case) or 'USER' / 'SCRAPPER' (UpperCase) depending on the model.
+    // Coupon Model uses: 'USER', 'SCRAPPER', 'ALL'
+    // Wallet Transaction uses: 'User', 'Scrapper'
+    // Coupon Usage uses: 'User', 'Scrapper'
+
+    if (!code) {
+        return sendError(res, 'Coupon code is required', 400);
+    }
+
+    const session = await mongoose.startSession();
+    session.startTransaction();
+
+    try {
+        // 1. Fetch Coupon
+        const coupon = await Coupon.findOne({ code: code.toUpperCase() }).session(session);
+        if (!coupon) {
+            throw new Error('Invalid coupon code');
+        }
+
+        // 2. Validate Coupon Status
+        if (!coupon.isActive) {
+            throw new Error('Coupon is inactive');
+        }
+
+        if (new Date() > coupon.validTo) {
+            throw new Error('Coupon has expired');
+        }
+
+        if (new Date() < coupon.validFrom) {
+            throw new Error('Coupon is not yet valid');
+        }
+
+        // 3. Validate Role
+        // coupon.applicableRole: 'USER', 'SCRAPPER', 'ALL'
+        const userRoleUpper = role.toUpperCase(); // 'USER' or 'SCRAPPER'
+        if (coupon.applicableRole !== 'ALL' && coupon.applicableRole !== userRoleUpper) {
+            throw new Error('This coupon is not applicable for your role');
+        }
+
+        // 4. Validate Usage Limits (Global)
+        if (coupon.usageType === 'LIMITED' && coupon.usedCount >= coupon.limit) {
+            throw new Error('Coupon usage limit exceeded');
+        }
+
+        // 5. Validate Per-User Usage
+        // Check if user has already used this coupon
+        const usageQuery = { couponId: coupon._id };
+        if (role === 'user') {
+            usageQuery.userId = userId;
+        } else {
+            usageQuery.scrapperId = userId;
+        }
+
+        const existingUsage = await CouponUsage.findOne(usageQuery).session(session);
+        if (existingUsage && (coupon.usageType === 'SINGLE_USE_PER_USER' || coupon.usageType === 'LIMITED')) {
+            throw new Error('You have already redeemed this coupon');
+        }
+
+        // 6. Credit Wallet
+        const Model = getUserModel(role);
+        const user = await Model.findById(userId).session(session);
+        if (!user) throw new Error('User not found');
+
+        if (!user.wallet) {
+            user.wallet = {
+                balance: 0,
+                currency: 'INR',
+                status: 'ACTIVE'
+            };
+        }
+
+        const previousBalance = user.wallet.balance;
+        const creditAmount = coupon.amount;
+
+        user.wallet.balance += creditAmount;
+        await user.save({ session });
+
+        // 7. Create Wallet Transaction
+        const trx = await WalletTransaction.create([{
+            trxId: `TRX-CPN-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+            user: userId,
+            userType: role === 'scrapper' ? 'Scrapper' : 'User',
+            amount: creditAmount,
+            type: 'CREDIT',
+            balanceBefore: previousBalance,
+            balanceAfter: user.wallet.balance,
+            category: 'COUPON_CREDIT',
+            status: 'SUCCESS',
+            description: `Coupon Applied: ${coupon.code}`,
+            couponCode: coupon.code,
+            gateway: {
+                provider: 'SYSTEM'
+            }
+        }], { session });
+
+        // 8. Record Usage
+        await CouponUsage.create([{
+            couponId: coupon._id,
+            userId: role === 'user' ? userId : null,
+            scrapperId: role === 'scrapper' ? userId : null,
+            userType: role === 'scrapper' ? 'Scrapper' : 'User',
+            walletTransactionId: trx[0]._id,
+            amount: creditAmount
+        }], { session });
+
+        // 9. Update Coupon Stats
+        coupon.usedCount += 1;
+        await coupon.save({ session });
+
+        await session.commitTransaction();
+
+        sendSuccess(res, 'Coupon applied successfully', {
+            newBalance: user.wallet.balance,
+            amountCredited: creditAmount,
+            message: `₹${creditAmount} added to your wallet!`
+        });
+
+    } catch (error) {
+        await session.abortTransaction();
+        logger.error('[Wallet] Apply Coupon Failed', error);
+        sendError(res, error.message || 'Failed to apply coupon', 400);
     } finally {
         session.endSession();
     }

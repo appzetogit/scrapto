@@ -23,6 +23,9 @@ const WalletPage = () => {
     const [showAddMoneyModal, setShowAddMoneyModal] = useState(false);
     const [rechargeAmount, setRechargeAmount] = useState('');
     const [processing, setProcessing] = useState(false);
+    const [couponCode, setCouponCode] = useState('');
+    const [applyingCoupon, setApplyingCoupon] = useState(false);
+    const [showCouponSection, setShowCouponSection] = useState(false);
 
     useEffect(() => {
         fetchWalletData();
@@ -104,6 +107,30 @@ const WalletPage = () => {
         }
     };
 
+    const handleApplyCoupon = async () => {
+        if (!couponCode || couponCode.trim() === '') {
+            alert('Please enter a coupon code');
+            return;
+        }
+
+        try {
+            setApplyingCoupon(true);
+            const response = await walletService.applyCoupon(couponCode.toUpperCase());
+
+            if (response.success) {
+                alert(`Success! ₹${response.data.amountCredited} added to your wallet!`);
+                setCouponCode('');
+                setShowCouponSection(false);
+                fetchWalletData(); // Refresh wallet data
+            }
+        } catch (error) {
+            console.error('Apply coupon error:', error);
+            alert(error.message || 'Failed to apply coupon. Please check the code and try again.');
+        } finally {
+            setApplyingCoupon(false);
+        }
+    };
+
     const formatDate = (dateString) => {
         const options = { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' };
         return new Date(dateString).toLocaleDateString('en-IN', options);
@@ -154,6 +181,77 @@ const WalletPage = () => {
                     </div>
                 </motion.div>
 
+                {/* Coupon Section */}
+                <motion.div
+                    initial={{ y: 20, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    transition={{ delay: 0.1 }}
+                    className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100"
+                >
+                    <button
+                        onClick={() => setShowCouponSection(!showCouponSection)}
+                        className="w-full flex items-center justify-between text-left"
+                    >
+                        <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-full bg-emerald-50 flex items-center justify-center">
+                                <svg className="w-5 h-5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
+                                </svg>
+                            </div>
+                            <div>
+                                <p className="font-semibold text-gray-800 text-sm">Have a Coupon?</p>
+                                <p className="text-xs text-gray-500">Apply code to get instant credit</p>
+                            </div>
+                        </div>
+                        <svg
+                            className={`w-5 h-5 text-gray-400 transition-transform ${showCouponSection ? 'rotate-180' : ''}`}
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                        >
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </button>
+
+                    <AnimatePresence>
+                        {showCouponSection && (
+                            <motion.div
+                                initial={{ height: 0, opacity: 0 }}
+                                animate={{ height: 'auto', opacity: 1 }}
+                                exit={{ height: 0, opacity: 0 }}
+                                transition={{ duration: 0.2 }}
+                                className="overflow-hidden"
+                            >
+                                <div className="pt-4 space-y-3">
+                                    <div className="flex gap-2">
+                                        <input
+                                            type="text"
+                                            value={couponCode}
+                                            onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                                            placeholder="Enter coupon code"
+                                            className="flex-1 px-4 py-2.5 rounded-xl border-2 border-gray-200 focus:border-emerald-500 focus:outline-none text-sm font-mono uppercase"
+                                            disabled={applyingCoupon}
+                                        />
+                                        <button
+                                            onClick={handleApplyCoupon}
+                                            disabled={applyingCoupon || !couponCode}
+                                            className="px-6 py-2.5 bg-emerald-600 text-white rounded-xl font-semibold text-sm hover:bg-emerald-700 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                                        >
+                                            {applyingCoupon ? 'Applying...' : 'Apply'}
+                                        </button>
+                                    </div>
+                                    <p className="text-xs text-gray-500 flex items-center gap-1">
+                                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                        Enter a valid coupon code to get instant wallet credit
+                                    </p>
+                                </div>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+                </motion.div>
+
                 {/* Transactions */}
                 <div>
                     <h3 className="text-lg font-bold text-gray-800 mb-3 px-1">Recent Transactions</h3>
@@ -174,9 +272,11 @@ const WalletPage = () => {
                                     className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex items-center justify-between"
                                 >
                                     <div className="flex items-center gap-3">
-                                        <div className={`w-10 h-10 rounded-full flex items-center justify-center ${trx.type === 'CREDIT' ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}>
+                                        <div className={`w-10 h-10 rounded-full flex items-center justify-center ${trx.category === 'COUPON_CREDIT' ? 'bg-purple-100 text-purple-600' : trx.type === 'CREDIT' ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}>
                                             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                {trx.type === 'CREDIT' ? (
+                                                {trx.category === 'COUPON_CREDIT' ? (
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
+                                                ) : trx.type === 'CREDIT' ? (
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
                                                 ) : (
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
@@ -185,11 +285,12 @@ const WalletPage = () => {
                                         </div>
                                         <div>
                                             <p className="font-semibold text-gray-800 text-sm">
-                                                {trx.category === 'RECHARGE' ? 'Wallet Recharge' :
-                                                    trx.category === 'PAYMENT_SENT' ? 'Payment Sent' :
-                                                        trx.category === 'PAYMENT_RECEIVED' ? 'Payment Received' :
-                                                            trx.category === 'COMMISSION' ? 'Commission Deducted' :
-                                                                trx.description}
+                                                {trx.category === 'COUPON_CREDIT' ? `Coupon Applied${trx.couponCode ? ': ' + trx.couponCode : ''}` :
+                                                    trx.category === 'RECHARGE' ? 'Wallet Recharge' :
+                                                        trx.category === 'PAYMENT_SENT' ? 'Payment Sent' :
+                                                            trx.category === 'PAYMENT_RECEIVED' ? 'Payment Received' :
+                                                                trx.category === 'COMMISSION' ? 'Commission Deducted' :
+                                                                    trx.description}
                                             </p>
                                             <p className="text-xs text-gray-500">{formatDate(trx.createdAt)}</p>
                                         </div>
