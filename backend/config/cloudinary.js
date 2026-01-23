@@ -1,5 +1,5 @@
 import { v2 as cloudinary } from 'cloudinary';
-import streamifier from 'streamifier';
+import { Readable } from 'stream';
 import logger from '../utils/logger.js';
 
 /**
@@ -80,7 +80,7 @@ export const uploadToCloudinary = async (filePathOrDataUri, options = {}) => {
 };
 
 /**
- * Upload buffer to Cloudinary (using streamifier)
+ * Upload buffer to Cloudinary (using native stream)
  * @param {Buffer} buffer - File buffer
  * @param {Object} options - Upload options
  * @returns {Promise<Object>} - Upload result
@@ -135,7 +135,10 @@ export const uploadBufferToCloudinary = (buffer, options = {}) => {
       }
     });
 
-    streamifier.createReadStream(buffer).pipe(stream);
+    const bufferStream = new Readable();
+    bufferStream.push(buffer);
+    bufferStream.push(null);
+    bufferStream.pipe(stream);
   });
 };
 
