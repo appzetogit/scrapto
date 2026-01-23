@@ -74,7 +74,8 @@ const ScrapperHelpSupport = () => {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.3 }}
-      className="min-h-screen w-full p-4 md:p-6 bg-slate-50"
+      className="min-h-screen w-full p-4 md:p-6"
+      style={{ background: "linear-gradient(to bottom, #72c688ff, #dcfce7)" }}
     >
       <div className="w-full p-2 md:p-4">
         <h2 className="text-xl md:text-2xl font-bold mb-2 text-slate-800">

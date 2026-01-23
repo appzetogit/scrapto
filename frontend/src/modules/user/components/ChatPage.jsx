@@ -489,7 +489,7 @@ const ChatPage = () => {
       transition={{ duration: 0.3 }}
       className="fixed inset-0 w-full flex flex-col"
       style={{
-        backgroundColor: "#f4ebe2",
+        background: "linear-gradient(to bottom, #72c688ff, #dcfce7)",
         height: "calc(var(--vh, 1vh) * 100)",
         width: "100vw",
         overflow: "hidden",
@@ -502,22 +502,22 @@ const ChatPage = () => {
       }}>
       {/* Fixed Header */}
       <div
-        className="flex items-center justify-between px-4 py-3 border-b z-10 flex-shrink-0"
+        className="flex items-center justify-between px-4 py-3 border-b z-10 flex-shrink-0 backdrop-blur-md"
         style={{
-          borderColor: "rgba(100, 148, 110, 0.2)",
-          backgroundColor: "#ffffff",
+          borderColor: "rgba(255, 255, 255, 0.3)",
+          backgroundColor: "rgba(255, 255, 255, 0.8)",
           boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
         }}>
         <button
           onClick={() => navigate(-1)}
           className="w-10 h-10 rounded-full flex items-center justify-center transition-colors active:opacity-70"
-          style={{ backgroundColor: "rgba(100, 148, 110, 0.1)" }}>
+          style={{ backgroundColor: "rgba(255, 255, 255, 0.5)" }}>
           <svg
             width="20"
             height="20"
             viewBox="0 0 24 24"
             fill="none"
-            style={{ color: "#2d3748" }}>
+            style={{ color: "#1e293b" }}>
             <path
               d="M19 12H5M12 19l-7-7 7-7"
               stroke="currentColor"
@@ -531,10 +531,10 @@ const ChatPage = () => {
         {otherUser && (
           <div className="flex items-center gap-3 flex-1 px-3">
             <div
-              className="w-10 h-10 rounded-full flex items-center justify-center text-base font-bold relative"
+              className="w-10 h-10 rounded-full flex items-center justify-center text-base font-bold relative shadow-sm"
               style={{
-                backgroundColor: "rgba(100, 148, 110, 0.15)",
-                color: "#64946e",
+                backgroundColor: "#ecfdf5",
+                color: "#059669",
               }}>
               {otherUser.name
                 ?.split(" ")
@@ -552,18 +552,18 @@ const ChatPage = () => {
             <div className="flex-1 min-w-0">
               <h3
                 className="text-base font-semibold truncate"
-                style={{ color: "#2d3748" }}>
+                style={{ color: "#1e293b" }}>
                 {getTranslatedText(otherUser.name) ||
                   getTranslatedText("Unknown User")}
               </h3>
               <div className="flex items-center gap-1">
                 {otherUserTyping && (
-                  <span className="text-xs italic" style={{ color: "#718096" }}>
+                  <span className="text-xs italic" style={{ color: "#64748b" }}>
                     {getTranslatedText("is typing...")}
                   </span>
                 )}
                 {!otherUserTyping && (
-                  <span className="text-xs" style={{ color: "#10b981" }}>
+                  <span className="text-xs" style={{ color: "#059669" }}>
                     {getTranslatedText("• Online")}
                   </span>
                 )}
@@ -579,13 +579,13 @@ const ChatPage = () => {
             }
           }}
           className="w-10 h-10 rounded-full flex items-center justify-center transition-colors active:opacity-70"
-          style={{ backgroundColor: "rgba(100, 148, 110, 0.1)" }}>
+          style={{ backgroundColor: "rgba(255, 255, 255, 0.5)" }}>
           <svg
             width="20"
             height="20"
             viewBox="0 0 24 24"
             fill="none"
-            style={{ color: "#64946e" }}>
+            style={{ color: "#059669" }}>
             <path
               d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"
               stroke="currentColor"
@@ -603,7 +603,7 @@ const ChatPage = () => {
         onScroll={handleScroll}
         className="flex-1 overflow-y-auto px-4 py-4"
         style={{
-          backgroundColor: "#f4ebe2",
+          backgroundColor: "transparent",
           WebkitOverflowScrolling: "touch",
           touchAction: "pan-y",
           overscrollBehavior: "contain",
@@ -612,7 +612,7 @@ const ChatPage = () => {
           <div className="text-center py-2">
             <FaSpinner
               className="animate-spin mx-auto"
-              style={{ color: "#64946e" }}
+              style={{ color: "#ffffff" }}
             />
           </div>
         )}
@@ -637,21 +637,19 @@ const ChatPage = () => {
                 initial={{ opacity: 0, y: 10, scale: 0.95 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 transition={{ duration: 0.2 }}
-                className={`flex ${
-                  isUserMessage ? "justify-end" : "justify-start"
-                }`}>
-                <div
-                  className={`flex items-end gap-2 max-w-[85%] ${
-                    isUserMessage ? "flex-row-reverse" : "flex-row"
+                className={`flex ${isUserMessage ? "justify-end" : "justify-start"
                   }`}>
+                <div
+                  className={`flex items-end gap-2 max-w-[85%] ${isUserMessage ? "flex-row-reverse" : "flex-row"
+                    }`}>
                   {/* Avatar */}
                   <div
-                    className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
+                    className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 shadow-sm"
                     style={{
                       backgroundColor: isUserMessage
-                        ? "rgba(100, 148, 110, 0.2)"
-                        : "rgba(100, 148, 110, 0.15)",
-                      color: "#64946e",
+                        ? "#ecfdf5"
+                        : "#ffffff",
+                      color: isUserMessage ? "#059669" : "#64748b",
                     }}>
                     {senderInitials}
                   </div>
@@ -659,25 +657,23 @@ const ChatPage = () => {
                   {/* Message Bubble */}
                   <div className="flex flex-col">
                     <div
-                      className={`rounded-2xl px-4 py-2.5 shadow-sm ${
-                        isUserMessage ? "rounded-tr-md" : "rounded-tl-md"
-                      }`}
+                      className={`rounded-2xl px-4 py-2.5 shadow-sm ${isUserMessage ? "rounded-tr-md" : "rounded-tl-md"
+                        }`}
                       style={{
-                        backgroundColor: isUserMessage ? "#64946e" : "#ffffff",
-                        color: isUserMessage ? "#ffffff" : "#2d3748",
+                        backgroundColor: isUserMessage ? "#059669" : "#ffffff",
+                        color: isUserMessage ? "#ffffff" : "#1e293b",
                         boxShadow: isUserMessage
-                          ? "0 2px 8px rgba(100, 148, 110, 0.2)"
-                          : "0 1px 3px rgba(0,0,0,0.1)",
+                          ? "0 4px 6px rgba(5, 150, 105, 0.2)"
+                          : "0 2px 4px rgba(0,0,0,0.05)",
                       }}>
                       <p className="text-sm leading-relaxed whitespace-pre-wrap break-words">
                         {getTranslatedText(message.content) || message.message}
                       </p>
                     </div>
                     <span
-                      className={`text-[10px] mt-1 px-1 ${
-                        isUserMessage ? "text-right" : "text-left"
-                      }`}
-                      style={{ color: "#9ca3af" }}>
+                      className={`text-[10px] mt-1 px-1 font-medium ${isUserMessage ? "text-right" : "text-left"
+                        }`}
+                      style={{ color: isUserMessage ? "rgba(255,255,255,0.7)" : "rgba(30,41,59,0.5)" }}>
                       {formatTime(message.createdAt)}
                       {isUserMessage && message.read && (
                         <span className="ml-1">✓✓</span>
@@ -694,10 +690,10 @@ const ChatPage = () => {
 
       {/* Fixed Input Area */}
       <div
-        className="px-4 border-t flex-shrink-0 z-10"
+        className="px-4 border-t flex-shrink-0 z-10 backdrop-blur-md"
         style={{
-          borderColor: "rgba(100, 148, 110, 0.2)",
-          backgroundColor: "#ffffff",
+          borderColor: "rgba(255, 255, 255, 0.3)",
+          backgroundColor: "rgba(255, 255, 255, 0.8)",
           boxShadow: "0 -2px 8px rgba(0,0,0,0.05)",
           paddingTop: "12px",
           paddingBottom: "max(12px, env(safe-area-inset-bottom))",
@@ -725,13 +721,14 @@ const ChatPage = () => {
               className="w-full py-2.5 px-4 rounded-2xl border-2 focus:outline-none resize-none text-sm disabled:opacity-50"
               style={{
                 borderColor: inputMessage
-                  ? "#64946e"
-                  : "rgba(100, 148, 110, 0.3)",
-                color: "#2d3748",
-                backgroundColor: "#f9fafb",
+                  ? "#059669"
+                  : "transparent",
+                color: "#1e293b",
+                backgroundColor: "#ffffff",
                 minHeight: "44px",
                 maxHeight: "100px",
                 transition: "all 0.2s ease",
+                boxShadow: "inset 0 1px 2px rgba(0,0,0,0.05)"
               }}
               onInput={(e) => {
                 e.target.style.height = "auto";
@@ -751,12 +748,12 @@ const ChatPage = () => {
             style={{
               backgroundColor:
                 inputMessage.trim() && !sending
-                  ? "#64946e"
-                  : "rgba(100, 148, 110, 0.3)",
+                  ? "#059669"
+                  : "#e2e8f0",
               color: "#ffffff",
               boxShadow:
                 inputMessage.trim() && !sending
-                  ? "0 4px 12px rgba(100, 148, 110, 0.3)"
+                  ? "0 4px 12px rgba(5, 150, 105, 0.3)"
                   : "none",
             }}>
             {sending ? (

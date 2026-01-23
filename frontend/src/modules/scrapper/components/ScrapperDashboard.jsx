@@ -501,7 +501,8 @@ const ScrapperDashboard = () => {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.3 }}
-      className="min-h-screen w-full bg-gradient-to-br from-emerald-900 via-gray-900 to-black text-white"
+      className="min-h-screen w-full text-slate-800"
+      style={{ background: "linear-gradient(to bottom, #72c688ff, #dcfce7)" }}
     >
       {/* Header */}
       <div className="p-4 md:p-6 border-b border-white/10">
@@ -532,14 +533,14 @@ const ScrapperDashboard = () => {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="flex items-center justify-between p-4 rounded-xl shadow-md bg-zinc-900 border border-white/10"
+          className="flex items-center justify-between p-4 rounded-xl shadow-md bg-white border border-slate-200"
         >
           <div className="flex items-center gap-3">
             <div
               className={`w-3 h-3 rounded-full ${isAvailable ? 'animate-pulse bg-emerald-500' : 'bg-red-500'}`}
             />
             <div>
-              <p className="text-sm font-semibold text-white">
+              <p className="text-sm font-semibold text-slate-800">
                 {isAvailable ? getTranslatedText('Available for Pickups') : getTranslatedText('Currently Offline')}
               </p>
               <p className="text-xs text-slate-500">
@@ -629,27 +630,27 @@ const ScrapperDashboard = () => {
             {getTranslatedText("Earnings Summary")}
           </h2>
           <div className="grid grid-cols-2 gap-3 md:gap-4">
-            <div className="p-3 md:p-4 rounded-xl bg-zinc-900 border border-white/5">
-              <p className="text-xs md:text-sm mb-1 text-gray-400">{getTranslatedText("Today")}</p>
-              <p className="text-lg md:text-2xl font-bold text-emerald-400">
+            <div className="p-3 md:p-4 rounded-xl bg-slate-50 border border-slate-100">
+              <p className="text-xs md:text-sm mb-1 text-slate-500">{getTranslatedText("Today")}</p>
+              <p className="text-lg md:text-2xl font-bold text-emerald-600">
                 ₹{earnings.today.toLocaleString()}
               </p>
             </div>
-            <div className="p-3 md:p-4 rounded-xl bg-zinc-900 border border-white/5">
-              <p className="text-xs md:text-sm mb-1 text-gray-400">{getTranslatedText("This Week")}</p>
-              <p className="text-lg md:text-2xl font-bold text-emerald-400">
+            <div className="p-3 md:p-4 rounded-xl bg-slate-50 border border-slate-100">
+              <p className="text-xs md:text-sm mb-1 text-slate-500">{getTranslatedText("This Week")}</p>
+              <p className="text-lg md:text-2xl font-bold text-emerald-600">
                 ₹{earnings.week.toLocaleString()}
               </p>
             </div>
-            <div className="p-3 md:p-4 rounded-xl bg-zinc-900 border border-white/5">
-              <p className="text-xs md:text-sm mb-1 text-gray-400">{getTranslatedText("This Month")}</p>
-              <p className="text-lg md:text-2xl font-bold text-emerald-400">
+            <div className="p-3 md:p-4 rounded-xl bg-slate-50 border border-slate-100">
+              <p className="text-xs md:text-sm mb-1 text-slate-500">{getTranslatedText("This Month")}</p>
+              <p className="text-lg md:text-2xl font-bold text-emerald-600">
                 ₹{earnings.month.toLocaleString()}
               </p>
             </div>
-            <div className="p-3 md:p-4 rounded-xl bg-zinc-900 border border-white/5">
-              <p className="text-xs md:text-sm mb-1 text-gray-400">{getTranslatedText("Total")}</p>
-              <p className="text-lg md:text-2xl font-bold text-emerald-400">
+            <div className="p-3 md:p-4 rounded-xl bg-slate-50 border border-slate-100">
+              <p className="text-xs md:text-sm mb-1 text-slate-500">{getTranslatedText("Total")}</p>
+              <p className="text-lg md:text-2xl font-bold text-emerald-600">
                 ₹{earnings.total.toLocaleString()}
               </p>
             </div>
@@ -677,28 +678,28 @@ const ScrapperDashboard = () => {
             {getTranslatedText("Quick Stats")}
           </h2>
           <div className="grid grid-cols-3 gap-3 md:gap-4">
-            <div className="text-center p-3 rounded-xl bg-green-50/50">
+            <div className="text-center p-3 rounded-xl bg-green-50">
               <p className="text-2xl md:text-3xl font-bold mb-1 text-emerald-600">
                 {stats.completedPickups}
               </p>
-              <p className="text-xs md:text-sm text-gray-400">{getTranslatedText("Completed")}</p>
+              <p className="text-xs md:text-sm text-slate-500">{getTranslatedText("Completed")}</p>
             </div>
-            <div className="text-center p-3 rounded-xl bg-zinc-900 border border-white/5">
+            <div className="text-center p-3 rounded-xl bg-slate-50 border border-slate-100">
               <div className="flex items-center justify-center gap-1 mb-1">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
                   <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" fill="#fbbf24" />
                 </svg>
-                <p className="text-2xl md:text-3xl font-bold text-emerald-400">
+                <p className="text-2xl md:text-3xl font-bold text-slate-800">
                   {stats.rating}
                 </p>
               </div>
-              <p className="text-xs md:text-sm text-gray-400">{getTranslatedText("Rating")}</p>
+              <p className="text-xs md:text-sm text-slate-500">{getTranslatedText("Rating")}</p>
             </div>
-            <div className="text-center p-3 rounded-xl bg-zinc-900 border border-white/5">
-              <p className="text-2xl md:text-3xl font-bold mb-1 text-emerald-400">
+            <div className="text-center p-3 rounded-xl bg-slate-50 border border-slate-100">
+              <p className="text-2xl md:text-3xl font-bold mb-1 text-slate-800">
                 {stats.activeRequests}
               </p>
-              <p className="text-xs md:text-sm text-gray-400">{getTranslatedText("Active")}</p>
+              <p className="text-xs md:text-sm text-slate-500">{getTranslatedText("Active")}</p>
             </div>
           </div>
         </motion.div>
@@ -754,21 +755,21 @@ const ScrapperDashboard = () => {
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: 0.1 * index }}
                       onClick={() => navigate(`/scrapper/active-request/${request.id}`, { state: { request }, replace: false })}
-                      className="p-3 md:p-4 rounded-xl border cursor-pointer transition-all hover:shadow-md bg-zinc-900 border-white/10"
+                      className="p-3 md:p-4 rounded-xl border cursor-pointer transition-all hover:shadow-md bg-white border-slate-200"
                     >
                       <div className="flex items-start justify-between gap-3">
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 mb-2">
-                            <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 bg-emerald-900/30">
-                              <span className="text-xs font-bold text-emerald-400">
+                            <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 bg-emerald-100">
+                              <span className="text-xs font-bold text-emerald-600">
                                 {request.userName?.[0]?.toUpperCase() || 'U'}
                               </span>
                             </div>
                             <div className="flex-1 min-w-0">
-                              <p className="text-sm font-semibold truncate text-white">
+                              <p className="text-sm font-semibold truncate text-slate-800">
                                 {request.userName || getTranslatedText('Unknown User')}
                               </p>
-                              <p className="text-xs truncate text-gray-400">
+                              <p className="text-xs truncate text-slate-500">
                                 {getTranslatedText(request.scrapType || 'Scrap')}
                               </p>
                             </div>
@@ -776,19 +777,19 @@ const ScrapperDashboard = () => {
                           <div className="ml-10 space-y-1">
                             {request.location?.address && (
                               <div className="flex items-center gap-1">
-                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" className="text-gray-400 flex-shrink-0">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" className="text-slate-500 flex-shrink-0">
                                   <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" fill="currentColor" />
                                 </svg>
-                                <p className="text-xs truncate text-gray-400">
+                                <p className="text-xs truncate text-slate-500">
                                   {request.location.address}
                                 </p>
                               </div>
                             )}
                             <div className="flex items-center gap-1">
-                              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" style={{ color: '#9ca3af', flexShrink: 0 }}>
+                              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" className="text-slate-400 flex-shrink-0">
                                 <path d="M8 2v2M16 2v2M5 7h14M6 4h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                               </svg>
-                              <p className="text-xs truncate" style={{ color: '#9ca3af' }}>
+                              <p className="text-xs truncate text-slate-400">
                                 {pickupTime}
                               </p>
                             </div>

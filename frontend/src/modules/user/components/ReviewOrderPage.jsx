@@ -175,7 +175,7 @@ const ReviewOrderPage = () => {
     return (
       <div
         className="min-h-screen flex items-center justify-center"
-        style={{ backgroundColor: "#f4ebe2" }}>
+        style={{ background: "linear-gradient(to bottom, #72c688ff, #dcfce7)" }}>
         <FaSpinner
           className="animate-spin text-4xl"
           style={{ color: "#64946e" }}
@@ -188,7 +188,7 @@ const ReviewOrderPage = () => {
     return (
       <div
         className="min-h-screen flex flex-col items-center justify-center p-4"
-        style={{ backgroundColor: "#f4ebe2" }}>
+        style={{ background: "linear-gradient(to bottom, #72c688ff, #dcfce7)" }}>
         <p className="text-red-500 mb-4">{error}</p>
         <button
           onClick={() => navigate(-1)}
@@ -200,18 +200,18 @@ const ReviewOrderPage = () => {
   }
 
   return (
-    <div className="min-h-screen pb-10" style={{ backgroundColor: "#f4ebe2" }}>
+    <div className="min-h-screen pb-10" style={{ background: "linear-gradient(to bottom, #72c688ff, #dcfce7)" }}>
       {/* Header */}
       <div
-        className="sticky top-0 z-40 px-4 py-4 shadow-sm"
-        style={{ backgroundColor: "#ffffff" }}>
+        className="sticky top-0 z-40 px-4 py-4"
+        style={{ background: "transparent" }}>
         <div className="max-w-2xl mx-auto flex items-center gap-4">
           <button
             onClick={() => navigate(-1)}
-            className="p-2 hover:bg-gray-100 rounded-full">
-            <FaArrowLeft size={20} style={{ color: "#2d3748" }} />
+            className="p-2 hover:bg-white/20 rounded-full transition-colors backdrop-blur-sm shadow-sm">
+            <FaArrowLeft size={20} style={{ color: "#ffffff" }} />
           </button>
-          <h1 className="text-xl font-bold" style={{ color: "#2d3748" }}>
+          <h1 className="text-xl font-bold" style={{ color: "#ffffff" }}>
             Rate & Review
           </h1>
         </div>
@@ -221,20 +221,21 @@ const ReviewOrderPage = () => {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-white rounded-2xl shadow-sm p-6 mb-6">
+          className="bg-white/95 rounded-2xl shadow-lg p-6 mb-6 backdrop-blur-sm">
           {/* Scrapper Info */}
           <div className="flex items-center gap-4 mb-6 pb-6 border-b border-gray-100">
             <div
-              className="w-16 h-16 rounded-full flex items-center justify-center text-xl font-bold"
+              className="w-16 h-16 rounded-full flex items-center justify-center text-xl font-bold shadow-inner"
               style={{
-                backgroundColor: "rgba(100, 148, 110, 0.15)",
-                color: "#64946e",
+                backgroundColor: "#ecfdf5",
+                color: "#059669",
+                border: "2px solid #10b981"
               }}>
               {order.scrapper?.name?.[0] || "S"}
             </div>
             <div>
               <p className="text-sm text-gray-500">You are rating</p>
-              <h2 className="text-xl font-bold" style={{ color: "#2d3748" }}>
+              <h2 className="text-xl font-bold" style={{ color: "#1e293b" }}>
                 {order.scrapper?.name || "Scrapper"}
               </h2>
               <p className="text-xs text-gray-400">
@@ -252,20 +253,20 @@ const ReviewOrderPage = () => {
                 {rating === 0
                   ? "Tap to rate"
                   : rating === 5
-                  ? "Excellent!"
-                  : rating === 4
-                  ? "Good"
-                  : rating === 3
-                  ? "Average"
-                  : rating === 2
-                  ? "Poor"
-                  : "Terrible"}
+                    ? "Excellent!"
+                    : rating === 4
+                      ? "Good"
+                      : rating === 3
+                        ? "Average"
+                        : rating === 2
+                          ? "Poor"
+                          : "Terrible"}
               </p>
             </div>
 
             {/* Tags */}
             <div>
-              <label className="block text-sm font-semibold mb-3 text-gray-700">
+              <label className="block text-sm font-semibold mb-3 text-slate-700">
                 What went well?
               </label>
               <div className="flex flex-wrap gap-2">
@@ -274,11 +275,10 @@ const ReviewOrderPage = () => {
                     key={tag}
                     type="button"
                     onClick={() => toggleTag(tag)}
-                    className={`px-3 py-1.5 rounded-full text-sm border transition-all ${
-                      tags.includes(tag)
-                        ? "bg-green-100 border-green-200 text-green-700"
-                        : "bg-white border-gray-200 text-gray-600 hover:border-gray-300"
-                    }`}>
+                    className={`px-3 py-1.5 rounded-full text-sm border transition-all ${tags.includes(tag)
+                      ? "bg-emerald-100 border-emerald-200 text-emerald-700 font-medium"
+                      : "bg-white border-slate-200 text-slate-600 hover:border-emerald-300 hover:text-emerald-600"
+                      }`}>
                     {getTranslatedText(
                       tag.charAt(0).toUpperCase() + tag.slice(1)
                     )}
@@ -289,7 +289,7 @@ const ReviewOrderPage = () => {
 
             {/* Title & Comment */}
             <div>
-              <label className="block text-sm font-semibold mb-2 text-gray-700">
+              <label className="block text-sm font-semibold mb-2 text-slate-700">
                 {getTranslatedText("Write a Review")}
               </label>
               <input
@@ -297,7 +297,7 @@ const ReviewOrderPage = () => {
                 placeholder={getTranslatedText("Title (e.g., Great Service!)")}
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-green-500 mb-3"
+                className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 text-slate-700 mb-3"
               />
               <textarea
                 rows={4}
@@ -306,17 +306,17 @@ const ReviewOrderPage = () => {
                 )}
                 value={comment}
                 onChange={(e) => setComment(e.target.value)}
-                className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-green-500"
+                className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 text-slate-700"
               />
             </div>
 
             {/* Photos */}
             <div>
-              <label className="block text-sm font-semibold mb-2 text-gray-700">
+              <label className="block text-sm font-semibold mb-2 text-slate-700">
                 Add Photos (Optional)
               </label>
               <div className="flex gap-4 overflow-x-auto pb-2">
-                <label className="w-20 h-20 flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-green-500 hover:text-green-500 transition-colors">
+                <label className="w-20 h-20 flex flex-col items-center justify-center border-2 border-dashed border-slate-300 rounded-xl cursor-pointer hover:border-emerald-500 hover:text-emerald-500 transition-colors bg-slate-50 hover:bg-emerald-50/50">
                   <FaCloudUploadAlt size={24} />
                   <span className="text-xs mt-1">Add</span>
                   <input
@@ -332,7 +332,7 @@ const ReviewOrderPage = () => {
                     <img
                       src={src}
                       alt="Preview"
-                      className="w-full h-full object-cover rounded-lg"
+                      className="w-full h-full object-cover rounded-xl border border-slate-200"
                     />
                     <button
                       type="button"
@@ -342,7 +342,7 @@ const ReviewOrderPage = () => {
                         );
                         // In real app, remove from 'images' state too if already uploaded
                       }}
-                      className="absolute -top-2 -right-2 bg-white rounded-full p-1 shadow-md text-red-500">
+                      className="absolute -top-2 -right-2 bg-white rounded-full p-1 shadow-md text-red-500 border border-slate-100">
                       <FaTimes size={10} />
                     </button>
                   </div>
@@ -354,8 +354,8 @@ const ReviewOrderPage = () => {
             <button
               type="submit"
               disabled={submitting || rating === 0}
-              className="w-full py-3.5 rounded-xl font-bold text-white shadow-lg transition-all transform active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
-              style={{ backgroundColor: "#64946e" }}>
+              className="w-full py-3.5 rounded-xl font-bold text-white shadow-lg transition-all transform active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-xl hover:bg-emerald-600"
+              style={{ backgroundColor: "#059669" }}>
               {submitting
                 ? getTranslatedText("Submitting...")
                 : getTranslatedText("Submit Review")}

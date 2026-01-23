@@ -178,17 +178,17 @@ const TrackOrderPage = () => {
     if (!isLoaded || !order) return <div className="p-4 text-center">Loading...</div>;
 
     return (
-        <div className="relative h-screen w-full bg-gray-50 flex flex-col">
-            {/* Header - unchanged ... */}
+        <div className="relative h-screen w-full flex flex-col" style={{ background: "linear-gradient(to bottom, #72c688ff, #dcfce7)" }}>
+            {/* Header */}
             <div className="absolute top-0 left-0 right-0 z-10 p-4">
                 <div className="flex items-center gap-3">
                     <button
                         onClick={() => navigate(-1)}
-                        className="w-10 h-10 rounded-full bg-white shadow-lg flex items-center justify-center text-gray-700"
+                        className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm shadow-sm flex items-center justify-center text-white"
                     >
                         <FaArrowLeft />
                     </button>
-                    <div className="bg-white px-4 py-2 rounded-full shadow-lg">
+                    <div className="bg-white/90 backdrop-blur-sm px-4 py-2 rounded-full shadow-lg">
                         <h1 className="font-bold text-gray-800">
                             {eta ? `Arriving in ${eta}` : 'Tracking Order'}
                         </h1>

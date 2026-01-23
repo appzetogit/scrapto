@@ -119,18 +119,17 @@ const PriceListPage = () => {
     return (
         <div
             className="min-h-screen w-full relative z-0 pb-20 md:pb-0 overflow-x-hidden"
-            style={{ backgroundColor: "#f4ebe2" }}>
+            style={{ background: "linear-gradient(to bottom, #72c688ff, #dcfce7)" }}>
             {/* Sticky Header */}
             <div
                 className="sticky top-0 z-40 px-4 md:px-6 lg:px-8 py-4 md:py-6"
-                style={{ backgroundColor: "#f4ebe2" }}>
+                style={{ backgroundColor: "transparent" }}>
                 <div className="max-w-7xl mx-auto flex items-center gap-4 mb-4">
                     <button
                         onClick={() => navigate("/")}
-                        className="p-2 rounded-full hover:opacity-70 transition-opacity flex-shrink-0"
+                        className="p-2 rounded-full hover:opacity-70 transition-opacity flex-shrink-0 bg-white/20 backdrop-blur-sm shadow-sm"
                         style={{
-                            color: "#64946e",
-                            backgroundColor: "rgba(100, 148, 110, 0.1)",
+                            color: "#ffffff",
                         }}
                         aria-label={getTranslatedText("Go back")}>
                         <FaArrowLeft size={18} />
@@ -138,12 +137,12 @@ const PriceListPage = () => {
                     <div>
                         <h1
                             className="text-xl md:text-2xl font-bold"
-                            style={{ color: "#2d3748" }}>
+                            style={{ color: "#ffffff" }}>
                             {getTranslatedText("Scrap Prices")}
                         </h1>
                         <p
                             className="text-sm md:text-base mt-0.5"
-                            style={{ color: "#718096" }}>
+                            style={{ color: "#ecfdf5" }}>
                             {getTranslatedText("Current market rates for scrap materials")}
                         </p>
                     </div>
@@ -151,13 +150,13 @@ const PriceListPage = () => {
 
                 {/* Search Bar */}
                 <div className="max-w-7xl mx-auto relative">
-                    <FaSearch className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                    <FaSearch className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400" />
                     <input
                         type="text"
                         placeholder={getTranslatedText("Search") + "..."}
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        className="w-full pl-10 pr-4 py-3 rounded-xl border-none shadow-sm focus:ring-2 focus:ring-emerald-500 outline-none"
+                        className="w-full pl-10 pr-4 py-3 rounded-xl border-none shadow-lg focus:ring-2 focus:ring-emerald-500 outline-none"
                         style={{ backgroundColor: "white" }}
                     />
                 </div>
@@ -166,7 +165,7 @@ const PriceListPage = () => {
             {/* Price List */}
             <div className="px-4 md:px-6 lg:px-8 max-w-7xl mx-auto pb-8">
                 {loading ? (
-                    <div className="text-center py-10">Loading...</div>
+                    <div className="text-center py-10 text-white font-medium">Loading...</div>
                 ) : filteredPrices.length > 0 ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         {filteredPrices.map((item, index) => (
@@ -175,17 +174,17 @@ const PriceListPage = () => {
                                 initial={{ opacity: 0, y: 10 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ duration: 0.3, delay: index * 0.05 }}
-                                className="bg-white rounded-xl p-4 shadow-sm flex items-center gap-4 border border-gray-100"
+                                className="bg-white rounded-xl p-4 shadow-md flex items-center gap-4 border border-slate-100 hover:shadow-lg transition-shadow"
                             >
-                                <div className="w-16 h-16 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
+                                <div className="w-16 h-16 rounded-lg overflow-hidden bg-slate-100 flex-shrink-0 border border-slate-200">
                                     <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
                                 </div>
                                 <div className="flex-1">
-                                    <h3 className="font-bold text-lg" style={{ color: "#2d3748" }}>{item.name}</h3>
-                                    <p className="text-sm text-gray-500">Per {item.unit}</p>
+                                    <h3 className="font-bold text-lg" style={{ color: "#1e293b" }}>{item.name}</h3>
+                                    <p className="text-sm text-slate-500">Per {item.unit}</p>
                                 </div>
                                 <div className="text-right">
-                                    <p className="text-xl font-bold" style={{ color: "#64946e" }}>₹{item.price}</p>
+                                    <p className="text-xl font-bold" style={{ color: "#059669" }}>₹{item.price}</p>
                                 </div>
                             </motion.div>
                         ))}

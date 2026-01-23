@@ -1,3 +1,5 @@
+import { useNavigate } from "react-router-dom";
+import { IoArrowBack } from "react-icons/io5";
 import { motion } from "framer-motion";
 import { usePageTranslation } from "../../../hooks/usePageTranslation";
 
@@ -63,6 +65,7 @@ const TermsAndConditions = () => {
   ];
 
   const { getTranslatedText } = usePageTranslation(staticTexts);
+  const navigate = useNavigate();
 
   return (
     <motion.div
@@ -71,16 +74,24 @@ const TermsAndConditions = () => {
       exit={{ opacity: 0, y: -10 }}
       transition={{ duration: 0.25 }}
       className="min-h-screen w-full"
-      style={{ backgroundColor: "#f4ebe2" }}>
+      style={{ background: "linear-gradient(to bottom, #72c688ff, #dcfce7)" }}>
       <div className="w-full p-4 md:p-6 max-w-3xl mx-auto">
         <div className="flex items-center justify-between pb-3 md:pb-6">
-          <h1 className="text-xl md:text-2xl font-bold" style={{ color: "#2d3748" }}>
-            {getTranslatedText("Scrapto – User Terms & Conditions")}
-          </h1>
-          <div className="text-sm text-gray-500">{getTranslatedText("Last Updated: 01 January 2026")}</div>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => navigate(-1)}
+              className="p-2 -ml-2 rounded-full hover:bg-white/20 transition-colors text-white"
+            >
+              <IoArrowBack size={24} />
+            </button>
+            <h1 className="text-xl md:text-2xl font-bold" style={{ color: "#ffffff" }}>
+              {getTranslatedText("Scrapto – User Terms & Conditions")}
+            </h1>
+          </div>
+          <div className="text-sm text-white/80 hidden md:block">{getTranslatedText("Last Updated: 01 January 2026")}</div>
         </div>
 
-        <div className="rounded-2xl p-4 md:p-6 shadow" style={{ backgroundColor: "#ffffff" }}>
+        <div className="rounded-2xl p-4 md:p-6 shadow-lg backdrop-blur-sm" style={{ backgroundColor: "rgba(255, 255, 255, 0.95)" }}>
           <div className="prose max-w-none text-sm md:text-base" style={{ color: "#334155" }}>
             <h3>{getTranslatedText("Introduction")}</h3>
             <p>{getTranslatedText("Scrapto (“Platform”, “We”, “Us”) is a technology platform that connects users with independent scrap collectors (“Scrappers”) for scrap material collection services.")}</p>

@@ -68,22 +68,18 @@ export const uploadFile = async (file, options = {}) => {
 
     // Check for Cloudinary credentials
     if (!process.env.CLOUDINARY_CLOUD_NAME || !process.env.CLOUDINARY_API_KEY || !process.env.CLOUDINARY_API_SECRET) {
-      logger.warn('Cloudinary credentials missing, using local storage fallback');
-      const filename = path.basename(filePath);
-      return {
-        secure_url: `/uploads/temp/${filename}`, // Frontend needs to handle relative path or proxy
-        public_id: `local_${filename}`,
-        format: path.extname(filename).substring(1),
-        resource_type: 'image'
-      };
+      throw new Error('Cloudinary credentials are not properly configured on the server');
     }
 
     // Upload to Cloudinary
+    logger.info(`Starting Cloudinary upload for ${file.originalname} to folder ${folder}`);
     const result = await uploadToCloudinary(filePath, {
       folder: folder,
       resource_type: options.resource_type || 'image',
       public_id: options.public_id || null
     });
+
+    logger.info(`Cloudinary upload success: ${result.secure_url}`);
 
     // Delete temporary file only if Cloudinary upload succeeded
     if (fs.existsSync(filePath)) {
@@ -94,19 +90,16 @@ export const uploadFile = async (file, options = {}) => {
   } catch (error) {
     logger.error('File upload error:', error);
 
-    // Fallback to local storage if Cloudinary fails
+    // Clean up temp file on error
     if (file && file.path && fs.existsSync(file.path)) {
-      logger.warn('Falling back to local storage due to upload error');
-      const filename = path.basename(file.path);
-      return {
-        secure_url: `/uploads/temp/${filename}`,
-        public_id: `local_${filename}`,
-        format: path.extname(filename).substring(1),
-        resource_type: 'image'
-      };
+      try {
+        fs.unlinkSync(file.path);
+      } catch (cleanupError) {
+        logger.error('Failed to cleanup temp file:', cleanupError);
+      }
     }
 
-    throw error;
+    throw new Error(`Failed to upload file: ${error.message}`);
   }
 };
 

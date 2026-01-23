@@ -543,7 +543,7 @@ const Hero = () => {
         ) : (
           <div
             ref={heroRef}
-            className="min-h-screen relative z-0 pb-20 md:pb-0 overflow-x-hidden"
+            className="min-h-screen relative z-0 pb-20 md:pb-0 overflow-x-hidden md:-mt-[1px]"
             style={{ background: "linear-gradient(to bottom, #72c688ff, #dcfce7)" }}>
             {/* Header */}
             <Header />

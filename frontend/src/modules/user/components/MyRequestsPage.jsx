@@ -302,22 +302,22 @@ const MyRequestsPage = () => {
       exit={{ opacity: 0 }}
       transition={{ duration: 0.3 }}
       className="min-h-screen pb-20 md:pb-0"
-      style={{ backgroundColor: "#f4ebe2" }}>
+      style={{ background: "linear-gradient(to bottom, #72c688ff, #dcfce7)" }}>
       {/* Header */}
       <div
         className="sticky top-0 z-40 px-4 md:px-6 lg:px-8 py-4 md:py-6"
-        style={{ backgroundColor: "#f4ebe2" }}>
+        style={{ background: "transparent" }}>
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
             <button
               onClick={() => navigate("/")}
-              className="p-2 rounded-full hover:opacity-70 transition-opacity"
-              style={{ color: "#64946e" }}>
+              className="p-2 rounded-full hover:opacity-70 transition-opacity bg-white/20 backdrop-blur-sm shadow-sm"
+              style={{ color: "#ffffff" }}>
               <FaTimes size={20} />
             </button>
             <h1
               className="text-xl md:text-2xl font-bold"
-              style={{ color: "#2d3748" }}>
+              style={{ color: "#ffffff" }}>
               {getTranslatedText("My Requests")}
             </h1>
           </div>
@@ -332,14 +332,14 @@ const MyRequestsPage = () => {
           transition={{ duration: 0.4 }}
           className="mb-4 md:mb-6">
           <div
-            className="rounded-2xl p-4 md:p-6"
-            style={{ backgroundColor: "#ffffff" }}>
+            className="rounded-2xl p-4 md:p-6 shadow-md backdrop-blur-sm"
+            style={{ backgroundColor: "rgba(255, 255, 255, 0.95)" }}>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
               {[
                 {
                   label: getTranslatedText("Total"),
                   value: requests.length,
-                  color: "#2d3748",
+                  color: "#1e293b",
                 },
                 {
                   label: getTranslatedText("Pending"),
@@ -356,7 +356,7 @@ const MyRequestsPage = () => {
                   label: getTranslatedText("Completed"),
                   value: requests.filter((r) => r.status === "completed")
                     .length,
-                  color: "#64946e",
+                  color: "#059669",
                 },
               ].map((stat, index) => (
                 <motion.div
@@ -372,7 +372,7 @@ const MyRequestsPage = () => {
                   </p>
                   <p
                     className="text-xs md:text-sm"
-                    style={{ color: "#718096" }}>
+                    style={{ color: "#64748b" }}>
                     {stat.label}
                   </p>
                 </motion.div>
@@ -392,15 +392,15 @@ const MyRequestsPage = () => {
               <button
                 key={filter.id}
                 onClick={() => setSelectedFilter(filter.id)}
-                className={`px-4 py-2 md:px-6 md:py-2.5 rounded-lg font-semibold text-xs md:text-sm whitespace-nowrap transition-all ${selectedFilter === filter.id ? "text-white" : "text-gray-600"
+                className={`px-4 py-2 md:px-6 md:py-2.5 rounded-full font-semibold text-xs md:text-sm whitespace-nowrap transition-all shadow-sm ${selectedFilter === filter.id ? "text-white shadow-md" : "text-slate-600 hover:bg-slate-50"
                   }`}
                 style={{
                   backgroundColor:
-                    selectedFilter === filter.id ? "#64946e" : "#ffffff",
+                    selectedFilter === filter.id ? "#059669" : "#ffffff",
                   border:
                     selectedFilter === filter.id
                       ? "none"
-                      : "1px solid rgba(100, 148, 110, 0.15)",
+                      : "1px solid #e2e8f0",
                 }}>
                 {filter.label}
               </button>
@@ -464,21 +464,21 @@ const MyRequestsPage = () => {
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="rounded-2xl p-8 md:p-12 text-center"
-                style={{ backgroundColor: "#ffffff" }}>
+                className="rounded-2xl p-8 md:p-12 text-center shadow-md backdrop-blur-sm"
+                style={{ backgroundColor: "rgba(255, 255, 255, 0.95)" }}>
                 <FaTruck
                   size={48}
                   className="mx-auto mb-4"
-                  style={{ color: "#a0aec0" }}
+                  style={{ color: "#94a3b8" }}
                 />
                 <h3
                   className="text-lg md:text-xl font-bold mb-2"
-                  style={{ color: "#2d3748" }}>
+                  style={{ color: "#1e293b" }}>
                   {getTranslatedText("No requests found")}
                 </h3>
                 <p
                   className="text-sm md:text-base"
-                  style={{ color: "#718096" }}>
+                  style={{ color: "#64748b" }}>
                   {selectedFilter === "all"
                     ? getTranslatedText(
                       "You haven't created any pickup requests yet"
@@ -501,10 +501,10 @@ const MyRequestsPage = () => {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.3, delay: index * 0.05 }}
-                    className="rounded-xl p-4 md:p-6"
+                    className="rounded-xl p-4 md:p-6 shadow-sm hover:shadow-md transition-shadow backdrop-blur-sm"
                     style={{
-                      backgroundColor: "#ffffff",
-                      border: "1px solid rgba(100, 148, 110, 0.15)",
+                      backgroundColor: "rgba(255, 255, 255, 0.95)",
+                      border: "1px solid #e2e8f0",
                     }}>
                     {/* Header */}
                     <div className="flex items-start justify-between gap-3 mb-3">
@@ -512,7 +512,7 @@ const MyRequestsPage = () => {
                         <div className="flex items-center gap-2 mb-2">
                           <h3
                             className="font-bold text-base md:text-lg"
-                            style={{ color: "#2d3748" }}>
+                            style={{ color: "#1e293b" }}>
                             {request.requestId}
                           </h3>
                           <span
@@ -527,7 +527,7 @@ const MyRequestsPage = () => {
                         </div>
                         <div
                           className="flex items-center gap-2 text-xs md:text-sm"
-                          style={{ color: "#718096" }}>
+                          style={{ color: "#64748b" }}>
                           <FaCalendarAlt size={12} />
                           <span>
                             {formatDate(request.createdAt)} at{" "}
@@ -545,8 +545,8 @@ const MyRequestsPage = () => {
                             key={catIndex}
                             className="px-2 py-1 rounded-full text-xs font-medium"
                             style={{
-                              backgroundColor: "rgba(100, 148, 110, 0.1)",
-                              color: "#64946e",
+                              backgroundColor: "#ecfdf5",
+                              color: "#059669",
                             }}>
                             {category}
                           </span>
@@ -560,8 +560,8 @@ const MyRequestsPage = () => {
                         {request.images.slice(0, 3).map((img, imgIndex) => (
                           <div
                             key={imgIndex}
-                            className="w-16 h-16 md:w-20 md:h-20 rounded-lg overflow-hidden flex-shrink-0 relative"
-                            style={{ backgroundColor: "#e5ddd4" }}>
+                            className="w-16 h-16 md:w-20 md:h-20 rounded-lg overflow-hidden flex-shrink-0 relative border border-slate-100"
+                            style={{ backgroundColor: "#f1f5f9" }}>
                             <img
                               src={img}
                               alt={`Request ${imgIndex + 1}`}
@@ -576,11 +576,11 @@ const MyRequestsPage = () => {
                           <div
                             className="w-16 h-16 md:w-20 md:h-20 rounded-lg flex items-center justify-center flex-shrink-0"
                             style={{
-                              backgroundColor: "rgba(100, 148, 110, 0.1)",
+                              backgroundColor: "#ecfdf5",
                             }}>
                             <span
                               className="text-xs font-bold"
-                              style={{ color: "#64946e" }}>
+                              style={{ color: "#059669" }}>
                               +{request.images.length - 3}
                             </span>
                           </div>
@@ -591,28 +591,28 @@ const MyRequestsPage = () => {
                     {/* Details Grid */}
                     <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4 mb-3">
                       <div className="flex items-center gap-2">
-                        <FaWeight size={14} style={{ color: "#64946e" }} />
+                        <FaWeight size={14} style={{ color: "#059669" }} />
                         <div>
-                          <p className="text-xs" style={{ color: "#718096" }}>
+                          <p className="text-xs" style={{ color: "#64748b" }}>
                             {getTranslatedText("Weight")}
                           </p>
                           <p
                             className="text-sm font-semibold"
-                            style={{ color: "#2d3748" }}>
+                            style={{ color: "#1e293b" }}>
                             {request.weight.toFixed(1)}{" "}
                             {getTranslatedText("kg")}
                           </p>
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
-                        <FaRupeeSign size={14} style={{ color: "#64946e" }} />
+                        <FaRupeeSign size={14} style={{ color: "#059669" }} />
                         <div>
-                          <p className="text-xs" style={{ color: "#718096" }}>
+                          <p className="text-xs" style={{ color: "#64748b" }}>
                             {getTranslatedText("Est. Price")}
                           </p>
                           <p
                             className="text-sm font-semibold"
-                            style={{ color: "#2d3748" }}>
+                            style={{ color: "#1e293b" }}>
                             ₹{request.estimatedPrice.toFixed(0)}
                           </p>
                         </div>

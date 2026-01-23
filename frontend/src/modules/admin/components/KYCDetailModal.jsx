@@ -69,11 +69,7 @@ const KYCDetailModal = ({ kyc, onClose, onApprove, onReject }) => {
 
   const getImageUrl = (url) => {
     if (!url) return null;
-    if (url.startsWith('http')) return url;
-    // Remove leading slash if present to avoid double slashes
-    const cleanUrl = url.startsWith('/') ? url.slice(1) : url;
-    // Use localhost:7000 as base for local dev
-    return `http://localhost:7000/${cleanUrl}`;
+    return url;
   };
 
   return (

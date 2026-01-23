@@ -199,6 +199,12 @@ export const walletAPI = {
       method: 'POST',
       body: JSON.stringify({ orderId, amount }),
     });
+  },
+  requestWithdrawal: async (amount, bankDetails) => {
+    return apiRequest('/wallet/withdraw', {
+      method: 'POST',
+      body: JSON.stringify({ amount, bankDetails }),
+    });
   }
 };
 

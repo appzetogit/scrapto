@@ -89,20 +89,21 @@ const ServiceAddressPage = () => {
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="min-h-screen w-full flex flex-col bg-[#f4ebe2]">
-      <div className="flex items-center gap-4 p-4 border-b bg-white/80 backdrop-blur-md sticky top-0 z-10">
+      className="min-h-screen w-full flex flex-col"
+      style={{ background: "linear-gradient(to bottom, #72c688ff, #dcfce7)" }}>
+      <div className="flex items-center gap-4 p-4 border-b border-white/20 bg-white/20 backdrop-blur-sm sticky top-0 z-10">
         <button
           onClick={() => navigate(-1)}
-          className="p-2 rounded-full hover:bg-gray-100">
+          className="p-2 rounded-full hover:bg-white/20 text-white transition-colors">
           <FaArrowLeft />
         </button>
-        <h1 className="text-lg font-bold text-gray-800">
+        <h1 className="text-lg font-bold text-white">
           {getTranslatedText("Pickup Address")}
         </h1>
       </div>
 
       <div className="flex-1 overflow-y-auto p-4 pb-24">
-        <div className="bg-white p-4 rounded-xl shadow-sm mb-6">
+        <div className="bg-white/95 backdrop-blur-sm p-4 rounded-xl shadow-sm mb-6">
           <button
             onClick={getCurrentLocation}
             disabled={isGettingLocation}
@@ -136,7 +137,7 @@ const ServiceAddressPage = () => {
         </div>
       </div>
 
-      <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t">
+      <div className="fixed bottom-0 left-0 right-0 p-4 bg-white/90 backdrop-blur-md border-t border-white/20">
         <button
           onClick={handleContinue}
           disabled={!address || !coordinates}

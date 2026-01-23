@@ -110,16 +110,16 @@ const WalletPage = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gray-50 pb-20 md:pb-0">
+        <div className="min-h-screen pb-20 md:pb-0" style={{ background: "linear-gradient(to bottom, #72c688ff, #dcfce7)" }}>
             {/* Header */}
-            <div className="bg-white shadow sticky top-0 z-10">
-                <div className="flex items-center px-4 py-3 gap-3">
-                    <button onClick={() => navigate(-1)} className="p-2 -ml-2 rounded-full hover:bg-gray-100">
-                        <svg className="w-6 h-6 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div className="sticky top-0 z-10" style={{ background: 'transparent' }}>
+                <div className="flex items-center px-4 py-4 gap-3">
+                    <button onClick={() => navigate(-1)} className="p-2 -ml-2 rounded-full hover:bg-white/20 text-white transition-colors backdrop-blur-sm shadow-sm">
+                        <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                         </svg>
                     </button>
-                    <h1 className="text-xl font-bold text-gray-800">My Wallet</h1>
+                    <h1 className="text-xl font-bold text-white">My Wallet</h1>
                 </div>
             </div>
 

@@ -149,18 +149,17 @@ const AllCategoriesPage = () => {
   return (
     <div
       className="min-h-screen w-full relative z-0 pb-20 md:pb-0 overflow-x-hidden"
-      style={{ backgroundColor: "#f4ebe2" }}>
+      style={{ background: "linear-gradient(to bottom, #72c688ff, #dcfce7)" }}>
       {/* Sticky Header with Back Button */}
       <div
         className="sticky top-0 z-40 px-4 md:px-6 lg:px-8 py-4 md:py-6"
-        style={{ backgroundColor: "#f4ebe2" }}>
+        style={{ background: "transparent" }}>
         <div className="max-w-7xl mx-auto flex items-center gap-4">
           <button
             onClick={() => navigate("/")}
-            className="p-2 rounded-full hover:opacity-70 transition-opacity flex-shrink-0"
+            className="p-2 rounded-full hover:opacity-70 transition-opacity flex-shrink-0 bg-white/20 backdrop-blur-sm shadow-sm"
             style={{
-              color: "#64946e",
-              backgroundColor: "rgba(100, 148, 110, 0.1)",
+              color: "#ffffff",
             }}
             aria-label={getTranslatedText("Go back")}>
             <FaArrowLeft size={18} />
@@ -168,12 +167,12 @@ const AllCategoriesPage = () => {
           <div>
             <h1
               className="text-xl md:text-2xl font-bold"
-              style={{ color: "#2d3748" }}>
+              style={{ color: "#ffffff" }}>
               {getTranslatedText("All Categories")}
             </h1>
             <p
               className="text-sm md:text-base mt-0.5"
-              style={{ color: "#718096" }}>
+              style={{ color: "#f1f5f9" }}>
               {getTranslatedText("Browse all available scrap categories")}
             </p>
           </div>

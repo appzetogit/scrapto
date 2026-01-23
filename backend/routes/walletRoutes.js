@@ -1,21 +1,27 @@
 import express from 'express';
+import { protect, isScrapper } from '../middleware/auth.js';
 import {
     getWalletProfile,
+    getWalletTransactions,
     createRechargeOrder,
     verifyRecharge,
-    getWalletTransactions,
-    payOrderViaWallet
+    payOrderViaWallet,
+    requestWithdrawal
 } from '../controllers/walletController.js';
-import { protect } from '../middleware/auth.js';
 
 const router = express.Router();
 
-router.use(protect); // All wallet routes require login
+router.get('/profile', protect, getWalletProfile);
+router.get('/transactions', protect, getWalletTransactions);
 
-router.get('/profile', getWalletProfile);
-router.get('/transactions', getWalletTransactions);
-router.post('/recharge/create', createRechargeOrder);
-router.post('/recharge/verify', verifyRecharge);
-router.post('/pay-order', payOrderViaWallet);
+// Recharge
+router.post('/recharge/create', protect, createRechargeOrder);
+router.post('/recharge/verify', protect, verifyRecharge);
+
+// Payments
+router.post('/pay-order', protect, payOrderViaWallet);
+
+// Withdrawals
+router.post('/withdraw', protect, requestWithdrawal);
 
 export default router;

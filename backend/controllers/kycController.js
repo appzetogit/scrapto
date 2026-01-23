@@ -9,94 +9,96 @@ import logger from '../utils/logger.js';
 // @access Private (Scrapper)
 export const submitKyc = async (req, res) => {
   try {
-    // req.user.id comes from JWT and typically points to User collection (role: 'scrapper')
     const userId = req.user.id;
-    const user = await User.findById(userId);
+    const { aadhaarNumber } = req.body;
 
+    logger.info(`Starting KYC submission for user: ${userId}`);
+    logger.info(`Files received: ${req.files ? Object.keys(req.files).join(',') : 'None'}`);
+
+    // 1. Find User and Scrapper
+    const user = await User.findById(userId);
     if (!user || user.role !== 'scrapper') {
       return sendError(res, 'Scrapper user not found', 404);
     }
 
-    // Try to find scrapper profile (support both legacy id-link and phone-link)
     let scrapper = await Scrapper.findById(userId);
     if (!scrapper && user.phone) {
       scrapper = await Scrapper.findOne({ phone: user.phone });
     }
 
-    // Auto-provision scrapper profile if missing (for existing scrapper users)
+    // Creating profile if not exists (auto-provision)
     if (!scrapper) {
-      const defaultVehicleInfo = {
-        type: 'bike',
-        number: 'NA',
-        capacity: 0
-      };
-
+      logger.info('Creating new scrapper profile for KYC');
       scrapper = await Scrapper.create({
         _id: user._id,
         phone: user.phone,
         name: user.name || 'Scrapper',
-        email: user.email || null,
-        vehicleInfo: defaultVehicleInfo
-      });
-
-      logger.info('✅ Auto-created scrapper profile during KYC submit:', {
-        userId: user._id,
-        phone: user.phone
+        email: user.email,
+        vehicleInfo: { type: 'bike', number: 'NA', capacity: 0 }
       });
     }
 
-    const { aadhaarNumber } = req.body;
-
-    logger.info('KYC Submit Request:', {
-      userId,
-      hasFiles: !!req.files,
-      fileKeys: req.files ? Object.keys(req.files) : [],
-      body: req.body
-    });
-
-    // Collect uploaded file objects from Multer
+    // 2. Validate Files
     const files = req.files || {};
-    const getFirst = (field) => (files[field]?.[0] ? files[field][0] : null);
-
-    const aadhaarFile = getFirst('aadhaar');
-    const selfieFile = getFirst('selfie');
-    const licenseFile = getFirst('license');
+    const aadhaarFile = files['aadhaar'] ? files['aadhaar'][0] : null;
+    const selfieFile = files['selfie'] ? files['selfie'][0] : null;
+    const licenseFile = files['license'] ? files['license'][0] : null;
 
     if (!aadhaarFile || !selfieFile) {
-      logger.warn('KYC submission missing files', { filesKeys: Object.keys(files) });
-      return sendError(res, 'Missing required documents (Aadhaar or Selfie)', 400);
+      return sendError(res, 'Aadhaar and Selfie photos are required.', 400);
     }
 
-    // Update KYC fields
-    if (aadhaarNumber) scrapper.kyc.aadhaarNumber = aadhaarNumber;
-
-    // Upload files to Cloudinary and update URLs
-    if (aadhaarFile) {
-      const result = await uploadFile(aadhaarFile, { folder: 'kyc/aadhaar' });
-      scrapper.kyc.aadhaarPhotoUrl = result.secure_url;
+    if (!aadhaarNumber) {
+      return sendError(res, 'Aadhaar number is required.', 400);
     }
 
-    if (selfieFile) {
-      const result = await uploadFile(selfieFile, { folder: 'kyc/selfie' });
-      scrapper.kyc.selfieUrl = result.secure_url;
+    // 3. Upload to Cloudinary
+    // We update fields one by one to ensure we have the URLs
+    let aadhaarUrl = scrapper.kyc?.aadhaarPhotoUrl;
+    let selfieUrl = scrapper.kyc?.selfieUrl;
+    let licenseUrl = scrapper.kyc?.licenseUrl;
+
+    try {
+      if (aadhaarFile) {
+        const result = await uploadFile(aadhaarFile, { folder: 'scrapto/kyc/aadhaar' });
+        aadhaarUrl = result.secure_url;
+      }
+
+      if (selfieFile) {
+        const result = await uploadFile(selfieFile, { folder: 'scrapto/kyc/selfie' });
+        selfieUrl = result.secure_url;
+      }
+
+      if (licenseFile) {
+        const result = await uploadFile(licenseFile, { folder: 'scrapto/kyc/license' });
+        licenseUrl = result.secure_url;
+      }
+    } catch (uploadError) {
+      logger.error('Error uploading KYC documents:', uploadError);
+      return sendError(res, 'Failed to upload documents. Please try again.', 500);
     }
 
-    if (licenseFile) {
-      const result = await uploadFile(licenseFile, { folder: 'kyc/license' });
-      scrapper.kyc.licenseUrl = result.secure_url;
-    }
-
-    scrapper.kyc.status = 'pending';
-    scrapper.kyc.verifiedAt = null;
-    scrapper.kyc.verifiedBy = null;
-    scrapper.kyc.rejectionReason = null;
+    // 4. Update Database
+    scrapper.kyc = {
+      aadhaarNumber: aadhaarNumber,
+      aadhaarPhotoUrl: aadhaarUrl,
+      selfieUrl: selfieUrl,
+      licenseUrl: licenseUrl,
+      status: 'pending',
+      submittedAt: new Date(),
+      rejectionReason: null,
+      verifiedAt: null
+    };
 
     await scrapper.save();
 
+    logger.info('KYC Submitted Successfully', { scrapperId: scrapper._id });
+
     return sendSuccess(res, 'KYC submitted successfully', { kyc: scrapper.kyc }, 201);
+
   } catch (error) {
-    logger.error('KYC submission error:', error);
-    return sendError(res, 'Failed to submit KYC', 500);
+    logger.error('KYC submission critical error:', error);
+    return sendError(res, 'Internal server error during KYC submission', 500);
   }
 };
 

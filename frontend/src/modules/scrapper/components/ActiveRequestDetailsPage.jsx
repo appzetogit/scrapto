@@ -629,23 +629,24 @@ const ActiveRequestDetailsPage = () => {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.3 }}
-      className="min-h-screen w-full relative flex flex-col bg-gradient-to-br from-emerald-900 via-gray-900 to-black"
+      className="min-h-screen w-full relative flex flex-col"
+      style={{ background: "linear-gradient(to bottom, #72c688ff, #dcfce7)" }}
     >
       {/* Header with Back Button and Navigation */}
-      <div className="absolute top-0 left-0 right-0 z-20 p-4 flex items-center justify-between bg-black/95 backdrop-blur-sm border-b border-white/10">
+      <div className="absolute top-0 left-0 right-0 z-20 p-4 flex items-center justify-between bg-white/95 backdrop-blur-sm border-b border-slate-200 shadow-sm">
         <div className="flex items-center gap-4">
           <button
             onClick={() => navigate('/scrapper/my-active-requests')}
-            className="w-10 h-10 rounded-full flex items-center justify-center shadow-md bg-zinc-900 text-white hover:bg-zinc-800"
+            className="w-10 h-10 rounded-full flex items-center justify-center shadow-md bg-white text-slate-800 hover:bg-slate-50 border border-slate-100"
           >
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" className="text-current">
               <path d="M19 12H5M12 19l-7-7 7-7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           </button>
           <div>
-            <h1 className="text-xl font-bold text-white">{getTranslatedText("Active Request")}</h1>
+            <h1 className="text-xl font-bold text-slate-800">{getTranslatedText("Active Request")}</h1>
             {allActiveRequests.length > 1 && (
-              <p className="text-xs text-gray-400">
+              <p className="text-xs text-slate-500">
                 {currentRequestIndex + 1} {getTranslatedText("of")} {allActiveRequests.length}
               </p>
             )}
@@ -666,9 +667,9 @@ const ActiveRequestDetailsPage = () => {
                 }
               }}
               disabled={currentRequestIndex <= 0}
-              className="w-9 h-9 rounded-full flex items-center justify-center shadow-md transition-opacity disabled:opacity-30 bg-zinc-900"
+              className="w-9 h-9 rounded-full flex items-center justify-center shadow-md transition-opacity disabled:opacity-30 bg-white text-slate-800 border border-slate-100"
             >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" className="text-white">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" className="text-current">
                 <path d="M15 18l-6-6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </button>
@@ -683,9 +684,9 @@ const ActiveRequestDetailsPage = () => {
                 }
               }}
               disabled={currentRequestIndex >= allActiveRequests.length - 1}
-              className="w-9 h-9 rounded-full flex items-center justify-center shadow-md transition-opacity disabled:opacity-30 bg-zinc-900"
+              className="w-9 h-9 rounded-full flex items-center justify-center shadow-md transition-opacity disabled:opacity-30 bg-white text-slate-800 border border-slate-100"
             >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" className="text-white">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" className="text-current">
                 <path d="M9 18l6-6-6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </button>
@@ -712,12 +713,12 @@ const ActiveRequestDetailsPage = () => {
             animate={{ opacity: 1 }}
             transition={{ duration: 0.3 }}
             className="absolute inset-0 z-40 flex flex-col"
-            style={{ backgroundColor: '#020617' }}
+            style={{ backgroundColor: '#ffffff' }}
           >
             {/* Header */}
             <div
               className="p-4 flex items-center gap-4 border-b"
-              style={{ borderColor: 'rgba(31, 41, 55, 0.9)', backgroundColor: '#020617' }}
+              style={{ borderColor: '#e2e8f0', backgroundColor: '#ffffff' }}
             >
               <button
                 onClick={() => {
@@ -725,68 +726,68 @@ const ActiveRequestDetailsPage = () => {
                   setIsPickedUp(false);
                   setPaymentStatus('pending');
                 }}
-                className="w-10 h-10 rounded-full flex items-center justify-center shadow-md"
-                style={{ backgroundColor: 'rgba(15, 23, 42, 0.9)' }}
+                className="w-10 h-10 rounded-full flex items-center justify-center shadow-md border border-slate-100"
+                style={{ backgroundColor: '#ffffff' }}
               >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" style={{ color: '#2d3748' }}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" style={{ color: '#1e293b' }}>
                   <path d="M19 12H5M12 19l-7-7 7-7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               </button>
-              <h1 className="text-xl font-bold" style={{ color: '#e5e7eb' }}>
+              <h1 className="text-xl font-bold" style={{ color: '#1e293b' }}>
                 {requestData.orderType === 'cleaning_service' ? getTranslatedText('Collect Payment') : getTranslatedText('Make Payment')}
               </h1>
             </div>
 
             {/* Payment Content */}
-            <div className="flex-1 overflow-y-auto p-6">
+            <div className="flex-1 overflow-y-auto p-6" style={{ background: "linear-gradient(to bottom, #f8fafc, #ffffff)" }}>
               <div className="max-w-md mx-auto">
                 {/* Customer Info */}
-                <div className="mb-6 p-4 rounded-xl" style={{ backgroundColor: '#0b1120' }}>
+                <div className="mb-6 p-4 rounded-xl border border-slate-200 shadow-sm" style={{ backgroundColor: '#ffffff' }}>
                   <div className="flex items-center gap-3 mb-3">
-                    <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{ backgroundColor: 'rgba(16, 185, 129, 0.2)' }}>
-                      <span className="text-lg font-bold" style={{ color: '#bbf7d0' }}>
+                    <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{ backgroundColor: '#ecfdf5' }}>
+                      <span className="text-lg font-bold" style={{ color: '#059669' }}>
                         {requestData.userName[0]}
                       </span>
                     </div>
                     <div className="flex-1">
-                      <p className="text-base font-semibold" style={{ color: '#f9fafb' }}>{requestData.userName}</p>
-                      <p className="text-sm" style={{ color: '#9ca3af' }}>{requestData.scrapType}</p>
+                      <p className="text-base font-semibold" style={{ color: '#1e293b' }}>{requestData.userName}</p>
+                      <p className="text-sm" style={{ color: '#64748b' }}>{requestData.scrapType}</p>
                     </div>
                   </div>
-                  <div className="p-3 rounded-lg" style={{ backgroundColor: 'rgba(31, 41, 55, 0.9)' }}>
-                    <p className="text-xs mb-1" style={{ color: '#9ca3af' }}>{getTranslatedText("Estimated Amount")}</p>
-                    <p className="text-xl font-bold" style={{ color: '#4ade80' }}>{finalAmount || requestData?.estimatedEarnings || '₹450'}</p>
+                  <div className="p-3 rounded-lg" style={{ backgroundColor: '#f1f5f9' }}>
+                    <p className="text-xs mb-1" style={{ color: '#64748b' }}>{getTranslatedText("Estimated Amount")}</p>
+                    <p className="text-xl font-bold" style={{ color: '#059669' }}>{finalAmount || requestData?.estimatedEarnings || '₹450'}</p>
                   </div>
                 </div>
 
                 {/* Payment Input */}
-                <div className="mb-6 p-6 rounded-2xl shadow-lg" style={{ backgroundColor: '#020617' }}>
-                  <h2 className="text-lg font-bold mb-4" style={{ color: '#e5e7eb' }}>
+                <div className="mb-6 p-6 rounded-2xl shadow-md border border-slate-100" style={{ backgroundColor: '#ffffff' }}>
+                  <h2 className="text-lg font-bold mb-4" style={{ color: '#1e293b' }}>
                     {requestData.orderType === 'cleaning_service' ? getTranslatedText('Enter Amount Received') : getTranslatedText('Enter Amount Paid')}
                   </h2>
 
                   {/* Payment Mode Selection for Scrap Pickup - Hidden for Cleaning Service */}
                   {requestData.orderType !== 'cleaning_service' && (
-                    <div className="mb-6 p-3 rounded-xl bg-gray-800 border border-gray-700">
+                    <div className="mb-6 p-3 rounded-xl bg-slate-50 border border-slate-200">
                       <div className="flex justify-between items-center mb-2">
-                        <span className="text-gray-400 text-sm">Wallet Balance</span>
-                        <span className="text-white font-bold">₹{walletBalance}</span>
+                        <span className="text-slate-500 text-sm">Wallet Balance</span>
+                        <span className="text-slate-800 font-bold">₹{walletBalance}</span>
                       </div>
 
                       {paidAmount && Number(paidAmount) > walletBalance && (
-                        <p className="text-red-400 text-xs mb-2">Insufficient Balance. Pay online.</p>
+                        <p className="text-red-500 text-xs mb-2">Insufficient Balance. Pay online.</p>
                       )}
 
                       <div className="flex gap-2">
                         <button
                           onClick={() => setUseWallet(true)}
-                          className={`flex-1 py-2 rounded-lg text-sm transition-all ${useWallet ? 'bg-green-600 text-white' : 'bg-gray-700 text-gray-400'}`}
+                          className={`flex-1 py-2 rounded-lg text-sm transition-all ${useWallet ? 'bg-emerald-600 text-white' : 'bg-white border border-slate-200 text-slate-500'}`}
                         >
                           Wallet
                         </button>
                         <button
                           onClick={() => setUseWallet(false)}
-                          className={`flex-1 py-2 rounded-lg text-sm transition-all ${!useWallet ? 'bg-green-600 text-white' : 'bg-gray-700 text-gray-400'}`}
+                          className={`flex-1 py-2 rounded-lg text-sm transition-all ${!useWallet ? 'bg-emerald-600 text-white' : 'bg-white border border-slate-200 text-slate-500'}`}
                         >
                           Online
                         </button>
@@ -795,7 +796,7 @@ const ActiveRequestDetailsPage = () => {
                   )}
 
                   <div className="mb-4">
-                    <label className="block text-sm font-semibold mb-2" style={{ color: '#d1d5db' }}>
+                    <label className="block text-sm font-semibold mb-2" style={{ color: '#475569' }}>
                       {getTranslatedText("Amount (₹)")}
                     </label>
                     <input
@@ -806,15 +807,15 @@ const ActiveRequestDetailsPage = () => {
                       placeholder="0.00"
                       className="w-full px-4 py-4 rounded-xl border-2 focus:outline-none focus:ring-2 transition-all text-2xl font-bold text-center bg-transparent"
                       style={{
-                        borderColor: paidAmount ? '#22c55e' : 'rgba(148, 163, 184, 0.5)',
-                        color: '#f9fafb'
+                        borderColor: paidAmount ? '#22c55e' : '#cbd5e1',
+                        color: '#1e293b'
                       }}
                       min="0"
                       step="0.01"
                       autoFocus
                     />
                     {paidAmount && (
-                      <p className="text-sm mt-2 text-center" style={{ color: '#9ca3af' }}>
+                      <p className="text-sm mt-2 text-center" style={{ color: '#64748b' }}>
                         {requestData.orderType === 'cleaning_service'
                           ? getTranslatedText("You collected ₹{amount} from the customer", { amount: parseFloat(paidAmount) || 0 })
                           : getTranslatedText("You will pay ₹{amount} to the customer", { amount: parseFloat(paidAmount) || 0 })
@@ -831,10 +832,11 @@ const ActiveRequestDetailsPage = () => {
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
                         onClick={() => setPaidAmount(amount.toString())}
-                        className="py-2 rounded-lg font-semibold text-sm"
+                        className="py-2 rounded-lg font-semibold text-sm border"
                         style={{
-                          backgroundColor: paidAmount === amount.toString() ? '#22c55e' : 'rgba(31, 41, 55, 1)',
-                          color: paidAmount === amount.toString() ? '#0f172a' : '#e5e7eb'
+                          backgroundColor: paidAmount === amount.toString() ? '#22c55e' : '#f1f5f9',
+                          borderColor: paidAmount === amount.toString() ? '#22c55e' : '#e2e8f0',
+                          color: paidAmount === amount.toString() ? '#ffffff' : '#475569'
                         }}
                       >
                         ₹{amount}
@@ -848,7 +850,7 @@ const ActiveRequestDetailsPage = () => {
                     onClick={handlePaymentMade}
                     disabled={!paidAmount || parseFloat(paidAmount) <= 0 || isProcessingPayment}
                     className="w-full py-4 rounded-xl font-bold text-base shadow-lg flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                    style={{ backgroundColor: '#22c55e', color: '#0f172a' }}
+                    style={{ backgroundColor: '#22c55e', color: '#ffffff' }}
                   >
                     {isProcessingPayment ? (
                       <span>{getTranslatedText("Processing...")}</span>
@@ -872,32 +874,32 @@ const ActiveRequestDetailsPage = () => {
               initial={{ y: '100%' }}
               animate={{ y: 0 }}
               transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              className="absolute bottom-0 left-0 right-0 z-30 rounded-t-2xl shadow-2xl flex flex-col bg-slate-900 border-t border-slate-800"
+              className="absolute bottom-0 left-0 right-0 z-30 rounded-t-2xl shadow-2xl flex flex-col bg-white border-t border-slate-200"
               style={{ maxHeight: '65vh', overflow: 'hidden' }}
             >
               {/* Slide Handle */}
-              <div className="w-12 h-1.5 mx-auto mt-2 rounded-full flex-shrink-0 bg-slate-700" />
+              <div className="w-12 h-1.5 mx-auto mt-2 rounded-full flex-shrink-0 bg-slate-300" />
 
               {/* Request Content - Compact - Scrollable */}
               <div className="p-4 pb-2 overflow-y-auto flex-1" style={{ minHeight: 0, WebkitOverflowScrolling: 'touch' }}>
                 <div className="flex items-center justify-between mb-3">
-                  <h2 className="text-lg font-bold text-slate-100">{getTranslatedText("Pickup Details")}</h2>
+                  <h2 className="text-lg font-bold text-slate-800">{getTranslatedText("Pickup Details")}</h2>
                 </div>
 
                 {/* Request Details - Compact */}
                 <div className="space-y-2 mb-4">
                   <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 bg-emerald-500/20">
-                      <span className="text-sm font-bold text-emerald-300">
+                    <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 bg-emerald-50">
+                      <span className="text-sm font-bold text-emerald-600">
                         {requestData.userName[0]}
                       </span>
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold truncate text-slate-50">{requestData.userName}</p>
-                      <p className="text-xs truncate text-slate-400">{requestData.scrapType}</p>
+                      <p className="text-sm font-semibold truncate text-slate-800">{requestData.userName}</p>
+                      <p className="text-xs truncate text-slate-500">{requestData.scrapType}</p>
                     </div>
                     <div className="text-right">
-                      <p className="text-sm font-bold text-emerald-400">{requestData.estimatedEarnings}</p>
+                      <p className="text-sm font-bold text-emerald-600">{requestData.estimatedEarnings}</p>
                     </div>
                   </div>
 
@@ -906,7 +908,7 @@ const ActiveRequestDetailsPage = () => {
                   {/* Scrap Images */}
                   {requestData.images && requestData.images.length > 0 && (
                     <div className="mt-3">
-                      <p className="text-xs font-semibold mb-2" style={{ color: '#e5e7eb' }}>
+                      <p className="text-xs font-semibold mb-2" style={{ color: '#475569' }}>
                         {requestData.orderType === 'cleaning_service' ? getTranslatedText('Area Images') : getTranslatedText('Scrap Images')}
                       </p>
                       <div className="grid grid-cols-3 gap-2">
@@ -914,8 +916,7 @@ const ActiveRequestDetailsPage = () => {
                           <motion.div
                             key={image.id || idx}
                             whileHover={{ scale: 1.05 }}
-                            className="relative aspect-square rounded-lg overflow-hidden"
-                            style={{ backgroundColor: 'rgba(15, 23, 42, 1)' }}
+                            className="relative aspect-square rounded-lg overflow-hidden bg-slate-100"
                           >
                             <img
                               src={image.preview || image}
@@ -942,14 +943,14 @@ const ActiveRequestDetailsPage = () => {
 
                 {/* Payment Made Status */}
                 {(paymentStatus === 'paid' || paymentStatus === 'completed') && requestData?.status !== 'completed' && (
-                  <div className="mb-3 p-4 rounded-xl" style={{ backgroundColor: 'rgba(22, 163, 74, 0.15)' }}>
+                  <div className="mb-3 p-4 rounded-xl bg-green-50 border border-green-100">
                     <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm font-semibold" style={{ color: '#bbf7d0' }}>{getTranslatedText("Payment Status")}</span>
-                      <span className="text-sm font-bold" style={{ color: '#4ade80' }}>
+                      <span className="text-sm font-semibold text-green-800">{getTranslatedText("Payment Status")}</span>
+                      <span className="text-sm font-bold text-green-600">
                         {requestData.orderType === 'cleaning_service' ? getTranslatedText('Collected ✓') : getTranslatedText('Paid ✓')}
                       </span>
                     </div>
-                    <p className="text-xs mb-3" style={{ color: '#e5e7eb' }}>
+                    <p className="text-xs mb-3 text-slate-600">
                       {requestData.orderType === 'cleaning_service'
                         ? getTranslatedText("Payment of ₹{amount} collected successfully", { amount: paidAmount || requestData?.paidAmount || '0' })
                         : getTranslatedText("Payment of ₹{amount} made successfully to customer", { amount: paidAmount || requestData?.paidAmount || '0' })
@@ -960,7 +961,7 @@ const ActiveRequestDetailsPage = () => {
                       whileTap={{ scale: 0.98 }}
                       onClick={handleCompleteOrder}
                       className="w-full py-3 rounded-xl font-bold text-base shadow-lg flex items-center justify-center gap-2"
-                      style={{ backgroundColor: '#22c55e', color: '#0f172a' }}
+                      style={{ backgroundColor: '#22c55e', color: '#ffffff' }}
                     >
                       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -972,19 +973,19 @@ const ActiveRequestDetailsPage = () => {
 
                 {/* Order Completed Status */}
                 {requestData?.status === 'completed' && (
-                  <div className="mb-3 p-4 rounded-xl text-center" style={{ backgroundColor: 'rgba(22, 163, 74, 0.15)' }}>
-                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" className="mx-auto mb-2" style={{ color: '#4ade80' }}>
+                  <div className="mb-3 p-4 rounded-xl text-center bg-green-50 border border-green-100">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" className="mx-auto mb-2 text-green-500">
                       <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
-                    <p className="text-sm font-bold mb-1" style={{ color: '#bbf7d0' }}>{getTranslatedText("Order Completed!")}</p>
-                    <p className="text-xs" style={{ color: '#e5e7eb' }}>{getTranslatedText("Redirecting to dashboard...")}</p>
+                    <p className="text-sm font-bold mb-1 text-green-800">{getTranslatedText("Order Completed!")}</p>
+                    <p className="text-xs text-slate-500">{getTranslatedText("Redirecting to dashboard...")}</p>
                   </div>
                 )}
               </div>
 
               {/* Contact Buttons - Fixed at Bottom */}
               <div
-                className="px-4 pb-4 pt-2 border-t border-slate-800 flex-shrink-0 bg-slate-900"
+                className="px-4 pb-4 pt-2 border-t border-slate-200 flex-shrink-0 bg-white"
               >
                 {/* Scrap Picked Up Button - Primary Action */}
                 {!isPickedUp ? (
@@ -1006,10 +1007,9 @@ const ActiveRequestDetailsPage = () => {
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                     onClick={handleCall}
-                    className="py-3 rounded-xl font-semibold text-sm shadow-md flex items-center justify-center gap-2"
-                    style={{ backgroundColor: 'rgba(31, 41, 55, 1)', color: '#f9fafb' }}
+                    className="py-3 rounded-xl font-semibold text-sm shadow-md flex items-center justify-center gap-2 bg-slate-100 text-slate-700 hover:bg-slate-200"
                   >
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" style={{ color: '#4ade80' }}>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" className="text-emerald-500">
                       <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
                     {getTranslatedText("Call")}
@@ -1018,10 +1018,9 @@ const ActiveRequestDetailsPage = () => {
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                     onClick={handleChat}
-                    className="py-3 rounded-xl font-semibold text-sm shadow-md flex items-center justify-center gap-2"
-                    style={{ backgroundColor: 'rgba(31, 41, 55, 1)', color: '#f9fafb' }}
+                    className="py-3 rounded-xl font-semibold text-sm shadow-md flex items-center justify-center gap-2 bg-slate-100 text-slate-700 hover:bg-slate-200"
                   >
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" style={{ color: '#60a5fa' }}>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" className="text-blue-500">
                       <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
                     {getTranslatedText("Chat")}
@@ -1040,31 +1039,30 @@ const ActiveRequestDetailsPage = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-70"
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-70 backdrop-blur-sm"
           >
             <motion.div
               initial={{ scale: 0.9, y: 20 }}
               animate={{ scale: 1, y: 0 }}
               exit={{ scale: 0.9, y: 20 }}
-              className="w-full max-w-sm rounded-2xl p-6"
-              style={{ backgroundColor: '#1f2937' }}
+              className="w-full max-w-sm rounded-2xl p-6 bg-white shadow-2xl"
             >
-              <h3 className="text-xl font-bold mb-4" style={{ color: '#f9fafb' }}>
+              <h3 className="text-xl font-bold mb-4 text-slate-800">
                 {getTranslatedText("Confirm Action")}
               </h3>
-              <p className="mb-6 text-base" style={{ color: '#d1d5db' }}>
+              <p className="mb-6 text-base text-slate-600">
                 {confirmMessage}
               </p>
               <div className="flex gap-3">
                 <button
                   onClick={handleCancel}
-                  className="flex-1 py-3 rounded-xl font-semibold bg-gray-700 text-white"
+                  className="flex-1 py-3 rounded-xl font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 transition-colors"
                 >
                   {getTranslatedText("Cancel")}
                 </button>
                 <button
                   onClick={handleConfirm}
-                  className="flex-1 py-3 rounded-xl font-bold bg-green-500 text-gray-900"
+                  className="flex-1 py-3 rounded-xl font-bold bg-emerald-600 text-white hover:bg-emerald-700 transition-colors"
                 >
                   {getTranslatedText("Yes, Confirm")}
                 </button>

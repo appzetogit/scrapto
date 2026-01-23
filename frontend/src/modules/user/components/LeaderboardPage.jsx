@@ -25,7 +25,7 @@ const LeaderboardPage = () => {
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-white rounded-2xl shadow-lg p-4 md:p-6">
+        className="rounded-2xl shadow-lg p-4 md:p-6 backdrop-blur-sm" style={{ backgroundColor: "rgba(255, 255, 255, 0.95)" }}>
         <div className="flex items-center gap-4 mb-4">
           <div
             className="w-16 h-16 rounded-full flex items-center justify-center"
@@ -48,9 +48,8 @@ const LeaderboardPage = () => {
         <div className="flex gap-2">
           <button
             onClick={() => setPeriod("all")}
-            className={`px-4 py-2 rounded-xl font-semibold text-sm transition-all ${
-              period === "all" ? "shadow-md" : ""
-            }`}
+            className={`px-4 py-2 rounded-xl font-semibold text-sm transition-all ${period === "all" ? "shadow-md" : ""
+              }`}
             style={{
               backgroundColor: period === "all" ? "#64946e" : "#f7fafc",
               color: period === "all" ? "#ffffff" : "#2d3748",
@@ -59,9 +58,8 @@ const LeaderboardPage = () => {
           </button>
           <button
             onClick={() => setPeriod("monthly")}
-            className={`px-4 py-2 rounded-xl font-semibold text-sm transition-all ${
-              period === "monthly" ? "shadow-md" : ""
-            }`}
+            className={`px-4 py-2 rounded-xl font-semibold text-sm transition-all ${period === "monthly" ? "shadow-md" : ""
+              }`}
             style={{
               backgroundColor: period === "monthly" ? "#64946e" : "#f7fafc",
               color: period === "monthly" ? "#ffffff" : "#2d3748",
@@ -76,7 +74,7 @@ const LeaderboardPage = () => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
-        className="bg-white rounded-2xl shadow-lg p-4 md:p-6">
+        className="rounded-2xl shadow-lg p-4 md:p-6 backdrop-blur-sm" style={{ backgroundColor: "rgba(255, 255, 255, 0.95)" }}>
         <div className="flex items-center gap-3 mb-4">
           <FaUsers className="text-xl" style={{ color: "#64946e" }} />
           <h2

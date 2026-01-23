@@ -1,17 +1,19 @@
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../shared/context/AuthContext';
-import { FaWallet, FaHistory, FaArrowUp, FaArrowDown, FaExclamationCircle } from 'react-icons/fa';
+import { FaWallet, FaHistory, FaArrowUp, FaArrowDown, FaExclamationCircle, FaTimes, FaMoneyBillWave, FaUniversity } from 'react-icons/fa';
 import { usePageTranslation } from '../../../hooks/usePageTranslation';
 import { walletAPI } from '../../shared/utils/api';
+import useRazorpay from '../../../hooks/useRazorpay';
 
 import ScrapperBottomNav from './ScrapperBottomNav';
 
 const ScrapperWallet = () => {
     const { user } = useAuth();
+    const { initializePayment } = useRazorpay();
     const staticTexts = [
         "My Wallet",
-        "Total Balance", // Changed from Earnings because it's a wallet now
+        "Total Balance",
         "Available Balance",
         "Recent Transactions",
         "Withdraw",
@@ -27,7 +29,25 @@ const ScrapperWallet = () => {
         "Bonus",
         "Status",
         "Date",
-        "Amount"
+        "Amount",
+        "Pending Clearance",
+        "Enter Amount to Add",
+        "Add Funds",
+        "Processing...",
+        "Withdraw Funds",
+        "Enter Amount to Withdraw",
+        "Withdrawal Amount",
+        "Enter UPI ID or Bank Details",
+        "Payment Method",
+        "UPI ID",
+        "Request Withdrawal",
+        "Insufficient Balance",
+        "Minimum Amount is ₹1",
+        "Minimum Withdrawal is ₹100",
+        "Request Submitted Successfully",
+        "Failed to submit request",
+        "Payment Successful",
+        "Failed to initiate payment"
     ];
 
     const { getTranslatedText } = usePageTranslation(staticTexts);
@@ -35,33 +55,143 @@ const ScrapperWallet = () => {
     const [transactions, setTransactions] = useState([]);
     const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        const fetchWalletData = async () => {
-            try {
-                setLoading(true);
-                // Fetch wallet profile which contains balance and recent transactions
-                const res = await walletAPI.getWalletProfile();
+    // Modals
+    const [showAddMoney, setShowAddMoney] = useState(false);
+    const [showWithdraw, setShowWithdraw] = useState(false);
+    const [amount, setAmount] = useState('');
+    const [withdrawDetails, setWithdrawDetails] = useState({ amount: '', method: 'UPI', upiId: '', accountHolderName: '', accountNumber: '', ifscCode: '' });
+    const [processing, setProcessing] = useState(false);
 
-                if (res.success && res.data) {
-                    setBalance({
-                        available: res.data.balance || 0,
-                        pending: 0, // Wallet usually doesn't have pending concept unless we add it
-                        total: res.data.balance || 0
-                    });
+    const fetchWalletData = async () => {
+        try {
+            // Fetch wallet profile which contains balance and recent transactions
+            const res = await walletAPI.getWalletProfile();
 
-                    if (res.data.transactions) {
-                        setTransactions(res.data.transactions);
-                    }
+            if (res.success && res.data) {
+                setBalance({
+                    available: res.data.balance || 0,
+                    pending: 0,
+                    total: res.data.balance || 0
+                });
+
+                if (res.data.transactions) {
+                    setTransactions(res.data.transactions);
                 }
-            } catch (error) {
-                console.error("Failed to fetch wallet data:", error);
-            } finally {
-                setLoading(false);
             }
-        };
+        } catch (error) {
+            console.error("Failed to fetch wallet data:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
 
+    useEffect(() => {
         fetchWalletData();
     }, []);
+
+    const handleAddMoney = async (e) => {
+        e.preventDefault();
+        if (!amount || amount < 1) {
+            alert(getTranslatedText("Minimum Amount is ₹1"));
+            return;
+        }
+
+        setProcessing(true);
+        try {
+            // 1. Create Order
+            const orderRes = await walletAPI.createRechargeOrder(Number(amount));
+            if (!orderRes.success) throw new Error(orderRes.message);
+
+            const { orderId, amount: orderAmount, currency, keyId } = orderRes.data;
+
+            // 2. Open Razorpay
+            const options = {
+                key: keyId,
+                amount: orderAmount,
+                currency: currency,
+                name: "Scrapto Wallet",
+                description: "Add Money to Wallet",
+                order_id: orderId,
+                prefill: {
+                    name: user?.name,
+                    email: user?.email,
+                    contact: user?.phone
+                },
+                theme: { color: "#10b981" }
+            };
+
+            await initializePayment(options, async (response) => {
+                // 3. Verify Payment
+                try {
+                    const verifyRes = await walletAPI.verifyRecharge({
+                        razorpay_order_id: response.razorpay_order_id,
+                        razorpay_payment_id: response.razorpay_payment_id,
+                        razorpay_signature: response.razorpay_signature,
+                        amount: Number(amount)
+                    });
+
+                    if (verifyRes.success) {
+                        alert(getTranslatedText("Payment Successful"));
+                        setShowAddMoney(false);
+                        setAmount('');
+                        fetchWalletData(); // Refresh balance
+                    } else {
+                        alert(verifyRes.message || "Verification Failed");
+                    }
+                } catch (err) {
+                    console.error("Verification error:", err);
+                    alert("Payment verification failed");
+                }
+            });
+
+        } catch (error) {
+            console.error("Add Money Failed:", error);
+            alert(error.message || getTranslatedText("Failed to initiate payment"));
+        } finally {
+            setProcessing(false);
+        }
+    };
+
+    const handleWithdraw = async (e) => {
+        e.preventDefault();
+        const withdrawAmount = Number(withdrawDetails.amount);
+
+        if (withdrawAmount < 100) {
+            alert(getTranslatedText("Minimum Withdrawal is ₹100"));
+            return;
+        }
+        if (withdrawAmount > balance.available) {
+            alert(getTranslatedText("Insufficient Balance"));
+            return;
+        }
+        if (!withdrawDetails.upiId && !withdrawDetails.accountNumber) {
+            alert(getTranslatedText("Enter UPI ID or Bank Details"));
+            return;
+        }
+
+        setProcessing(true);
+        try {
+            const res = await walletAPI.requestWithdrawal(withdrawAmount, {
+                method: withdrawDetails.method,
+                upiId: withdrawDetails.upiId,
+                accountNumber: withdrawDetails.accountNumber,
+                ifscCode: withdrawDetails.ifscCode,
+                accountHolderName: withdrawDetails.accountHolderName
+            });
+
+            if (res.success) {
+                alert(getTranslatedText("Request Submitted Successfully"));
+                setShowWithdraw(false);
+                setWithdrawDetails({ amount: '', method: 'UPI', upiId: '', accountHolderName: '', accountNumber: '', ifscCode: '' });
+                fetchWalletData();
+            }
+        } catch (error) {
+            console.error("Withdrawal Failed:", error);
+            alert(error.message || getTranslatedText("Failed to submit request"));
+        } finally {
+            setProcessing(false);
+        }
+    };
 
     const formatDate = (dateString) => {
         const options = { year: 'numeric', month: 'short', day: 'numeric' };
@@ -69,9 +199,9 @@ const ScrapperWallet = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-zinc-900 via-gray-900 to-black pb-20">
+        <div className="min-h-screen pb-20" style={{ background: "linear-gradient(to bottom, #72c688ff, #dcfce7)" }}>
             {/* Header for Mobile */}
-            <div className="md:hidden sticky top-0 z-40 bg-black/95 backdrop-blur-md px-4 py-4 border-b border-white/10">
+            <div className="md:hidden sticky top-0 z-40 px-4 py-4" style={{ background: "transparent" }}>
                 <h1 className="text-xl font-bold text-white">{getTranslatedText("My Wallet")}</h1>
             </div>
 
@@ -106,11 +236,17 @@ const ScrapperWallet = () => {
 
                 {/* Actions */}
                 <div className="grid grid-cols-2 gap-4 mb-8">
-                    <button className="flex items-center justify-center gap-2 bg-emerald-600 text-white py-3 px-4 rounded-xl font-semibold shadow-lg hover:bg-emerald-700 transition-colors">
+                    <button
+                        onClick={() => setShowWithdraw(true)}
+                        className="flex items-center justify-center gap-2 bg-emerald-600 text-white py-3 px-4 rounded-xl font-semibold shadow-lg hover:bg-emerald-700 transition-colors"
+                    >
                         <FaArrowUp />
                         {getTranslatedText("Withdraw")}
                     </button>
-                    <button className="flex items-center justify-center gap-2 bg-zinc-900 text-white py-3 px-4 rounded-xl font-semibold shadow-md border border-white/10 hover:bg-zinc-800 transition-colors">
+                    <button
+                        onClick={() => setShowAddMoney(true)}
+                        className="flex items-center justify-center gap-2 bg-white text-slate-800 py-3 px-4 rounded-xl font-semibold shadow-md border border-slate-200 hover:bg-slate-50 transition-colors"
+                    >
                         <FaArrowDown />
                         {getTranslatedText("Add Money")}
                     </button>
@@ -122,25 +258,24 @@ const ScrapperWallet = () => {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.1 }}
                 >
-                    <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-                        <FaHistory className="text-emerald-500" />
+                    <h3 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+                        <FaHistory className="text-emerald-600" />
                         {getTranslatedText("Recent Transactions")}
                     </h3>
 
                     {loading ? (
                         <div className="space-y-3">
                             {[1, 2, 3].map(i => (
-                                <div key={i} className="bg-zinc-900 rounded-xl p-4 h-20 animate-pulse" />
+                                <div key={i} className="bg-slate-100 rounded-xl p-4 h-20 animate-pulse" />
                             ))}
                         </div>
                     ) : transactions.length > 0 ? (
                         <div className="space-y-3">
                             {transactions.map((tx, index) => {
                                 const isDebit = tx.type === 'DEBIT';
-                                const isCredit = tx.type === 'CREDIT';
 
                                 let label = getTranslatedText("Completed Pickup");
-                                let icon = isDebit ? <FaArrowUp /> : <FaArrowDown />; // Debit = Out (Up), Credit = In (Down)
+                                let icon = isDebit ? <FaArrowUp /> : <FaArrowDown />;
 
                                 switch (tx.category) {
                                     case 'RECHARGE': label = getTranslatedText("Recharge"); break;
@@ -159,30 +294,30 @@ const ScrapperWallet = () => {
                                         initial={{ opacity: 0, x: -10 }}
                                         animate={{ opacity: 1, x: 0 }}
                                         transition={{ delay: 0.05 * index }}
-                                        className="bg-zinc-900 rounded-xl p-4 shadow-sm border border-white/10 flex items-center justify-between"
+                                        className="bg-white rounded-xl p-4 shadow-sm border border-slate-200 flex items-center justify-between"
                                     >
                                         <div className="flex items-center gap-3">
-                                            <div className={`w-10 h-10 rounded-full flex items-center justify-center ${isDebit ? 'bg-red-900/20 text-red-400' : 'bg-emerald-900/20 text-emerald-400'
+                                            <div className={`w-10 h-10 rounded-full flex items-center justify-center ${isDebit ? 'bg-red-50 text-red-500' : 'bg-emerald-50 text-emerald-600'
                                                 }`}>
                                                 {icon}
                                             </div>
                                             <div>
-                                                <p className="font-semibold text-white">
+                                                <p className="font-semibold text-slate-800">
                                                     {label}
-                                                    {tx.orderId && <span className="text-xs text-gray-500 ml-1">#{tx.orderId.substring(tx.orderId.length - 4)}</span>}
+                                                    {tx.orderId && <span className="text-xs text-slate-400 ml-1">#{typeof tx.orderId === 'string' ? tx.orderId.slice(-4) : '...'}</span>}
                                                 </p>
-                                                <p className="text-xs text-gray-400">
+                                                <p className="text-xs text-slate-500">
                                                     {formatDate(tx.createdAt)}
                                                 </p>
                                             </div>
                                         </div>
                                         <div className="text-right">
-                                            <p className={`font-bold ${isDebit ? 'text-red-400' : 'text-emerald-400'
+                                            <p className={`font-bold ${isDebit ? 'text-red-500' : 'text-emerald-600'
                                                 }`}>
                                                 {isDebit ? '-' : '+'}₹{tx.amount?.toLocaleString()}
                                             </p>
-                                            <span className={`text-[10px] px-2 py-0.5 rounded-full ${tx.status === 'SUCCESS' ? 'bg-green-900/30 text-green-400' :
-                                                tx.status === 'PENDING' ? 'bg-yellow-900/30 text-yellow-400' : 'bg-red-900/30 text-red-400'
+                                            <span className={`text-[10px] px-2 py-0.5 rounded-full ${tx.status === 'SUCCESS' ? 'bg-green-100 text-green-700' :
+                                                tx.status === 'PENDING' ? 'bg-yellow-100 text-yellow-700' : 'bg-red-100 text-red-700'
                                                 }`}>
                                                 {tx.status}
                                             </span>
@@ -192,13 +327,190 @@ const ScrapperWallet = () => {
                             })}
                         </div>
                     ) : (
-                        <div className="text-center py-10 bg-zinc-900 rounded-xl border border-dashed border-gray-700">
-                            <FaExclamationCircle className="mx-auto text-gray-600 mb-3" size={40} />
-                            <p className="text-gray-400">{getTranslatedText("No transactions yet")}</p>
+                        <div className="text-center py-10 bg-white rounded-xl border border-dashed border-slate-300">
+                            <FaExclamationCircle className="mx-auto text-slate-400 mb-3" size={40} />
+                            <p className="text-slate-500">{getTranslatedText("No transactions yet")}</p>
                         </div>
                     )}
                 </motion.div>
             </div>
+
+            {/* Add Money Modal */}
+            <AnimatePresence>
+                {showAddMoney && (
+                    <motion.div
+                        initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+                    >
+                        <motion.div
+                            initial={{ scale: 0.95 }} animate={{ scale: 1 }} exit={{ scale: 0.95 }}
+                            className="bg-white rounded-2xl w-full max-w-md p-6 border border-slate-200 shadow-2xl"
+                        >
+                            <div className="flex justify-between items-center mb-6">
+                                <h3 className="text-xl font-bold text-slate-800 flex items-center gap-2">
+                                    <FaMoneyBillWave className="text-emerald-600" /> {getTranslatedText("Add Funds")}
+                                </h3>
+                                <button onClick={() => setShowAddMoney(false)} className="text-slate-400 hover:text-slate-600">
+                                    <FaTimes size={20} />
+                                </button>
+                            </div>
+                            <form onSubmit={handleAddMoney}>
+                                <div className="mb-6">
+                                    <label className="block text-sm text-slate-500 mb-2">{getTranslatedText("Enter Amount to Add")}</label>
+                                    <div className="relative">
+                                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-800 font-bold text-lg">₹</span>
+                                        <input
+                                            type="number"
+                                            value={amount}
+                                            onChange={(e) => setAmount(e.target.value)}
+                                            className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 pl-10 pr-4 text-slate-800 text-lg font-bold focus:border-emerald-500 outline-none"
+                                            placeholder="1000"
+                                            min="1"
+                                            required
+                                        />
+                                    </div>
+                                    <div className="flex gap-2 mt-3">
+                                        {[500, 1000, 2000].map(val => (
+                                            <button
+                                                key={val}
+                                                type="button"
+                                                onClick={() => setAmount(val.toString())}
+                                                className="bg-slate-100 text-xs px-3 py-1 rounded-full text-slate-600 hover:bg-slate-200 border border-slate-200"
+                                            >
+                                                ₹{val}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                                <button
+                                    type="submit"
+                                    disabled={processing}
+                                    className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-4 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    {processing ? getTranslatedText("Processing...") : getTranslatedText("Add Funds")}
+                                </button>
+                            </form>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* Withdraw Modal */}
+            <AnimatePresence>
+                {showWithdraw && (
+                    <motion.div
+                        initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+                    >
+                        <motion.div
+                            initial={{ scale: 0.95 }} animate={{ scale: 1 }} exit={{ scale: 0.95 }}
+                            className="bg-white rounded-2xl w-full max-w-md p-6 border border-slate-200 shadow-2xl max-h-[90vh] overflow-y-auto"
+                        >
+                            <div className="flex justify-between items-center mb-6">
+                                <h3 className="text-xl font-bold text-slate-800 flex items-center gap-2">
+                                    <FaUniversity className="text-emerald-600" /> {getTranslatedText("Withdraw Funds")}
+                                </h3>
+                                <button onClick={() => setShowWithdraw(false)} className="text-slate-400 hover:text-slate-600">
+                                    <FaTimes size={20} />
+                                </button>
+                            </div>
+                            <form onSubmit={handleWithdraw}>
+                                <div className="mb-4">
+                                    <label className="block text-sm text-slate-500 mb-2">{getTranslatedText("Withdrawal Amount")}</label>
+                                    <div className="relative">
+                                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-800 font-bold text-lg">₹</span>
+                                        <input
+                                            type="number"
+                                            value={withdrawDetails.amount}
+                                            onChange={(e) => setWithdrawDetails({ ...withdrawDetails, amount: e.target.value })}
+                                            className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 pl-10 pr-4 text-slate-800 text-lg font-bold focus:border-emerald-500 outline-none"
+                                            placeholder="1000"
+                                            min="100"
+                                            required
+                                        />
+                                    </div>
+                                    <p className="text-xs text-slate-500 mt-1">{getTranslatedText("Available")}: ₹{balance.available}</p>
+                                </div>
+
+                                <div className="mb-4">
+                                    <label className="block text-sm text-slate-500 mb-2">{getTranslatedText("Payment Method")}</label>
+                                    <div className="flex p-1 bg-slate-100 rounded-lg border border-slate-200">
+                                        <button
+                                            type="button"
+                                            onClick={() => setWithdrawDetails({ ...withdrawDetails, method: 'UPI' })}
+                                            className={`flex-1 py-2 text-sm font-medium rounded-md transition-all ${withdrawDetails.method === 'UPI' ? 'bg-white text-slate-800 shadow' : 'text-slate-500'}`}
+                                        >
+                                            UPI
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => setWithdrawDetails({ ...withdrawDetails, method: 'BANK_TRANSFER' })}
+                                            className={`flex-1 py-2 text-sm font-medium rounded-md transition-all ${withdrawDetails.method === 'BANK_TRANSFER' ? 'bg-white text-slate-800 shadow' : 'text-slate-500'}`}
+                                        >
+                                            Bank Transfer
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {withdrawDetails.method === 'UPI' ? (
+                                    <div className="mb-6">
+                                        <label className="block text-sm text-slate-500 mb-2">{getTranslatedText("UPI ID")}</label>
+                                        <input
+                                            type="text"
+                                            value={withdrawDetails.upiId}
+                                            onChange={(e) => setWithdrawDetails({ ...withdrawDetails, upiId: e.target.value })}
+                                            className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 text-slate-800 focus:border-emerald-500 outline-none"
+                                            placeholder="username@okaxis"
+                                            required
+                                        />
+                                    </div>
+                                ) : (
+                                    <div className="space-y-4 mb-6">
+                                        <div>
+                                            <label className="block text-sm text-slate-500 mb-2">Account Holder Name</label>
+                                            <input
+                                                type="text"
+                                                value={withdrawDetails.accountHolderName}
+                                                onChange={(e) => setWithdrawDetails({ ...withdrawDetails, accountHolderName: e.target.value })}
+                                                className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 text-slate-800 focus:border-emerald-500 outline-none"
+                                                required
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm text-slate-500 mb-2">Account Number</label>
+                                            <input
+                                                type="text"
+                                                value={withdrawDetails.accountNumber}
+                                                onChange={(e) => setWithdrawDetails({ ...withdrawDetails, accountNumber: e.target.value })}
+                                                className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 text-slate-800 focus:border-emerald-500 outline-none"
+                                                required
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm text-slate-500 mb-2">IFSC Code</label>
+                                            <input
+                                                type="text"
+                                                value={withdrawDetails.ifscCode}
+                                                onChange={(e) => setWithdrawDetails({ ...withdrawDetails, ifscCode: e.target.value })}
+                                                className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 text-slate-800 focus:border-emerald-500 outline-none"
+                                                required
+                                            />
+                                        </div>
+                                    </div>
+                                )}
+
+                                <button
+                                    type="submit"
+                                    disabled={processing}
+                                    className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-4 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    {processing ? getTranslatedText("Processing...") : getTranslatedText("Request Withdrawal")}
+                                </button>
+                            </form>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
 
             {/* Mobile Bottom Nav is handled by the layout, but we ensure spacing is active */}
             <div className="md:hidden">

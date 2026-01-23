@@ -121,13 +121,13 @@ const ChatListPage = () => {
     return (
       <div
         className="min-h-screen flex items-center justify-center"
-        style={{ backgroundColor: "#f4ebe2" }}>
+        style={{ background: "linear-gradient(to bottom, #72c688ff, #dcfce7)" }}>
         <div className="text-center">
           <FaSpinner
-            className="animate-spin mx-auto mb-4"
-            style={{ color: "#64946e", fontSize: "2rem" }}
+            className="animate-spin mx-auto mb-4 text-white"
+            style={{ fontSize: "2rem" }}
           />
-          <p style={{ color: "#2d3748" }}>
+          <p className="text-white font-medium">
             {getTranslatedText("Loading chats...")}
           </p>
         </div>
@@ -136,13 +136,13 @@ const ChatListPage = () => {
   }
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: "#f4ebe2" }}>
+    <div className="min-h-screen" style={{ background: "linear-gradient(to bottom, #72c688ff, #dcfce7)" }}>
       <div className="p-4 md:p-6 space-y-4">
         {/* Header */}
         <div className="flex items-center justify-between mb-4">
           <h1
             className="text-2xl md:text-3xl font-bold"
-            style={{ color: "#2d3748" }}>
+            style={{ color: "#ffffff" }}>
             {getTranslatedText("Messages")}
           </h1>
         </div>
@@ -152,18 +152,16 @@ const ChatListPage = () => {
           <div className="relative">
             <FaSearch
               className="absolute left-4 top-1/2 transform -translate-y-1/2"
-              style={{ color: "#718096" }}
+              style={{ color: "#9ca3af" }}
             />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder={getTranslatedText("Search chats...")}
-              className="w-full pl-12 pr-4 py-3 rounded-xl border-2 focus:outline-none focus:ring-2"
+              className="w-full pl-12 pr-4 py-3 rounded-xl border-none shadow-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-slate-800 placeholder-slate-400"
               style={{
-                borderColor: "rgba(100, 148, 110, 0.3)",
                 backgroundColor: "#ffffff",
-                color: "#2d3748",
               }}
             />
           </div>
@@ -171,26 +169,16 @@ const ChatListPage = () => {
           <div className="flex gap-2">
             <button
               onClick={() => setFilter("active")}
-              className={`px-4 py-2 rounded-xl font-semibold transition-all ${
-                filter === "active" ? "text-white" : "text-gray-700"
-              }`}
-              style={{
-                backgroundColor:
-                  filter === "active" ? "#64946e" : "rgba(100, 148, 110, 0.1)",
-              }}>
+              className={`px-4 py-2 rounded-xl font-semibold transition-all shadow-sm ${filter === "active" ? "bg-emerald-600 text-white shadow-md" : "bg-white text-slate-600 hover:bg-slate-50"
+                }`}
+            >
               {getTranslatedText("Active")}
             </button>
             <button
               onClick={() => setFilter("archived")}
-              className={`px-4 py-2 rounded-xl font-semibold transition-all ${
-                filter === "archived" ? "text-white" : "text-gray-700"
-              }`}
-              style={{
-                backgroundColor:
-                  filter === "archived"
-                    ? "#64946e"
-                    : "rgba(100, 148, 110, 0.1)",
-              }}>
+              className={`px-4 py-2 rounded-xl font-semibold transition-all shadow-sm ${filter === "archived" ? "bg-emerald-600 text-white shadow-md" : "bg-white text-slate-600 hover:bg-slate-50"
+                }`}
+            >
               {getTranslatedText("Archived")}
             </button>
           </div>
@@ -199,8 +187,8 @@ const ChatListPage = () => {
         {/* Error Message */}
         {error && (
           <div
-            className="p-3 rounded-xl text-sm"
-            style={{ backgroundColor: "#fee2e2", color: "#dc2626" }}>
+            className="p-3 rounded-xl text-sm border border-red-200"
+            style={{ backgroundColor: "#fee2e2", color: "#b91c1c" }}>
             {error}
           </div>
         )}
@@ -209,20 +197,20 @@ const ChatListPage = () => {
         {filteredChats.length === 0 ? (
           <div className="text-center py-12">
             <FaComments
-              className="mx-auto mb-4"
-              style={{ color: "#9ca3af", fontSize: "3rem" }}
+              className="mx-auto mb-4 text-emerald-100"
+              style={{ fontSize: "3rem" }}
             />
             <p
               className="text-lg font-semibold mb-2"
-              style={{ color: "#2d3748" }}>
+              style={{ color: "#ffffff" }}>
               {getTranslatedText("No chats found")}
             </p>
-            <p className="text-sm" style={{ color: "#718096" }}>
+            <p className="text-sm" style={{ color: "#ecfdf5" }}>
               {searchQuery
                 ? getTranslatedText("Try a different search term")
                 : getTranslatedText(
-                    "Start a conversation from an active order"
-                  )}
+                  "Start a conversation from an active order"
+                )}
             </p>
           </div>
         ) : (
@@ -250,20 +238,20 @@ const ChatListPage = () => {
                       state: { orderId: chat.orderId?._id || chat.orderId },
                     })
                   }
-                  className="rounded-2xl p-4 shadow-lg cursor-pointer transition-all"
+                  className="rounded-2xl p-4 shadow-md cursor-pointer transition-all border border-slate-100/50 hover:shadow-lg"
                   style={{ backgroundColor: "#ffffff" }}>
                   <div className="flex items-center gap-3">
                     {/* Avatar */}
                     <div
                       className="w-12 h-12 rounded-full flex items-center justify-center text-base font-bold relative flex-shrink-0"
                       style={{
-                        backgroundColor: "rgba(100, 148, 110, 0.15)",
-                        color: "#64946e",
+                        backgroundColor: "#ecfdf5",
+                        color: "#059669",
                       }}>
                       {otherUserInitials}
                       {unreadCount > 0 && (
                         <div
-                          className="absolute -top-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold text-white"
+                          className="absolute -top-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold text-white shadow-sm"
                           style={{ backgroundColor: "#ef4444" }}>
                           {unreadCount > 9 ? "9+" : unreadCount}
                         </div>
@@ -275,7 +263,7 @@ const ChatListPage = () => {
                       <div className="flex items-center justify-between mb-1">
                         <h3
                           className="text-base font-semibold truncate"
-                          style={{ color: "#2d3748" }}>
+                          style={{ color: "#1e293b" }}>
                           {otherUserName}
                         </h3>
                         <span
@@ -286,14 +274,14 @@ const ChatListPage = () => {
                       </div>
                       <p
                         className="text-sm truncate"
-                        style={{ color: "#718096" }}>
+                        style={{ color: "#64748b" }}>
                         {chat.lastMessage ||
                           getTranslatedText("No messages yet")}
                       </p>
                       {chat.orderId && (
                         <p
                           className="text-xs mt-1"
-                          style={{ color: "#9ca3af" }}>
+                          style={{ color: "#94a3b8" }}>
                           {getTranslatedText("Order: ")}
                           {chat.orderId.status || getTranslatedText("Active")}
                         </p>

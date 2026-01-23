@@ -27,8 +27,8 @@ const Profile = ({ onClose }) => {
     "Help & Support",
     "FAQ, contact support",
     "Settings",
-  "Terms & Conditions",
-  "Read platform terms & conditions",
+    "Terms & Conditions",
+    "Read platform terms & conditions",
     "App preferences & privacy",
     "Verified",
     "Full Name",
@@ -244,21 +244,21 @@ const Profile = ({ onClose }) => {
       exit={{ opacity: 0, y: 20 }}
       transition={{ duration: 0.3 }}
       className="min-h-screen pb-20 md:pb-0"
-      style={{ backgroundColor: "#f4ebe2" }}>
+      style={{ background: "linear-gradient(to bottom, #72c688ff, #dcfce7)" }}>
       {/* Header */}
       <div
         className="sticky top-0 z-40 px-4 md:px-6 lg:px-8 py-4 md:py-6"
-        style={{ backgroundColor: "#f4ebe2" }}>
+        style={{ background: "transparent" }}>
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <h1
             className="text-xl md:text-2xl font-bold"
-            style={{ color: "#2d3748" }}>
+            style={{ color: "#ffffff" }}>
             {getTranslatedText("Profile")}
           </h1>
           <button
             onClick={onClose}
-            className="p-2 rounded-full hover:opacity-70 transition-opacity"
-            style={{ color: "#64946e" }}>
+            className="p-2 rounded-full hover:opacity-70 transition-opacity bg-white/20 backdrop-blur-sm"
+            style={{ color: "#ffffff" }}>
             <svg
               width="24"
               height="24"
@@ -281,8 +281,8 @@ const Profile = ({ onClose }) => {
           transition={{ duration: 0.5 }}
           className="mb-6 md:mb-8">
           <div
-            className="rounded-2xl p-4 md:p-6 shadow-md"
-            style={{ backgroundColor: "#ffffff" }}>
+            className="rounded-2xl p-4 md:p-6 shadow-md backdrop-blur-sm"
+            style={{ backgroundColor: "rgba(255, 255, 255, 0.95)" }}>
             <AnimatePresence mode="wait">
               {!isEditMode ? (
                 <motion.div
@@ -540,9 +540,9 @@ const Profile = ({ onClose }) => {
               animate={{ y: 0, opacity: 1 }}
               transition={{ duration: 0.4, delay: 0.1 + index * 0.05 }}
               onClick={option.action}
-              className="text-left p-3 md:p-4 rounded-xl transition-all duration-300 hover:shadow-lg"
+              className="text-left p-3 md:p-4 rounded-xl transition-all duration-300 hover:shadow-lg backdrop-blur-sm"
               style={{
-                backgroundColor: "#ffffff",
+                backgroundColor: "rgba(255, 255, 255, 0.95)",
                 border: "1px solid rgba(100, 148, 110, 0.15)",
               }}
               onMouseEnter={(e) => {
@@ -597,8 +597,8 @@ const Profile = ({ onClose }) => {
           transition={{ duration: 0.5, delay: 0.6 }}
           className="mb-6">
           <div
-            className="rounded-2xl p-4 md:p-6"
-            style={{ backgroundColor: "#ffffff" }}>
+            className="rounded-2xl p-4 md:p-6 backdrop-blur-sm"
+            style={{ backgroundColor: "rgba(255, 255, 255, 0.95)" }}>
             <h3
               className="font-bold text-base md:text-lg mb-4"
               style={{ color: "#2d3748" }}>
@@ -633,9 +633,9 @@ const Profile = ({ onClose }) => {
           animate={{ y: 0, opacity: 1 }}
           transition={{ duration: 0.5, delay: 0.7 }}
           onClick={handleLogout}
-          className="w-full p-4 rounded-xl font-semibold transition-all duration-300 mb-20 md:mb-8"
+          className="w-full p-4 rounded-xl font-semibold transition-all duration-300 mb-20 md:mb-8 backdrop-blur-sm"
           style={{
-            backgroundColor: "#ffffff",
+            backgroundColor: "rgba(255, 255, 255, 0.95)",
             border: "1px solid rgba(239, 68, 68, 0.3)",
             color: "#ef4444",
           }}
@@ -643,7 +643,7 @@ const Profile = ({ onClose }) => {
             e.currentTarget.style.backgroundColor = "#fee2e2";
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = "#ffffff";
+            e.currentTarget.style.backgroundColor = "rgba(255, 255, 255, 0.95)";
           }}>
           {getTranslatedText("Logout")}
         </motion.button>

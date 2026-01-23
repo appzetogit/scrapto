@@ -292,68 +292,16 @@ const ReferAndEarn = () => {
         </div>
 
         {/* Share Buttons */}
-        <div className="grid grid-cols-3 gap-2">
+        <div className="mt-4">
           <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
             onClick={() => handleShare('whatsapp')}
-            className="p-3 rounded-xl font-semibold text-sm flex flex-col items-center gap-2 transition-all"
-            style={{ backgroundColor: '#25D366', color: '#ffffff' }}
+            className="w-full py-3.5 rounded-xl font-bold text-base flex items-center justify-center gap-2 transition-all shadow-md hover:shadow-lg text-white"
+            style={{ backgroundColor: '#25D366' }}
           >
-            <FaWhatsapp className="text-xl" />
-            <span className="text-xs">{getTranslatedText("WhatsApp")}</span>
-          </motion.button>
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => handleShare('sms')}
-            className="p-3 rounded-xl font-semibold text-sm flex flex-col items-center gap-2 transition-all bg-slate-50 text-slate-800"
-          >
-            <FaShareAlt className="text-xl" />
-            <span className="text-xs">{getTranslatedText("SMS")}</span>
-          </motion.button>
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => handleShare('email')}
-            className="p-3 rounded-xl font-semibold text-sm flex flex-col items-center gap-2 transition-all bg-slate-50 text-slate-800"
-          >
-            <FaEnvelope className="text-xl" />
-            <span className="text-xs">{getTranslatedText("Email")}</span>
-          </motion.button>
-        </div>
-
-        {/* Social Media Share */}
-        <div className="grid grid-cols-3 gap-2 mt-2">
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => handleShare('facebook')}
-            className="p-3 rounded-xl font-semibold text-sm flex flex-col items-center gap-2 transition-all"
-            style={{ backgroundColor: '#1877F2', color: '#ffffff' }}
-          >
-            <FaFacebook className="text-xl" />
-            <span className="text-xs">{getTranslatedText("Facebook")}</span>
-          </motion.button>
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => handleShare('twitter')}
-            className="p-3 rounded-xl font-semibold text-sm flex flex-col items-center gap-2 transition-all"
-            style={{ backgroundColor: '#1DA1F2', color: '#ffffff' }}
-          >
-            <FaTwitter className="text-xl" />
-            <span className="text-xs">{getTranslatedText("Twitter")}</span>
-          </motion.button>
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => handleShare('instagram')}
-            className="p-3 rounded-xl font-semibold text-sm flex flex-col items-center gap-2 transition-all"
-            style={{ backgroundColor: '#E4405F', color: '#ffffff' }}
-          >
-            <FaInstagram className="text-xl" />
-            <span className="text-xs">{getTranslatedText("Instagram")}</span>
+            <FaWhatsapp className="text-2xl" />
+            <span>{getTranslatedText("WhatsApp")}</span>
           </motion.button>
         </div>
       </motion.div>

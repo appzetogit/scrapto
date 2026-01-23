@@ -80,16 +80,16 @@ const UserHelpSupport = () => {
       exit={{ opacity: 0 }}
       transition={{ duration: 0.3 }}
       className="min-h-screen w-full flex flex-col"
-      style={{ backgroundColor: "#f4ebe2" }}>
+      style={{ background: "linear-gradient(to bottom, #72c688ff, #dcfce7)" }}>
       {/* Content */}
       <div className="w-full p-3 md:p-6 space-y-4 md:space-y-6">
         {/* Header - Now inside scrollable flow */}
         <div
           className="flex items-center justify-between pb-3 md:pb-6 border-b"
-          style={{ borderColor: "rgba(100, 148, 110, 0.2)" }}>
+          style={{ borderColor: "rgba(255, 255, 255, 0.3)" }}>
           <h2
             className="text-lg md:text-2xl font-bold"
-            style={{ color: "#2d3748" }}>
+            style={{ color: "#ffffff" }}>
             {getTranslatedText("Help & Support")}
           </h2>
           <div className="w-10" />
@@ -97,9 +97,9 @@ const UserHelpSupport = () => {
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="rounded-2xl p-4 md:p-6 shadow-lg"
-          style={{ backgroundColor: "#ffffff" }}>
-          <p className="text-xs md:text-sm mb-4" style={{ color: "#718096" }}>
+          className="rounded-2xl p-4 md:p-6 shadow-lg backdrop-blur-sm"
+          style={{ backgroundColor: "rgba(255, 255, 255, 0.95)" }}>
+          <p className="text-xs md:text-sm mb-4" style={{ color: "#64748b" }}>
             {getTranslatedText(
               "Tell us what you need help with. Our admin team will review your request and reach out if needed."
             )}
@@ -107,25 +107,25 @@ const UserHelpSupport = () => {
 
           {(submitting || success) && statusMessage && (
             <div
-              className="mb-4 text-xs md:text-sm rounded-xl p-3 md:p-4"
-              style={{ backgroundColor: "#000000", color: "#e5e7eb" }}>
+              className="mb-4 text-xs md:text-sm rounded-xl p-3 md:p-4 shadow-md"
+              style={{ backgroundColor: "#1e293b", color: "#f8fafc" }}>
               {statusMessage}
             </div>
           )}
 
           <form onSubmit={handleSubmit} className="space-y-4 md:space-y-5">
             <div>
-              <label className="block text-xs md:text-sm font-semibold mb-2" style={{ color: '#2d3748' }}>
+              <label className="block text-xs md:text-sm font-semibold mb-2" style={{ color: '#334155' }}>
                 {getTranslatedText("Category")}
               </label>
               <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl border-2 focus:outline-none focus:ring-2 transition-all text-sm md:text-base"
+                className="w-full px-4 py-3 rounded-xl border-2 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 transition-all text-sm md:text-base cursor-pointer hover:bg-slate-50"
                 style={{
-                  borderColor: category ? '#64946e' : 'rgba(100, 148, 110, 0.3)',
-                  color: '#2d3748',
-                  backgroundColor: '#f9f9f9'
+                  borderColor: category ? '#10b981' : '#e2e8f0',
+                  color: '#334155',
+                  backgroundColor: '#ffffff'
                 }}
               >
                 <option value="">{getTranslatedText("Select an issue")}</option>
@@ -138,7 +138,7 @@ const UserHelpSupport = () => {
             </div>
 
             <div>
-              <label className="block text-xs md:text-sm font-semibold mb-2" style={{ color: '#2d3748' }}>
+              <label className="block text-xs md:text-sm font-semibold mb-2" style={{ color: '#334155' }}>
                 {getTranslatedText("Describe your issue")}
               </label>
               <textarea
@@ -146,13 +146,13 @@ const UserHelpSupport = () => {
                 onChange={(e) => setMessage(e.target.value)}
                 rows={5}
                 placeholder={getTranslatedText("Please share as much detail as possible...")}
-                className="w-full px-4 py-3 rounded-xl border-2 focus:outline-none focus:ring-2 transition-all text-sm md:text-base resize-none"
+                className="w-full px-4 py-3 rounded-xl border-2 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 transition-all text-sm md:text-base resize-none"
                 style={{
                   borderColor: message.trim()
-                    ? "#64946e"
-                    : "rgba(100, 148, 110, 0.3)",
-                  color: "#2d3748",
-                  backgroundColor: "#f9f9f9",
+                    ? "#10b981"
+                    : "#e2e8f0",
+                  color: "#334155",
+                  backgroundColor: "#ffffff",
                 }}
               />
             </div>
@@ -162,8 +162,8 @@ const UserHelpSupport = () => {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               disabled={submitting || !category || !message.trim()}
-              className="w-full py-3 md:py-4 rounded-full text-white font-semibold text-sm md:text-lg shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
-              style={{ backgroundColor: "#64946e" }}>
+              className="w-full py-3 md:py-4 rounded-full text-white font-semibold text-sm md:text-lg shadow-lg hover:shadow-xl hover:bg-emerald-600 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+              style={{ backgroundColor: "#059669" }}>
               {submitting ? getTranslatedText('Submitting...') : getTranslatedText('Submit Request')}
             </motion.button>
           </form>

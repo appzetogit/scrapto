@@ -203,8 +203,8 @@ const MyActiveRequestsPage = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen w-full flex items-center justify-center bg-black">
-        <p className="text-white">{getTranslatedText("Loading active requests...")}</p>
+      <div className="min-h-screen w-full flex items-center justify-center bg-[#f4fcf6]">
+        <p className="text-emerald-800 font-medium">{getTranslatedText("Loading active requests...")}</p>
       </div>
     );
   }
@@ -214,25 +214,26 @@ const MyActiveRequestsPage = () => {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.3 }}
-      className="min-h-screen w-full pb-20 md:pb-0 bg-gradient-to-br from-emerald-900 via-gray-900 to-black"
+      className="min-h-screen w-full pb-20 md:pb-0"
+      style={{ background: "linear-gradient(to bottom, #72c688ff, #dcfce7)" }}
     >
       {/* Header */}
-      <div className="sticky top-0 z-40 px-4 md:px-6 lg:px-8 py-4 md:py-6 border-b bg-black/95 backdrop-blur-sm border-white/10">
+      <div className="sticky top-0 z-40 px-4 md:px-6 lg:px-8 py-4 md:py-6 border-b border-transparent bg-transparent">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-4">
             <button
               onClick={() => navigate('/scrapper')}
-              className="w-10 h-10 rounded-full flex items-center justify-center shadow-md bg-zinc-900 text-white"
+              className="w-10 h-10 rounded-full flex items-center justify-center shadow-md bg-white text-slate-800"
             >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" className="text-white">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" className="text-slate-800">
                 <path d="M19 12H5M12 19l-7-7 7-7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </button>
             <div>
-              <h1 className="text-xl md:text-2xl font-bold text-white">
+              <h1 className="text-xl md:text-2xl font-bold text-slate-800">
                 {getTranslatedText("My Active Requests")}
               </h1>
-              <p className="text-xs md:text-sm mt-1 text-gray-400">
+              <p className="text-xs md:text-sm mt-1 text-slate-600">
                 {activeRequests.length === 1
                   ? getTranslatedText("{count} request in progress", { count: activeRequests.length })
                   : getTranslatedText("{count} requests in progress", { count: activeRequests.length })}
@@ -247,7 +248,7 @@ const MyActiveRequestsPage = () => {
           {activeRequests.length > 0 && (
             <button
               onClick={() => navigate('/scrapper/active-requests')}
-              className="px-4 py-2 rounded-full text-sm font-semibold transition-colors bg-emerald-600 text-white"
+              className="px-4 py-2 rounded-full text-sm font-semibold transition-colors bg-emerald-600 text-white shadow-lg hover:bg-emerald-700"
             >
               {getTranslatedText("Go Online")}
             </button>
@@ -263,20 +264,20 @@ const MyActiveRequestsPage = () => {
             animate={{ opacity: 1, y: 0 }}
             className="text-center py-12 md:py-16"
           >
-            <div className="w-20 h-20 mx-auto mb-6 rounded-full flex items-center justify-center bg-emerald-900/20">
+            <div className="w-20 h-20 mx-auto mb-6 rounded-full flex items-center justify-center bg-white shadow-sm border border-slate-100">
               <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2M9 5a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2M9 5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2" stroke="#34d399" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </div>
-            <h3 className="text-lg md:text-xl font-bold mb-2 text-white">
+            <h3 className="text-lg md:text-xl font-bold mb-2 text-slate-800">
               {getTranslatedText("No Active Requests")}
             </h3>
-            <p className="text-sm md:text-base mb-6 text-gray-400">
+            <p className="text-sm md:text-base mb-6 text-slate-500">
               {getTranslatedText("You don't have any active requests at the moment.")}
             </p>
             <button
               onClick={() => navigate('/scrapper/active-requests')}
-              className="px-6 py-3 rounded-full font-semibold text-sm md:text-base transition-all bg-emerald-600 text-white"
+              className="px-6 py-3 rounded-full font-semibold text-sm md:text-base transition-all bg-emerald-600 text-white shadow-lg hover:bg-emerald-700"
             >
               {getTranslatedText("Go Online to Receive Requests")}
             </button>
@@ -294,13 +295,13 @@ const MyActiveRequestsPage = () => {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.1 }}
                   onClick={() => navigate(`/scrapper/active-request/${request.id}`, { state: { request } })}
-                  className="rounded-2xl p-4 md:p-6 shadow-lg cursor-pointer transition-all hover:shadow-xl border bg-black border-white/10 hover:border-emerald-500/30"
+                  className="rounded-2xl p-4 md:p-6 shadow-md cursor-pointer transition-all hover:shadow-xl border bg-white border-slate-200 hover:border-emerald-200"
                 >
                   <div className="flex items-start justify-between gap-4 mb-4">
                     <div className="flex items-start gap-3 flex-1 min-w-0">
                       {/* User Avatar */}
                       <div
-                        className="w-12 h-12 md:w-14 md:h-14 rounded-full flex items-center justify-center flex-shrink-0 bg-emerald-900/30 text-emerald-400 font-bold text-lg md:text-xl"
+                        className="w-12 h-12 md:w-14 md:h-14 rounded-full flex items-center justify-center flex-shrink-0 bg-emerald-50 text-emerald-600 font-bold text-lg md:text-xl"
                       >
                         {request.userName?.[0]?.toUpperCase() || 'U'}
                       </div>
@@ -308,7 +309,7 @@ const MyActiveRequestsPage = () => {
                       {/* User Info */}
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1">
-                          <h3 className="text-base md:text-lg font-bold truncate text-white">
+                          <h3 className="text-base md:text-lg font-bold truncate text-slate-800">
                             {request.userName || getTranslatedText('Unknown User')}
                           </h3>
                           <span
@@ -318,10 +319,10 @@ const MyActiveRequestsPage = () => {
                             {statusConfig.icon} {statusConfig.label}
                           </span>
                         </div>
-                        <p className="text-sm md:text-base mb-2 text-gray-400">
+                        <p className="text-sm md:text-base mb-2 text-slate-500">
                           {getTranslatedText(request.scrapType) || getTranslatedText('Scrap')}
                         </p>
-                        <p className="text-lg md:text-xl font-bold text-emerald-400">
+                        <p className="text-lg md:text-xl font-bold text-emerald-600">
                           {request.estimatedEarnings || '₹0'}
                         </p>
                       </div>
@@ -329,16 +330,16 @@ const MyActiveRequestsPage = () => {
                   </div>
 
                   {/* Details Grid */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-4 pt-4 border-t border-white/10">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-4 pt-4 border-t border-slate-100">
                     {/* Location */}
                     {request.location?.address && (
                       <div className="flex items-start gap-2">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="text-gray-500 mt-0.5 shrink-0">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="text-slate-400 mt-0.5 shrink-0">
                           <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" fill="currentColor" />
                         </svg>
                         <div className="flex-1 min-w-0">
-                          <p className="text-xs text-gray-400 mb-0.5">{getTranslatedText("Location")}</p>
-                          <p className="text-sm font-medium truncate text-gray-300">
+                          <p className="text-xs text-slate-400 mb-0.5">{getTranslatedText("Location")}</p>
+                          <p className="text-sm font-medium truncate text-slate-600">
                             {request.location.address}
                           </p>
                         </div>
@@ -347,12 +348,12 @@ const MyActiveRequestsPage = () => {
 
                     {/* Pickup Time */}
                     <div className="flex items-start gap-2">
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="text-gray-500 mt-0.5 shrink-0">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="text-slate-400 mt-0.5 shrink-0">
                         <path d="M8 2v2M16 2v2M5 7h14M6 4h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                       </svg>
                       <div className="flex-1 min-w-0">
-                        <p className="text-xs text-gray-400 mb-0.5">{getTranslatedText("Pickup Time")}</p>
-                        <p className="text-sm font-medium truncate text-gray-300">
+                        <p className="text-xs text-slate-400 mb-0.5">{getTranslatedText("Pickup Time")}</p>
+                        <p className="text-sm font-medium truncate text-slate-600">
                           {pickupTime}
                         </p>
                       </div>
@@ -361,12 +362,12 @@ const MyActiveRequestsPage = () => {
                     {/* Distance */}
                     {request.distance && (
                       <div className="flex items-start gap-2">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="text-gray-500 mt-0.5 shrink-0">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="text-slate-400 mt-0.5 shrink-0">
                           <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
                         </svg>
                         <div className="flex-1 min-w-0">
-                          <p className="text-xs text-gray-400 mb-0.5">{getTranslatedText("Distance")}</p>
-                          <p className="text-sm font-medium text-gray-300">
+                          <p className="text-xs text-slate-400 mb-0.5">{getTranslatedText("Distance")}</p>
+                          <p className="text-sm font-medium text-slate-600">
                             {request.distance}
                           </p>
                         </div>
@@ -376,12 +377,12 @@ const MyActiveRequestsPage = () => {
                     {/* Accepted At */}
                     {request.acceptedAt && (
                       <div className="flex items-start gap-2">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="text-gray-500 mt-0.5 shrink-0">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="text-slate-400 mt-0.5 shrink-0">
                           <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                         </svg>
                         <div className="flex-1 min-w-0">
-                          <p className="text-xs text-gray-400 mb-0.5">{getTranslatedText("Accepted")}</p>
-                          <p className="text-sm font-medium text-gray-300">
+                          <p className="text-xs text-slate-400 mb-0.5">{getTranslatedText("Accepted")}</p>
+                          <p className="text-sm font-medium text-slate-600">
                             {new Date(request.acceptedAt).toLocaleDateString('en-IN', {
                               day: 'numeric',
                               month: 'short',
@@ -395,7 +396,7 @@ const MyActiveRequestsPage = () => {
                   </div>
 
                   {/* Action Button */}
-                  <div className="mt-4 pt-4 border-t border-white/10">
+                  <div className="mt-4 pt-4 border-t border-slate-100">
                     <button
                       onClick={(e) => {
                         e.stopPropagation();

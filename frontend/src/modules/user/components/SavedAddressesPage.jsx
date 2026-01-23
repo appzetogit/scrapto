@@ -194,22 +194,21 @@ const SavedAddressesPage = () => {
       exit={{ opacity: 0 }}
       transition={{ duration: 0.3 }}
       className="min-h-screen pb-20 md:pb-0"
-      style={{ backgroundColor: "#f4ebe2" }}>
-      {/* Header */}
+      style={{ background: "linear-gradient(to bottom, #72c688ff, #dcfce7)" }}>
       <div
         className="sticky top-0 z-40 px-4 md:px-6 lg:px-8 py-4 md:py-6"
-        style={{ backgroundColor: "#f4ebe2" }}>
+        style={{ background: "transparent" }}>
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
             <button
               onClick={() => navigate("/")}
-              className="p-2 rounded-full hover:opacity-70 transition-opacity"
-              style={{ color: "#64946e" }}>
+              className="p-2 rounded-full hover:opacity-70 transition-opacity bg-white/20 backdrop-blur-sm shadow-sm"
+              style={{ color: "#ffffff" }}>
               <FaTimes size={20} />
             </button>
             <h1
               className="text-xl md:text-2xl font-bold"
-              style={{ color: "#2d3748" }}>
+              style={{ color: "#ffffff" }}>
               {getTranslatedText("Saved Addresses")}
             </h1>
           </div>
@@ -220,11 +219,11 @@ const SavedAddressesPage = () => {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={handleAddNew}
-              className="flex items-center gap-2 px-4 py-2 rounded-lg font-semibold text-sm md:text-base text-white transition-all"
-              style={{ backgroundColor: "#64946e" }}
-              onMouseEnter={(e) => (e.target.style.backgroundColor = "#5a8263")}
+              className="flex items-center gap-2 px-4 py-2 rounded-lg font-semibold text-sm md:text-base text-white transition-all shadow-md hover:shadow-lg hover:bg-emerald-600"
+              style={{ backgroundColor: "#059669" }}
+              onMouseEnter={(e) => (e.target.style.backgroundColor = "#047857")}
               onMouseLeave={(e) =>
-                (e.target.style.backgroundColor = "#64946e")
+                (e.target.style.backgroundColor = "#059669")
               }>
               <FaPlus size={16} />
               <span className="hidden md:inline">
@@ -246,11 +245,11 @@ const SavedAddressesPage = () => {
               transition={{ duration: 0.3 }}
               className="mb-6">
               <div
-                className="rounded-2xl p-4 md:p-6 shadow-md"
-                style={{ backgroundColor: "#ffffff" }}>
+                className="rounded-2xl p-4 md:p-6 shadow-lg backdrop-blur-sm"
+                style={{ backgroundColor: "rgba(255, 255, 255, 0.95)" }}>
                 <h2
                   className="text-lg md:text-xl font-bold mb-4"
-                  style={{ color: "#2d3748" }}>
+                  style={{ color: "#1e293b" }}>
                   {editingId
                     ? getTranslatedText("Edit Address")
                     : getTranslatedText("Add New Address")}
@@ -261,7 +260,7 @@ const SavedAddressesPage = () => {
                   <div>
                     <label
                       className="block text-xs md:text-sm font-medium mb-2"
-                      style={{ color: "#4a5568" }}>
+                      style={{ color: "#475569" }}>
                       {getTranslatedText("Address Type")}
                     </label>
                     <div className="flex gap-2 md:gap-3">
@@ -273,15 +272,14 @@ const SavedAddressesPage = () => {
                             onClick={() =>
                               setFormData({ ...formData, type: type.value })
                             }
-                            className={`flex-1 flex flex-col items-center gap-2 p-3 md:p-4 rounded-xl border-2 transition-all ${
-                              formData.type === type.value
-                                ? "border-green-600"
-                                : "border-gray-200"
-                            }`}
+                            className={`flex-1 flex flex-col items-center gap-2 p-3 md:p-4 rounded-xl border-2 transition-all ${formData.type === type.value
+                              ? "border-emerald-500 bg-emerald-50/50"
+                              : "border-slate-200 hover:bg-slate-50"
+                              }`}
                             style={{
                               backgroundColor:
                                 formData.type === type.value
-                                  ? "rgba(100, 148, 110, 0.1)"
+                                  ? "#ecfdf5"
                                   : "#ffffff",
                             }}>
                             <IconComponent
@@ -289,8 +287,8 @@ const SavedAddressesPage = () => {
                               style={{
                                 color:
                                   formData.type === type.value
-                                    ? "#64946e"
-                                    : "#718096",
+                                    ? "#059669"
+                                    : "#64748b",
                               }}
                             />
                             <span
@@ -298,8 +296,8 @@ const SavedAddressesPage = () => {
                               style={{
                                 color:
                                   formData.type === type.value
-                                    ? "#64946e"
-                                    : "#718096",
+                                    ? "#059669"
+                                    : "#64748b",
                               }}>
                               {type.label}
                             </span>
@@ -313,7 +311,7 @@ const SavedAddressesPage = () => {
                   <div>
                     <label
                       className="block text-xs md:text-sm font-medium mb-1.5"
-                      style={{ color: "#4a5568" }}>
+                      style={{ color: "#475569" }}>
                       {getTranslatedText("Label")}{" "}
                       <span style={{ color: "#ef4444" }}>*</span>
                     </label>
@@ -324,20 +322,11 @@ const SavedAddressesPage = () => {
                         setFormData({ ...formData, label: e.target.value })
                       }
                       placeholder={getTranslatedText("e.g., Home, Office")}
-                      className="w-full px-3 py-2 md:px-4 md:py-2.5 rounded-lg text-sm md:text-base border transition-all focus:outline-none"
+                      className="w-full px-3 py-2 md:px-4 md:py-2.5 rounded-lg text-sm md:text-base border transition-all focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
                       style={{
-                        borderColor: "#e5ddd4",
-                        color: "#2d3748",
+                        borderColor: "#e2e8f0",
+                        color: "#1e293b",
                         backgroundColor: "#ffffff",
-                      }}
-                      onFocus={(e) => {
-                        e.target.style.borderColor = "#64946e";
-                        e.target.style.boxShadow =
-                          "0 0 0 2px rgba(100, 148, 110, 0.2)";
-                      }}
-                      onBlur={(e) => {
-                        e.target.style.borderColor = "#e5ddd4";
-                        e.target.style.boxShadow = "none";
                       }}
                     />
                   </div>
@@ -346,7 +335,7 @@ const SavedAddressesPage = () => {
                   <div>
                     <label
                       className="block text-xs md:text-sm font-medium mb-1.5"
-                      style={{ color: "#4a5568" }}>
+                      style={{ color: "#475569" }}>
                       {getTranslatedText("Address")}{" "}
                       <span style={{ color: "#ef4444" }}>*</span>
                     </label>
@@ -359,20 +348,11 @@ const SavedAddressesPage = () => {
                         "Street address, building, house no."
                       )}
                       rows={3}
-                      className="w-full px-3 py-2 md:px-4 md:py-2.5 rounded-lg text-sm md:text-base border transition-all focus:outline-none resize-none"
+                      className="w-full px-3 py-2 md:px-4 md:py-2.5 rounded-lg text-sm md:text-base border transition-all focus:outline-none resize-none focus:ring-2 focus:ring-emerald-500/20"
                       style={{
-                        borderColor: "#e5ddd4",
-                        color: "#2d3748",
+                        borderColor: "#e2e8f0",
+                        color: "#1e293b",
                         backgroundColor: "#ffffff",
-                      }}
-                      onFocus={(e) => {
-                        e.target.style.borderColor = "#64946e";
-                        e.target.style.boxShadow =
-                          "0 0 0 2px rgba(100, 148, 110, 0.2)";
-                      }}
-                      onBlur={(e) => {
-                        e.target.style.borderColor = "#e5ddd4";
-                        e.target.style.boxShadow = "none";
                       }}
                     />
                   </div>
@@ -382,7 +362,7 @@ const SavedAddressesPage = () => {
                     <div>
                       <label
                         className="block text-xs md:text-sm font-medium mb-1.5"
-                        style={{ color: "#4a5568" }}>
+                        style={{ color: "#475569" }}>
                         {getTranslatedText("City")}{" "}
                         <span style={{ color: "#ef4444" }}>*</span>
                       </label>
@@ -393,27 +373,18 @@ const SavedAddressesPage = () => {
                           setFormData({ ...formData, city: e.target.value })
                         }
                         placeholder={getTranslatedText("City")}
-                        className="w-full px-3 py-2 md:px-4 md:py-2.5 rounded-lg text-sm md:text-base border transition-all focus:outline-none"
+                        className="w-full px-3 py-2 md:px-4 md:py-2.5 rounded-lg text-sm md:text-base border transition-all focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
                         style={{
-                          borderColor: "#e5ddd4",
-                          color: "#2d3748",
+                          borderColor: "#e2e8f0",
+                          color: "#1e293b",
                           backgroundColor: "#ffffff",
-                        }}
-                        onFocus={(e) => {
-                          e.target.style.borderColor = "#64946e";
-                          e.target.style.boxShadow =
-                            "0 0 0 2px rgba(100, 148, 110, 0.2)";
-                        }}
-                        onBlur={(e) => {
-                          e.target.style.borderColor = "#e5ddd4";
-                          e.target.style.boxShadow = "none";
                         }}
                       />
                     </div>
                     <div>
                       <label
                         className="block text-xs md:text-sm font-medium mb-1.5"
-                        style={{ color: "#4a5568" }}>
+                        style={{ color: "#475569" }}>
                         {getTranslatedText("State")}{" "}
                         <span style={{ color: "#ef4444" }}>*</span>
                       </label>
@@ -424,20 +395,11 @@ const SavedAddressesPage = () => {
                           setFormData({ ...formData, state: e.target.value })
                         }
                         placeholder={getTranslatedText("State")}
-                        className="w-full px-3 py-2 md:px-4 md:py-2.5 rounded-lg text-sm md:text-base border transition-all focus:outline-none"
+                        className="w-full px-3 py-2 md:px-4 md:py-2.5 rounded-lg text-sm md:text-base border transition-all focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
                         style={{
-                          borderColor: "#e5ddd4",
-                          color: "#2d3748",
+                          borderColor: "#e2e8f0",
+                          color: "#1e293b",
                           backgroundColor: "#ffffff",
-                        }}
-                        onFocus={(e) => {
-                          e.target.style.borderColor = "#64946e";
-                          e.target.style.boxShadow =
-                            "0 0 0 2px rgba(100, 148, 110, 0.2)";
-                        }}
-                        onBlur={(e) => {
-                          e.target.style.borderColor = "#e5ddd4";
-                          e.target.style.boxShadow = "none";
                         }}
                       />
                     </div>
@@ -448,7 +410,7 @@ const SavedAddressesPage = () => {
                     <div>
                       <label
                         className="block text-xs md:text-sm font-medium mb-1.5"
-                        style={{ color: "#4a5568" }}>
+                        style={{ color: "#475569" }}>
                         {getTranslatedText("Pincode")}{" "}
                         <span style={{ color: "#ef4444" }}>*</span>
                       </label>
@@ -465,27 +427,18 @@ const SavedAddressesPage = () => {
                         }
                         placeholder={getTranslatedText("Pincode")}
                         maxLength={6}
-                        className="w-full px-3 py-2 md:px-4 md:py-2.5 rounded-lg text-sm md:text-base border transition-all focus:outline-none"
+                        className="w-full px-3 py-2 md:px-4 md:py-2.5 rounded-lg text-sm md:text-base border transition-all focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
                         style={{
-                          borderColor: "#e5ddd4",
-                          color: "#2d3748",
+                          borderColor: "#e2e8f0",
+                          color: "#1e293b",
                           backgroundColor: "#ffffff",
-                        }}
-                        onFocus={(e) => {
-                          e.target.style.borderColor = "#64946e";
-                          e.target.style.boxShadow =
-                            "0 0 0 2px rgba(100, 148, 110, 0.2)";
-                        }}
-                        onBlur={(e) => {
-                          e.target.style.borderColor = "#e5ddd4";
-                          e.target.style.boxShadow = "none";
                         }}
                       />
                     </div>
                     <div>
                       <label
                         className="block text-xs md:text-sm font-medium mb-1.5"
-                        style={{ color: "#4a5568" }}>
+                        style={{ color: "#475569" }}>
                         {getTranslatedText("Landmark (Optional)")}
                       </label>
                       <input
@@ -495,20 +448,11 @@ const SavedAddressesPage = () => {
                           setFormData({ ...formData, landmark: e.target.value })
                         }
                         placeholder={getTranslatedText("Nearby landmark")}
-                        className="w-full px-3 py-2 md:px-4 md:py-2.5 rounded-lg text-sm md:text-base border transition-all focus:outline-none"
+                        className="w-full px-3 py-2 md:px-4 md:py-2.5 rounded-lg text-sm md:text-base border transition-all focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
                         style={{
-                          borderColor: "#e5ddd4",
-                          color: "#2d3748",
+                          borderColor: "#e2e8f0",
+                          color: "#1e293b",
                           backgroundColor: "#ffffff",
-                        }}
-                        onFocus={(e) => {
-                          e.target.style.borderColor = "#64946e";
-                          e.target.style.boxShadow =
-                            "0 0 0 2px rgba(100, 148, 110, 0.2)";
-                        }}
-                        onBlur={(e) => {
-                          e.target.style.borderColor = "#e5ddd4";
-                          e.target.style.boxShadow = "none";
                         }}
                       />
                     </div>
@@ -528,14 +472,14 @@ const SavedAddressesPage = () => {
                       }
                       className="w-4 h-4 rounded border-2"
                       style={{
-                        accentColor: "#64946e",
-                        borderColor: formData.isDefault ? "#64946e" : "#e5ddd4",
+                        accentColor: "#059669",
+                        borderColor: formData.isDefault ? "#059669" : "#e2e8f0",
                       }}
                     />
                     <label
                       htmlFor="isDefault"
                       className="text-sm md:text-base cursor-pointer"
-                      style={{ color: "#4a5568" }}>
+                      style={{ color: "#475569" }}>
                       {getTranslatedText("Set as default address")}
                     </label>
                   </div>
@@ -544,31 +488,20 @@ const SavedAddressesPage = () => {
                   <div className="flex gap-3 pt-2">
                     <button
                       onClick={handleCancel}
-                      className="flex-1 py-2.5 md:py-3 px-4 rounded-lg font-semibold text-sm md:text-base transition-all"
+                      className="flex-1 py-2.5 md:py-3 px-4 rounded-lg font-semibold text-sm md:text-base transition-all hover:bg-slate-50"
                       style={{
                         backgroundColor: "#ffffff",
-                        border: "1px solid rgba(100, 148, 110, 0.3)",
-                        color: "#64946e",
+                        border: "1px solid #e2e8f0",
+                        color: "#64748b",
                       }}
-                      onMouseEnter={(e) => {
-                        e.target.style.backgroundColor =
-                          "rgba(100, 148, 110, 0.1)";
-                      }}
-                      onMouseLeave={(e) => {
-                        e.target.style.backgroundColor = "#ffffff";
-                      }}>
+                    >
                       {getTranslatedText("Cancel")}
                     </button>
                     <button
                       onClick={handleSave}
-                      className="flex-1 py-2.5 md:py-3 px-4 rounded-lg font-semibold text-sm md:text-base text-white transition-all flex items-center justify-center gap-2"
-                      style={{ backgroundColor: "#64946e" }}
-                      onMouseEnter={(e) => {
-                        e.target.style.backgroundColor = "#5a8263";
-                      }}
-                      onMouseLeave={(e) => {
-                        e.target.style.backgroundColor = "#64946e";
-                      }}>
+                      className="flex-1 py-2.5 md:py-3 px-4 rounded-lg font-semibold text-sm md:text-base text-white transition-all flex items-center justify-center gap-2 shadow-md hover:shadow-lg hover:bg-emerald-600"
+                      style={{ backgroundColor: "#059669" }}
+                    >
                       <FaCheck size={14} />
                       {getTranslatedText("Save Address")}
                     </button>
@@ -585,27 +518,27 @@ const SavedAddressesPage = () => {
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="rounded-2xl p-8 md:p-12 text-center"
-              style={{ backgroundColor: "#ffffff" }}>
+              className="rounded-2xl p-8 md:p-12 text-center shadow-lg backdrop-blur-sm"
+              style={{ backgroundColor: "rgba(255, 255, 255, 0.95)" }}>
               <HiLocationMarker
                 size={48}
                 className="mx-auto mb-4"
-                style={{ color: "#a0aec0" }}
+                style={{ color: "#94a3b8" }}
               />
               <h3
                 className="text-lg md:text-xl font-bold mb-2"
-                style={{ color: "#2d3748" }}>
+                style={{ color: "#1e293b" }}>
                 {getTranslatedText("No saved addresses")}
               </h3>
               <p
                 className="text-sm md:text-base mb-4"
-                style={{ color: "#718096" }}>
+                style={{ color: "#64748b" }}>
                 {getTranslatedText("Add your first address to get started")}
               </p>
               <button
                 onClick={handleAddNew}
-                className="px-6 py-3 rounded-lg font-semibold text-white transition-all"
-                style={{ backgroundColor: "#64946e" }}>
+                className="px-6 py-3 rounded-lg font-semibold text-white transition-all shadow-md hover:shadow-lg hover:bg-emerald-600"
+                style={{ backgroundColor: "#059669" }}>
                 <FaPlus className="inline mr-2" />
                 Add Address
               </button>
@@ -621,20 +554,20 @@ const SavedAddressesPage = () => {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.3, delay: index * 0.05 }}
-                  className="rounded-xl p-4 md:p-6"
+                  className="rounded-xl p-4 md:p-6 shadow-sm hover:shadow-md transition-shadow backdrop-blur-sm"
                   style={{
-                    backgroundColor: "#ffffff",
+                    backgroundColor: "rgba(255, 255, 255, 0.9)",
                     border: address.isDefault
-                      ? "2px solid #64946e"
-                      : "1px solid rgba(100, 148, 110, 0.15)",
+                      ? "2px solid #10b981"
+                      : "1px solid #e2e8f0",
                   }}>
                   <div className="flex items-start gap-3 md:gap-4">
                     {/* Icon */}
                     <div
                       className="w-12 h-12 md:w-14 md:h-14 rounded-full flex items-center justify-center flex-shrink-0"
                       style={{
-                        backgroundColor: "rgba(100, 148, 110, 0.1)",
-                        color: "#64946e",
+                        backgroundColor: "#ecfdf5",
+                        color: "#059669",
                       }}>
                       <TypeIcon size={20} />
                     </div>
@@ -646,15 +579,15 @@ const SavedAddressesPage = () => {
                           <div className="flex items-center gap-2 mb-1">
                             <h3
                               className="font-bold text-base md:text-lg"
-                              style={{ color: "#2d3748" }}>
+                              style={{ color: "#1e293b" }}>
                               {address.label}
                             </h3>
                             {address.isDefault && (
                               <span
-                                className="text-xs px-2 py-0.5 rounded-full"
+                                className="text-xs px-2 py-0.5 rounded-full font-medium"
                                 style={{
-                                  backgroundColor: "rgba(100, 148, 110, 0.1)",
-                                  color: "#64946e",
+                                  backgroundColor: "#d1fae5",
+                                  color: "#047857",
                                 }}>
                                 Default
                               </span>
@@ -662,18 +595,18 @@ const SavedAddressesPage = () => {
                           </div>
                           <p
                             className="text-sm md:text-base mb-1"
-                            style={{ color: "#4a5568" }}>
+                            style={{ color: "#475569" }}>
                             {address.address}
                           </p>
                           <p
                             className="text-sm md:text-base mb-1"
-                            style={{ color: "#718096" }}>
+                            style={{ color: "#64748b" }}>
                             {address.city}, {address.state} - {address.pincode}
                           </p>
                           {address.landmark && (
                             <p
                               className="text-xs md:text-sm"
-                              style={{ color: "#a0aec0" }}>
+                              style={{ color: "#94a3b8" }}>
                               Near {address.landmark}
                             </p>
                           )}
@@ -685,55 +618,37 @@ const SavedAddressesPage = () => {
                         {!address.isDefault && (
                           <button
                             onClick={() => handleSetDefault(address.id)}
-                            className="px-3 py-1.5 rounded-lg text-xs md:text-sm font-medium transition-all"
+                            className="px-3 py-1.5 rounded-lg text-xs md:text-sm font-medium transition-all hover:bg-emerald-50"
                             style={{
-                              backgroundColor: "rgba(100, 148, 110, 0.1)",
-                              color: "#64946e",
+                              backgroundColor: "transparent",
+                              border: "1px solid #10b981",
+                              color: "#059669",
                             }}
-                            onMouseEnter={(e) => {
-                              e.target.style.backgroundColor =
-                                "rgba(100, 148, 110, 0.2)";
-                            }}
-                            onMouseLeave={(e) => {
-                              e.target.style.backgroundColor =
-                                "rgba(100, 148, 110, 0.1)";
-                            }}>
+                          >
                             Set as Default
                           </button>
                         )}
                         <button
                           onClick={() => handleEdit(address)}
-                          className="px-3 py-1.5 rounded-lg text-xs md:text-sm font-medium transition-all flex items-center gap-1"
+                          className="px-3 py-1.5 rounded-lg text-xs md:text-sm font-medium transition-all flex items-center gap-1 hover:bg-slate-50"
                           style={{
-                            backgroundColor: "rgba(100, 148, 110, 0.1)",
-                            color: "#64946e",
+                            backgroundColor: "transparent",
+                            border: "1px solid #cbd5e1",
+                            color: "#475569",
                           }}
-                          onMouseEnter={(e) => {
-                            e.target.style.backgroundColor =
-                              "rgba(100, 148, 110, 0.2)";
-                          }}
-                          onMouseLeave={(e) => {
-                            e.target.style.backgroundColor =
-                              "rgba(100, 148, 110, 0.1)";
-                          }}>
+                        >
                           <FaEdit size={12} />
                           Edit
                         </button>
                         <button
                           onClick={() => handleDelete(address.id)}
-                          className="px-3 py-1.5 rounded-lg text-xs md:text-sm font-medium transition-all flex items-center gap-1"
+                          className="px-3 py-1.5 rounded-lg text-xs md:text-sm font-medium transition-all flex items-center gap-1 hover:bg-red-50"
                           style={{
-                            backgroundColor: "rgba(239, 68, 68, 0.1)",
+                            backgroundColor: "transparent",
+                            border: "1px solid #fecaca",
                             color: "#ef4444",
                           }}
-                          onMouseEnter={(e) => {
-                            e.target.style.backgroundColor =
-                              "rgba(239, 68, 68, 0.2)";
-                          }}
-                          onMouseLeave={(e) => {
-                            e.target.style.backgroundColor =
-                              "rgba(239, 68, 68, 0.1)";
-                          }}>
+                        >
                           <FaTrash size={12} />
                           Delete
                         </button>

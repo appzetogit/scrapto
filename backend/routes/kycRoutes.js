@@ -11,9 +11,9 @@ router.post(
   protect,
   isScrapper,
   uploadFields([
-    { name: 'aadhaar', maxCount: 2 },
+    { name: 'aadhaar', maxCount: 1 },
     { name: 'selfie', maxCount: 1 },
-    { name: 'license', maxCount: 2 },
+    { name: 'license', maxCount: 1 },
   ]),
   submitKyc
 );

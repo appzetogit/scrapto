@@ -85,13 +85,8 @@ const KYCStatusPage = () => {
               }
             }
 
-            setTimeout(() => {
-              if (isActive) {
-                navigate('/scrapper', { replace: true });
-              } else {
-                navigate('/scrapper/subscription', { replace: true });
-              }
-            }, 1000);
+            // Removed auto-redirect for verified users so they can view the status status.
+            // Users can manually proceed using the buttons provided.
           } else if (kyc.status === 'rejected') {
             // Stay here, user sees rejected status and button to resubmit
           }

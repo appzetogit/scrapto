@@ -162,7 +162,7 @@ const ReferAndEarn = () => {
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-white rounded-2xl shadow-lg p-4 md:p-6">
+        className="rounded-2xl shadow-lg p-4 md:p-6 backdrop-blur-sm" style={{ backgroundColor: "rgba(255, 255, 255, 0.95)" }}>
         <div className="flex items-center gap-4 mb-4">
           <div
             className="w-16 h-16 rounded-full flex items-center justify-center"
@@ -231,7 +231,7 @@ const ReferAndEarn = () => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
-        className="bg-white rounded-2xl shadow-lg p-4 md:p-6">
+        className="rounded-2xl shadow-lg p-4 md:p-6 backdrop-blur-sm" style={{ backgroundColor: "rgba(255, 255, 255, 0.95)" }}>
         <h2
           className="text-lg md:text-xl font-bold mb-4"
           style={{ color: "#2d3748" }}>
@@ -350,7 +350,7 @@ const ReferAndEarn = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.15 }}
-          className="bg-white rounded-2xl shadow-lg p-4 md:p-6">
+          className="rounded-2xl shadow-lg p-4 md:p-6 backdrop-blur-sm" style={{ backgroundColor: "rgba(255, 255, 255, 0.95)" }}>
           <div className="flex items-center justify-between">
             <div>
               <h3
@@ -400,7 +400,7 @@ const ReferAndEarn = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="bg-white rounded-2xl shadow-lg p-4 md:p-6">
+          className="rounded-2xl shadow-lg p-4 md:p-6 backdrop-blur-sm" style={{ backgroundColor: "rgba(255, 255, 255, 0.95)" }}>
           <div className="flex items-center gap-3 mb-4">
             <div
               className="w-12 h-12 rounded-xl flex items-center justify-center"
@@ -422,7 +422,7 @@ const ReferAndEarn = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
-          className="bg-white rounded-2xl shadow-lg p-4 md:p-6">
+          className="rounded-2xl shadow-lg p-4 md:p-6 backdrop-blur-sm" style={{ backgroundColor: "rgba(255, 255, 255, 0.95)" }}>
           <div className="flex items-center gap-3 mb-4">
             <div
               className="w-12 h-12 rounded-xl flex items-center justify-center"
@@ -447,7 +447,7 @@ const ReferAndEarn = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.35 }}
-          className="bg-white rounded-2xl shadow-lg p-4 md:p-6">
+          className="rounded-2xl shadow-lg p-4 md:p-6 backdrop-blur-sm" style={{ backgroundColor: "rgba(255, 255, 255, 0.95)" }}>
           <div className="flex items-center gap-3 mb-4">
             <FaTrophy className="text-2xl" style={{ color: tierInfo.color }} />
             <h2
@@ -480,7 +480,7 @@ const ReferAndEarn = () => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.4 }}
-        className="bg-white rounded-2xl shadow-lg p-4 md:p-6">
+        className="rounded-2xl shadow-lg p-4 md:p-6 backdrop-blur-sm" style={{ backgroundColor: "rgba(255, 255, 255, 0.95)" }}>
         <h2
           className="text-lg md:text-xl font-bold mb-4"
           style={{ color: "#2d3748" }}>
@@ -550,7 +550,7 @@ const ReferAndEarn = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5 }}
-          className="bg-white rounded-2xl shadow-lg p-4 md:p-6">
+          className="rounded-2xl shadow-lg p-4 md:p-6 backdrop-blur-sm" style={{ backgroundColor: "rgba(255, 255, 255, 0.95)" }}>
           <h2
             className="text-lg md:text-xl font-bold mb-4"
             style={{ color: "#2d3748" }}>

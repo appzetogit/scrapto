@@ -135,22 +135,22 @@ const ServiceDetailsPage = () => {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       className="min-h-screen w-full flex flex-col"
-      style={{ backgroundColor: "#f4ebe2" }}>
+      style={{ background: "linear-gradient(to bottom, #72c688ff, #dcfce7)" }}>
       {/* Header */}
-      <div className="flex items-center gap-4 p-4 border-b bg-white/80 backdrop-blur-md sticky top-0 z-10">
+      <div className="flex items-center gap-4 p-4 border-b border-white/20 bg-white/20 backdrop-blur-sm sticky top-0 z-10">
         <button
           onClick={() => navigate("/categories")}
-          className="p-2 rounded-full hover:bg-gray-100">
+          className="p-2 rounded-full hover:bg-white/20 text-white transition-colors">
           <FaArrowLeft />
         </button>
-        <h1 className="text-lg font-bold text-gray-800">
+        <h1 className="text-lg font-bold text-white">
           {getTranslatedText("Service Details")}
         </h1>
       </div>
 
       <div className="flex-1 overflow-y-auto p-4 pb-24">
         {/* Service Card */}
-        <div className="bg-white p-4 rounded-xl shadow-sm mb-6 flex items-center gap-4">
+        <div className="bg-white/95 backdrop-blur-sm p-4 rounded-xl shadow-sm mb-6 flex items-center gap-4">
           <div className="w-16 h-16 bg-green-100 rounded-lg flex items-center justify-center text-2xl">
             🧹
           </div>
@@ -162,7 +162,7 @@ const ServiceDetailsPage = () => {
         </div>
 
         {/* Description Input */}
-        <div className="bg-white p-4 rounded-xl shadow-sm mb-6">
+        <div className="bg-white/95 backdrop-blur-sm p-4 rounded-xl shadow-sm mb-6">
           <label className="block text-gray-700 font-semibold mb-2">
             {getTranslatedText("What needs cleaning?")}
           </label>
@@ -178,7 +178,7 @@ const ServiceDetailsPage = () => {
         </div>
 
         {/* Image Upload */}
-        <div className="bg-white p-4 rounded-xl shadow-sm mb-6">
+        <div className="bg-white/95 backdrop-blur-sm p-4 rounded-xl shadow-sm mb-6">
           <label className="block text-gray-700 font-semibold mb-2">
             {getTranslatedText("Add Photos (Optional)")}
           </label>
@@ -220,7 +220,7 @@ const ServiceDetailsPage = () => {
       </div>
 
       {/* Footer */}
-      <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t">
+      <div className="fixed bottom-0 left-0 right-0 p-4 bg-white/90 backdrop-blur-md border-t border-white/20">
         <button
           onClick={handleContinue}
           disabled={isUploading}

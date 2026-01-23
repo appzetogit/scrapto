@@ -72,17 +72,17 @@ const ReviewListPage = () => {
   }
 
   return (
-    <div className="min-h-screen pb-10" style={{ backgroundColor: "#f4ebe2" }}>
+    <div className="min-h-screen pb-10" style={{ background: "linear-gradient(to bottom, #72c688ff, #dcfce7)" }}>
       <div
-        className="sticky top-0 z-40 px-4 py-4 shadow-sm"
-        style={{ backgroundColor: "#ffffff" }}>
+        className="sticky top-0 z-40 px-4 py-4 shadow-sm backdrop-blur-sm"
+        style={{ backgroundColor: "rgba(255, 255, 255, 0.2)" }}>
         <div className="max-w-2xl mx-auto flex items-center gap-4">
           <button
             onClick={() => navigate(-1)}
-            className="p-2 hover:bg-gray-100 rounded-full">
-            <FaArrowLeft size={20} style={{ color: "#2d3748" }} />
+            className="p-2 hover:bg-white/20 rounded-full transition-colors">
+            <FaArrowLeft size={20} style={{ color: "#ffffff" }} />
           </button>
-          <h1 className="text-xl font-bold" style={{ color: "#2d3748" }}>
+          <h1 className="text-xl font-bold" style={{ color: "#ffffff" }}>
             {getTranslatedText("My Reviews")}
           </h1>
         </div>
