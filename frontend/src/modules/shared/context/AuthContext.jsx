@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { authAPI } from '../utils/api';
+import { registerFCMToken } from '../../../services/pushNotificationService';
 
 const AuthContext = createContext();
 
@@ -76,6 +77,8 @@ export const AuthProvider = ({ children }) => {
         tokenLength: token.length,
         tokenPreview: `${token.substring(0, 20)}...`
       });
+      // Register FCM Token
+      registerFCMToken(true).catch(err => console.error('FCM registration failed', err));
     } else {
       console.warn('⚠️ No token provided to login function');
     }
@@ -87,4 +90,3 @@ export const AuthProvider = ({ children }) => {
     </AuthContext.Provider>
   );
 };
-

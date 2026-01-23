@@ -24,7 +24,9 @@ const ChatListPage = () => {
     "Unknown User",
     "No messages yet",
     "Order:",
-    "U"
+    "U",
+    "Loading...",
+    "Load More Chats"
   ];
   const { getTranslatedText } = usePageTranslation(staticTexts);
   const navigate = useNavigate();
@@ -41,34 +43,70 @@ const ChatListPage = () => {
       return;
     }
 
-    loadChats();
+    // Initial load
+    setPage(1);
+    loadChats(1, true);
 
-    // Refresh chats every 30 seconds
+    // Refresh only first page periodically if we are on page 1
     const interval = setInterval(() => {
-      loadChats();
+      if (page === 1) {
+        loadChats(1, true, true); // silent refresh
+      }
     }, 30000);
 
     return () => clearInterval(interval);
   }, [isAuthenticated, user, navigate, filter]);
 
-  const loadChats = async () => {
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
+
+  const loadChats = async (pageNum = 1, reset = false, silent = false) => {
     try {
-      setError(null);
-      const query = `status=${filter}&limit=50`;
+      if (reset) {
+        if (!silent) setLoading(true);
+        setError(null);
+      } else {
+        setLoadingMore(true);
+      }
+
+      const limit = 20;
+      const query = `status=${filter}&limit=${limit}&page=${pageNum}`;
       const response = await chatAPI.getMyChats(query);
 
       if (response.success && response.data?.chats) {
-        setChats(response.data.chats);
+        const newChats = response.data.chats;
+
+        if (reset) {
+          setChats(newChats);
+        } else {
+          setChats(prev => [...prev, ...newChats]);
+        }
+
+        setHasMore(newChats.length === limit);
+        setPage(pageNum);
       } else {
-        setError(getTranslatedText('Failed to load chats'));
-        setChats([]);
+        if (reset) {
+          setError(getTranslatedText('Failed to load chats'));
+          setChats([]);
+        }
+        setHasMore(false);
       }
     } catch (err) {
       console.error('Error loading chats:', err);
-      setError(err.message || getTranslatedText('Failed to load chats'));
-      setChats([]);
+      if (reset) {
+        setError(err.message || getTranslatedText('Failed to load chats'));
+        setChats([]);
+      }
     } finally {
-      setLoading(false);
+      if (reset) setLoading(false);
+      setLoadingMore(false);
+    }
+  };
+
+  const handleLoadMore = () => {
+    if (!loadingMore && hasMore) {
+      loadChats(page + 1, false);
     }
   };
 
@@ -236,6 +274,21 @@ const ChatListPage = () => {
                 </motion.div>
               );
             })}
+
+            {hasMore && !searchQuery && (
+              <div className="pt-4 text-center">
+                <button
+                  onClick={handleLoadMore}
+                  disabled={loadingMore}
+                  className="px-6 py-2 rounded-full font-semibold text-sm transition-all bg-zinc-800 text-white hover:bg-zinc-700 disabled:opacity-50"
+                >
+                  {loadingMore ? (
+                    <FaSpinner className="animate-spin inline mr-2" />
+                  ) : null}
+                  {loadingMore ? getTranslatedText("Loading...") : getTranslatedText("Load More Chats")}
+                </button>
+              </div>
+            )}
           </div>
         )}
       </div>

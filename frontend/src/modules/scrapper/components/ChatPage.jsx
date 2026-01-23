@@ -73,7 +73,10 @@ const ChatPage = () => {
           // Load messages for the chat
           const messagesResponse = await chatAPI.getMessages(currentChatId);
           if (messagesResponse.success && messagesResponse.data?.messages) {
-            setMessages(messagesResponse.data.messages || []);
+            const msgs = messagesResponse.data.messages || [];
+            setMessages(msgs);
+            setHasMoreMessages(msgs.length >= 50);
+            currentPageRef.current = 1;
           }
         } else {
           throw new Error('Failed to create/get chat');
@@ -81,9 +84,14 @@ const ChatPage = () => {
       } else if (currentChatId) {
         // Get existing chat - first get chat info, then messages
         chatIdRef.current = currentChatId;
+        currentPageRef.current = 1; // Reset page
+
         const messagesResponse = await chatAPI.getMessages(currentChatId);
         if (messagesResponse.success && messagesResponse.data?.messages) {
-          setMessages(messagesResponse.data.messages || []);
+          const msgs = messagesResponse.data.messages || [];
+          setMessages(msgs);
+          setHasMoreMessages(msgs.length >= 50); // Check if we might have more pages
+
           // Try to get chat info from order if available
           if (orderId) {
             const chatResponse = await chatAPI.getOrCreate(orderId);

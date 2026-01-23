@@ -75,7 +75,7 @@ export const submitKyc = async (req, res) => {
       }
     } catch (uploadError) {
       logger.error('Error uploading KYC documents:', uploadError);
-      return sendError(res, 'Failed to upload documents. Please try again.', 500);
+      return sendError(res, `Failed to upload documents: ${uploadError.message}`, 500);
     }
 
     // 4. Update Database

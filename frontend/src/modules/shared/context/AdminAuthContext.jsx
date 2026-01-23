@@ -1,4 +1,5 @@
 import { createContext, useContext, useState } from 'react';
+import { registerFCMToken } from '../../../services/pushNotificationService';
 
 const AdminAuthContext = createContext();
 
@@ -25,6 +26,8 @@ export const AdminAuthProvider = ({ children }) => {
     setAdmin(adminData);
     localStorage.setItem('adminAuthenticated', 'true');
     localStorage.setItem('adminUser', JSON.stringify(adminData));
+    // Register FCM Token
+    registerFCMToken(true).catch(err => console.error('FCM registration failed', err));
   };
 
   const logout = () => {
@@ -40,4 +43,3 @@ export const AdminAuthProvider = ({ children }) => {
     </AdminAuthContext.Provider>
   );
 };
-

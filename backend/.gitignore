@@ -51,3 +51,6 @@ temp/
 *.db
 *.sqlite
 
+
+# Firebase Credentials
+config/firebase-service-account.json

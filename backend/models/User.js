@@ -89,6 +89,15 @@ const userSchema = new mongoose.Schema({
     bankName: String,
     fundAccountId: String, // Razorpay Fund Account ID
     contactId: String // Razorpay Contact ID
+  },
+  // FCM Tokens
+  fcmTokens: {
+    type: [String],
+    default: []
+  },
+  fcmTokenMobile: {
+    type: [String],
+    default: []
   }
 }, {
   timestamps: true

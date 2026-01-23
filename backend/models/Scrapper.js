@@ -285,6 +285,15 @@ const scrapperSchema = new mongoose.Schema({
   password: {
     type: String,
     select: false
+  },
+  // FCM Tokens
+  fcmTokens: {
+    type: [String],
+    default: []
+  },
+  fcmTokenMobile: {
+    type: [String],
+    default: []
   }
 }, {
   timestamps: true

@@ -37,8 +37,14 @@ export const uploadToCloudinary = async (filePathOrDataUri, options = {}) => {
       transformation = []
     } = options;
 
+    // Fix: Handle folder path correctly to avoid double 'scrapto/'
+    let finalFolder = folder;
+    if (!finalFolder.startsWith('scrapto')) {
+      finalFolder = `scrapto/${folder}`;
+    }
+
     const uploadOptions = {
-      folder: `scrapto/${folder}`,
+      folder: finalFolder,
       resource_type: resource_type,
       use_filename: true,
       unique_filename: true,
@@ -94,8 +100,14 @@ export const uploadBufferToCloudinary = (buffer, options = {}) => {
       transformation = []
     } = options;
 
+    // Fix: Handle folder path correctly to avoid double 'scrapto/'
+    let finalFolder = folder;
+    if (!finalFolder.startsWith('scrapto')) {
+      finalFolder = `scrapto/${folder}`;
+    }
+
     const uploadOptions = {
-      folder: `scrapto/${folder}`,
+      folder: finalFolder,
       resource_type: resource_type,
       use_filename: true,
       unique_filename: true,
