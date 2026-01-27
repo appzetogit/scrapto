@@ -11,6 +11,7 @@ import {
   FaArrowLeft,
 } from "react-icons/fa";
 import { usePageTranslation } from "../../../../hooks/usePageTranslation";
+import { walletService } from "../../../shared/services/wallet.service";
 
 const ServiceConfirmationPage = () => {
   const navigate = useNavigate();
@@ -39,6 +40,18 @@ const ServiceConfirmationPage = () => {
   const [serviceDetails, setServiceDetails] = useState(null);
   const [addressData, setAddressData] = useState(null);
   const [pickupSlot, setPickupSlot] = useState(null);
+  const [walletBalance, setWalletBalance] = useState(0);
+
+  useEffect(() => {
+    // Fetch wallet balance
+    if (user) {
+      walletService.getWalletProfile()
+        .then(data => {
+          setWalletBalance(data.balance || 0);
+        })
+        .catch(err => console.error("Failed to fetch wallet balance:", err));
+    }
+  }, [user]);
 
   useEffect(() => {
     const storedDetails = sessionStorage.getItem("serviceDetails");
@@ -59,6 +72,17 @@ const ServiceConfirmationPage = () => {
     if (!user) {
       alert(getTranslatedText("Please login to continue."));
       navigate(getTranslatedText("/auth/login"));
+      return;
+    }
+
+    // Minimum Balance Check
+    if (walletBalance < 100) {
+      const confirmRecharge = window.confirm(
+        "Insufficient wallet balance. Minimum ₹100 required to book a cleaning service. Do you want to recharge now?"
+      );
+      if (confirmRecharge) {
+        navigate('/wallet');
+      }
       return;
     }
 
@@ -102,7 +126,14 @@ const ServiceConfirmationPage = () => {
       });
     } catch (error) {
       console.error(getTranslatedText("Booking failed:"), error);
-      alert(getTranslatedText("Failed to book service. Please try again."));
+
+      // Handle backend insufficient balance error gracefully if frontend check is bypassed
+      if (error.response && error.response.status === 403) {
+        alert("Insufficient wallet balance. Please recharge your wallet to continue.");
+        navigate('/wallet');
+      } else {
+        alert(getTranslatedText("Failed to book service. Please try again."));
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -182,6 +213,17 @@ const ServiceConfirmationPage = () => {
       </div>
 
       <div className="fixed bottom-0 left-0 right-0 p-4 bg-white/90 backdrop-blur-md border-t border-white/20">
+        <div className="flex justify-between items-center mb-3 px-1">
+          <span className="text-sm text-gray-600">Wallet Balance:</span>
+          <span className={`font-bold ${walletBalance < 100 ? 'text-red-500' : 'text-green-600'}`}>
+            ₹{walletBalance.toFixed(2)}
+          </span>
+        </div>
+        {walletBalance < 100 && (
+          <p className="text-xs text-red-500 mb-2 text-center">
+            Minimum ₹100 required in wallet.
+          </p>
+        )}
         <button
           onClick={handleConfirm}
           disabled={isSubmitting}

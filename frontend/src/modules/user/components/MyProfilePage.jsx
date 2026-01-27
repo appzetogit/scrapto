@@ -535,7 +535,7 @@ const MyProfilePage = () => {
                     {getTranslatedText("Wallet Balance")}
                   </h3>
                   <button
-                    onClick={() => navigate('/user/wallet')}
+                    onClick={() => navigate('/wallet')}
                     className="text-xs md:text-sm font-medium hover:underline text-white/90"
                   >
                     {getTranslatedText("View All")}

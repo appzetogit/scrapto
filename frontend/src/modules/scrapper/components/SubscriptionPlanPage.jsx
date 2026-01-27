@@ -48,7 +48,7 @@ const SubscriptionPlanPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [currentSubscription, setCurrentSubscription] = useState(null);
-  const [planType, setPlanType] = useState('market_price'); // Default to market value
+  const [planType, setPlanType] = useState('general'); // Default to platform access
 
   // Check if user is authenticated as scrapper
   useEffect(() => {
@@ -214,7 +214,6 @@ const SubscriptionPlanPage = () => {
               console.error('Error processing milestone:', err);
             }
 
-            alert(getTranslatedText('Subscription activated successfully!'));
             navigate('/scrapper', { replace: true });
           } catch (err) {
             console.error('Verification failed', err);
@@ -309,7 +308,7 @@ const SubscriptionPlanPage = () => {
           <h1 className="text-2xl md:text-3xl font-bold mb-2 text-white">
             {isTabActive ? getTranslatedText('Manage Your Subscription') : getTranslatedText('Choose Your Plan')}
           </h1>
-          <div className="flex justify-center gap-4 mt-4 mb-6">
+          <div className="flex justify-center gap-4 mt-4 mb-6" style={{ display: 'none' }}>
             <button
               onClick={() => { setPlanType('general'); setSelectedPlan(null); }}
               className={`px-4 py-2 rounded-full font-semibold transition-colors ${planType === 'general' ? 'bg-emerald-600 text-white' : 'bg-zinc-900 text-gray-400'}`}

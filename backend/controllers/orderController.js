@@ -28,6 +28,19 @@ export const createOrder = asyncHandler(async (req, res) => {
   } = req.body;
   const userId = req.user.id;
 
+  // New Wallet Check for Cleaning Service
+  if (orderType === 'cleaning_service') {
+    const user = await User.findById(userId);
+    if (!user) {
+      return sendError(res, 'User not found', 404);
+    }
+
+    // Check if user has minimum balance (₹100)
+    if (!user.wallet || user.wallet.balance < 100) {
+      return sendError(res, 'Insufficient wallet balance. Minimum ₹100 required to book a cleaning service. Please recharge your wallet.', 403);
+    }
+  }
+
   // Calculate totals
   let totalWeight = 0;
   let totalAmount = 0;
@@ -306,7 +319,42 @@ export const updateOrderStatus = asyncHandler(async (req, res) => {
     order.completedDate = new Date();
 
     // Commission Deduction Logic (1%)
-    if (order.scrapper) {
+    // Case A: Cleaning Service (User pays 1 Rupee commission)
+    if (order.orderType === 'cleaning_service') {
+      const user = await User.findById(order.user);
+      if (user) {
+        const commissionAmount = 1; // Fixed ₹1 commission per request
+        const balanceBefore = user.wallet.balance;
+
+        // Deduct from wallet
+        user.wallet.balance -= commissionAmount;
+        await user.save();
+
+        const balanceAfter = user.wallet.balance;
+
+        // Log the commission transaction
+        await WalletTransaction.create({
+          trxId: `TRX-COMM-${Date.now()}-${order._id.toString().slice(-4)}`,
+          user: user._id,
+          userType: 'User',
+          amount: commissionAmount,
+          type: 'DEBIT',
+          balanceBefore: balanceBefore,
+          balanceAfter: balanceAfter,
+          category: 'COMMISSION',
+          status: 'SUCCESS',
+          description: `Service Fee (₹1) for Cleaning Request #${order._id}`,
+          orderId: order._id,
+          gateway: {
+            provider: 'SYSTEM'
+          }
+        });
+
+        logger.info(`[Commission] Deducted ₹${commissionAmount} from User ${user._id} for Cleaning Order ${order._id}. New Balance: ${balanceAfter}`);
+      }
+    }
+    // Case B: Scrap Sell (Scrapper pays 1 Rupee commission)
+    else if (order.scrapper) {
       const scrapper = await Scrapper.findById(order.scrapper);
       if (scrapper) {
         const commissionAmount = 1; // Fixed ₹1 commission per request

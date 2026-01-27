@@ -24,7 +24,7 @@ import ServiceDetailsPage from "./components/ServiceBookingFlow/ServiceDetailsPa
 import ServiceAddressPage from "./components/ServiceBookingFlow/ServiceAddressPage";
 import ServiceSchedulePage from "./components/ServiceBookingFlow/ServiceSchedulePage";
 import ServiceConfirmationPage from "./components/ServiceBookingFlow/ServiceConfirmationPage";
-import WalletPage from "./components/WalletPage";
+import UserWallet from "./components/UserWallet";
 import TrackOrderPage from "./components/TrackOrderPage";
 
 import { FaHome, FaList, FaRegComments, FaUser } from "react-icons/fa";
@@ -82,7 +82,7 @@ const UserModule = () => {
         <Route path="/chats" element={<ChatListPage />} />
         <Route path="/chat/:chatId" element={<ChatPage />} />
         <Route path="/chat" element={<ChatPage />} />
-        <Route path="/user/wallet" element={<WalletPage />} />
+        <Route path="/wallet" element={<UserWallet />} />
         <Route path="/my-profile" element={<MyProfilePage />} />
         <Route path="/saved-addresses" element={<SavedAddressesPage />} />
         <Route path="/my-requests" element={<MyRequestsPage />} />
