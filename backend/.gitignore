@@ -54,3 +54,5 @@ temp/
 
 # Firebase Credentials
 config/firebase-service-account.json
+config/scrapto-eedb1-firebase-adminsdk-fbsvc-a34416a973.json
+
