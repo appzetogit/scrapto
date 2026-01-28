@@ -59,3 +59,59 @@ export const getScrapperPublicProfile = asyncHandler(async (req, res) => {
 
     sendSuccess(res, 'Scrapper fetched successfully', { scrapper });
 });
+
+export const updateFcmToken = asyncHandler(async (req, res) => {
+    const { token, platform = 'web' } = req.body;
+    const scrapperId = req.user.id;
+
+    if (!token) {
+        return sendError(res, 'Token is required', 400);
+    }
+
+    const scrapper = await Scrapper.findById(scrapperId);
+    if (!scrapper) {
+        return sendError(res, 'Scrapper profile not found', 404);
+    }
+
+    // Update Scrapper model
+    if (platform === 'web') {
+        if (!scrapper.fcmTokens) scrapper.fcmTokens = [];
+        if (!scrapper.fcmTokens.includes(token)) {
+            scrapper.fcmTokens.push(token);
+            if (scrapper.fcmTokens.length > 10) scrapper.fcmTokens = scrapper.fcmTokens.slice(-10);
+        }
+    } else {
+        // mobile
+        if (!scrapper.fcmTokenMobile) scrapper.fcmTokenMobile = [];
+        if (!scrapper.fcmTokenMobile.includes(token)) {
+            scrapper.fcmTokenMobile.push(token);
+            if (scrapper.fcmTokenMobile.length > 10) scrapper.fcmTokenMobile = scrapper.fcmTokenMobile.slice(-10);
+        }
+    }
+    await scrapper.save();
+
+    // Sync with User model (optional but recommended since auth is shared)
+    try {
+        const user = await User.findById(scrapperId);
+        if (user) {
+            if (platform === 'web') {
+                if (!user.fcmTokens) user.fcmTokens = [];
+                if (!user.fcmTokens.includes(token)) {
+                    user.fcmTokens.push(token);
+                    if (user.fcmTokens.length > 10) user.fcmTokens = user.fcmTokens.slice(-10);
+                }
+            } else {
+                if (!user.fcmTokenMobile) user.fcmTokenMobile = [];
+                if (!user.fcmTokenMobile.includes(token)) {
+                    user.fcmTokenMobile.push(token);
+                    if (user.fcmTokenMobile.length > 10) user.fcmTokenMobile = user.fcmTokenMobile.slice(-10);
+                }
+            }
+            await user.save();
+        }
+    } catch (error) {
+        logger.warn('Failed to sync FCM token to User model:', error.message);
+    }
+
+    sendSuccess(res, 'FCM token updated successfully');
+});
