@@ -29,7 +29,7 @@ export const protect = async (req, res, next) => {
   }
 
   const secret = process.env.JWT_SECRET || 'scrapto-dev-secret-key-change-in-production-2024';
-  
+
   // Debug logging to show which secret is being used for verification
   const secretSource = process.env.JWT_SECRET ? 'process.env.JWT_SECRET' : 'DEFAULT_JWT_SECRET';
   const secretPreview = secret.length > 20 ? `${secret.substring(0, 20)}...` : secret;
@@ -40,7 +40,7 @@ export const protect = async (req, res, next) => {
     tokenLength: token?.length,
     tokenPreview: token ? `${token.substring(0, 30)}...` : 'none'
   });
-  
+
   if (!secret) {
     return res.status(500).json({
       success: false,

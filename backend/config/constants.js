@@ -31,11 +31,11 @@ export const SCRAP_CATEGORIES = {
 };
 
 export const FILE_TYPES = {
-  IMAGE: ['image/jpeg', 'image/png', 'image/jpg', 'image/webp'],
+  IMAGE: ['image/jpeg', 'image/png', 'image/jpg', 'image/webp', 'image/heic', 'image/heif'],
   DOCUMENT: ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document']
 };
 
-export const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+export const MAX_FILE_SIZE = 15 * 1024 * 1024; // 15MB
 
 export const PAGINATION = {
   DEFAULT_PAGE: 1,
