@@ -83,6 +83,7 @@ export const register = asyncHandler(async (req, res) => {
         phone,
         name,
         email,
+        services: req.body.services || ['scrap_pickup'],
         vehicleInfo: defaultVehicleInfo
       });
     } catch (scrapperError) {

@@ -129,13 +129,38 @@ export const getAvailableOrders = asyncHandler(async (req, res) => {
   // 1. Unassigned
   // 2. Status is pending
   // 3. Not already assigned to this scrapper
+  // 4. Matches scrapper's service types
   const scrapperId = req.user.id;
 
+  // Fetch scrapper profile to check services
+  const scrapper = await Scrapper.findById(scrapperId);
+  if (!scrapper) {
+    return sendError(res, 'Scrapper profile not found', 404);
+  }
+
+  const services = scrapper.services || ['scrap_pickup']; // Default to scrap only if not set
+
+  // Build query
   const query = {
     status: ORDER_STATUS.PENDING,
     assignmentStatus: 'unassigned',
     scrapper: { $ne: scrapperId }
   };
+
+  // Service filtering logic
+  const allowedOrderTypes = [];
+
+  if (services.includes('scrap_pickup')) {
+    // Regular scrap orders usually don't have orderType or is 'scrap_pickup'
+    allowedOrderTypes.push(null, undefined, 'scrap_pickup');
+  }
+
+  if (services.includes('home_cleaning')) {
+    allowedOrderTypes.push('cleaning_service');
+  }
+
+  // Apply filter
+  query.orderType = { $in: allowedOrderTypes };
 
   const orders = await Order.find(query)
     .populate('user', 'name phone')

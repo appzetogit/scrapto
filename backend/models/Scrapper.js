@@ -25,6 +25,11 @@ const scrapperSchema = new mongoose.Schema({
     type: String,
     default: null
   },
+  services: {
+    type: [String],
+    enum: ['scrap_pickup', 'home_cleaning'],
+    default: ['scrap_pickup']
+  },
   vehicleInfo: {
     type: {
       type: String,

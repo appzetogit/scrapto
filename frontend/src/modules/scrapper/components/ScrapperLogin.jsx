@@ -83,6 +83,7 @@ const ScrapperLogin = () => {
   const [vehicleInfo, setVehicleInfo] = useState('');
   const [heardFrom, setHeardFrom] = useState('');
   const [heardFromOther, setHeardFromOther] = useState('');
+  const [selectedServices, setSelectedServices] = useState(['scrap_pickup']);
   const [referralCode, setReferralCode] = useState('');
   const [referralCodeError, setReferralCodeError] = useState('');
   const [referrerName, setReferrerName] = useState('');
@@ -243,6 +244,11 @@ const ScrapperLogin = () => {
       return;
     }
 
+    if (!isLogin && selectedServices.length === 0) {
+      setError(getTranslatedText('Please select at least one service'));
+      return;
+    }
+
     if (!isLogin && email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       setError(getTranslatedText('Please enter a valid email address'));
       return;
@@ -269,7 +275,8 @@ const ScrapperLogin = () => {
           email: email.trim(),
           phone,
           password,
-          role: 'scrapper'
+          role: 'scrapper',
+          services: selectedServices
         });
 
         if (response.success) {
@@ -500,6 +507,7 @@ const ScrapperLogin = () => {
                 setName('');
                 setEmail('');
                 setVehicleInfo('');
+                setSelectedServices(['scrap_pickup']);
               }}
               className={`px-5 py-2.5 rounded-full font-semibold text-xs md:text-sm transition-all duration-300 ${isLogin
                 ? 'bg-gradient-to-r from-green-500 to-emerald-600 text-white shadow-md'
@@ -516,6 +524,7 @@ const ScrapperLogin = () => {
                 setName('');
                 setEmail('');
                 setVehicleInfo('');
+                setSelectedServices(['scrap_pickup']);
               }}
               className={`px-5 py-2.5 rounded-full font-semibold text-xs md:text-sm transition-all duration-300 ${!isLogin
                 ? 'bg-gradient-to-r from-green-500 to-emerald-600 text-white shadow-md'
@@ -618,6 +627,62 @@ const ScrapperLogin = () => {
                           className={`mt-2 w-full px-4 py-3 rounded-xl border-2 focus:outline-none focus:ring-2 transition-all text-sm md:text-base bg-black text-white ${heardFromOther ? 'border-emerald-500' : 'border-zinc-700'}`}
                         />
                       )}
+                    </motion.div>
+                  )}
+
+                  {!isLogin && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      transition={{ duration: 0.3, delay: 0.1 }}
+                      className="mb-4"
+                    >
+                      <label className="block text-sm font-semibold mb-2 text-white">
+                        {getTranslatedText("Select Services")}
+                      </label>
+                      <div className="grid grid-cols-2 gap-3">
+                        <label
+                          className={`flex items-center gap-3 p-3 rounded-xl border-2 cursor-pointer transition-all ${selectedServices.includes('scrap_pickup')
+                              ? 'border-emerald-500 bg-emerald-900/20'
+                              : 'border-zinc-700 bg-zinc-800/50 hover:border-zinc-600'
+                            }`}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={selectedServices.includes('scrap_pickup')}
+                            onChange={(e) => {
+                              if (e.target.checked) {
+                                setSelectedServices([...selectedServices, 'scrap_pickup']);
+                              } else {
+                                setSelectedServices(selectedServices.filter(s => s !== 'scrap_pickup'));
+                              }
+                            }}
+                            className="w-4 h-4 rounded text-emerald-500 focus:ring-emerald-500 bg-zinc-900 border-zinc-600"
+                          />
+                          <span className="text-sm text-white">Scrap Pickup</span>
+                        </label>
+
+                        <label
+                          className={`flex items-center gap-3 p-3 rounded-xl border-2 cursor-pointer transition-all ${selectedServices.includes('home_cleaning')
+                              ? 'border-emerald-500 bg-emerald-900/20'
+                              : 'border-zinc-700 bg-zinc-800/50 hover:border-zinc-600'
+                            }`}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={selectedServices.includes('home_cleaning')}
+                            onChange={(e) => {
+                              if (e.target.checked) {
+                                setSelectedServices([...selectedServices, 'home_cleaning']);
+                              } else {
+                                setSelectedServices(selectedServices.filter(s => s !== 'home_cleaning'));
+                              }
+                            }}
+                            className="w-4 h-4 rounded text-emerald-500 focus:ring-emerald-500 bg-zinc-900 border-zinc-600"
+                          />
+                          <span className="text-sm text-white">Home Cleaning</span>
+                        </label>
+                      </div>
                     </motion.div>
                   )}
 
