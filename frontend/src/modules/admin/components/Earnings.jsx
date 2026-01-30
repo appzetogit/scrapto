@@ -10,8 +10,13 @@ const Earnings = () => {
         endDate: new Date().toISOString().split('T')[0]
     });
 
+
+
+    const [transactions, setTransactions] = useState([]);
+
     useEffect(() => {
         fetchAnalytics();
+        fetchTransactions();
     }, [dateRange]);
 
     const fetchAnalytics = async () => {
@@ -25,6 +30,17 @@ const Earnings = () => {
             console.error('Failed to fetch payment analytics:', error);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const fetchTransactions = async () => {
+        try {
+            const response = await adminAPI.getCommissionTransactions('limit=50');
+            if (response && response.success) {
+                setTransactions(response.data.transactions);
+            }
+        } catch (error) {
+            console.error('Failed to fetch transactions:', error);
         }
     };
 
@@ -126,55 +142,67 @@ const Earnings = () => {
                 </motion.div>
             </div>
 
-            {/* Revenue Chart */}
+            {/* Commissions List Table */}
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
-                className="rounded-xl bg-white p-6 shadow-sm border border-gray-100"
-            >
-                <h2 className="mb-6 text-lg font-bold text-gray-800">Revenue Overview</h2>
-                <div className="h-[300px] flex items-center justify-center bg-gray-50 rounded-lg">
-                    {/* <Line options={chartOptions} data={chartData} /> */}
-                    <p className="text-gray-400">Chart visualization is momentarily disabled for maintenance.</p>
-                </div>
-            </motion.div>
-
-            {/* Monthly Breakdown Table */}
-            <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 }}
                 className="rounded-xl bg-white shadow-sm border border-gray-100 overflow-hidden"
             >
                 <div className="border-b border-gray-100 bg-gray-50/50 px-6 py-4">
-                    <h3 className="text-lg font-bold text-gray-800">Monthly Breakdown</h3>
+                    <h3 className="text-lg font-bold text-gray-800">Earnings & Commission History (User Wise)</h3>
                 </div>
                 <div className="p-6">
                     <div className="overflow-x-auto">
                         <table className="w-full text-left text-sm text-gray-500">
                             <thead className="bg-gray-50 text-xs uppercase text-gray-700">
                                 <tr>
-                                    <th className="px-6 py-3">Month</th>
-                                    <th className="px-6 py-3">Transaction Count</th>
-                                    <th className="px-6 py-3 text-right">Total Revenue</th>
+                                    <th className="px-6 py-3">Date</th>
+                                    <th className="px-6 py-3">User/Scrapper</th>
+                                    <th className="px-6 py-3">Type</th>
+                                    <th className="px-6 py-3">Order ID</th>
+                                    <th className="px-6 py-3 text-right">Commission (Admin Revenue)</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-100">
-                                {Array.isArray(analyticsData?.monthlyRevenue) && analyticsData.monthlyRevenue.map((item, index) => {
-                                    if (!item) return null;
-                                    return (
-                                        <tr key={item._id || index} className="hover:bg-gray-50">
-                                            <td className="px-6 py-4 font-medium text-gray-900">{item._id || 'N/A'}</td>
-                                            <td className="px-6 py-4">{item.count || 0}</td>
-                                            <td className="px-6 py-4 text-right font-bold text-emerald-600">₹{(item.total || 0).toLocaleString()}</td>
+                                {transactions.length > 0 ? (
+                                    transactions.map((trx) => (
+                                        <tr key={trx._id} className="hover:bg-gray-50">
+                                            <td className="px-6 py-4">
+                                                {new Date(trx.createdAt).toLocaleDateString()}
+                                                <div className="text-xs text-gray-400">
+                                                    {new Date(trx.createdAt).toLocaleTimeString()}
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                <div className="font-medium text-gray-900">{trx.user?.name || 'Unknown'}</div>
+                                                <div className="text-xs text-gray-500">{trx.user?.phone || 'N/A'}</div>
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                <span className={`px-2 py-1 rounded-full text-xs font-semibold ${trx.userType === 'Scrapper' ? 'bg-orange-100 text-orange-600' : 'bg-blue-100 text-blue-600'
+                                                    }`}>
+                                                    {trx.userType}
+                                                </span>
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                {trx.orderId?.requestId ? (
+                                                    <span className="font-mono">{trx.orderId.requestId}</span>
+                                                ) : (
+                                                    '-'
+                                                )}
+                                                {trx.orderId?.totalAmount && (
+                                                    <div className="text-xs text-gray-400">Order Amt: ₹{trx.orderId.totalAmount}</div>
+                                                )}
+                                            </td>
+                                            <td className="px-6 py-4 text-right font-bold text-emerald-600">
+                                                ₹{Math.abs(trx.amount).toFixed(2)}
+                                            </td>
                                         </tr>
-                                    );
-                                })}
-                                {(!analyticsData?.monthlyRevenue || analyticsData.monthlyRevenue.length === 0) && (
+                                    ))
+                                ) : (
                                     <tr>
-                                        <td colSpan="3" className="px-6 py-8 text-center text-gray-500">
-                                            No data available
+                                        <td colSpan="5" className="px-6 py-8 text-center text-gray-500">
+                                            No commission transactions found.
                                         </td>
                                     </tr>
                                 )}

@@ -551,6 +551,9 @@ export const adminAPI = {
       body: JSON.stringify(bankDetails),
     });
   },
+  getCommissionTransactions: async (query = '') => {
+    return apiRequest(`/admin/earnings/commissions${query ? `?${query}` : ''}`, { method: 'GET' });
+  },
 };
 
 // Scrapper Profile API

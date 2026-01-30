@@ -41,7 +41,8 @@ import {
   getAllSubscriptions,
   getAllSubscriptionPlans,
   withdrawFunds,
-  updateAdminBankDetails
+  updateAdminBankDetails,
+  getCommissionTransactions
 } from '../controllers/adminController.js';
 import { getScrapperEarningsForAdmin } from '../controllers/earningsController.js';
 import {
@@ -123,6 +124,7 @@ router.get('/subscriptions/all', getAllSubscriptions);
 // EARNINGS MANAGEMENT
 // ============================================
 router.get('/scrappers/:scrapperId/earnings', getScrapperEarningsForAdmin);
+router.get('/earnings/commissions', getCommissionTransactions);
 
 // ============================================
 // REVIEW MANAGEMENT

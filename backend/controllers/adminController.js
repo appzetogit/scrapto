@@ -452,7 +452,8 @@ export const getScrapperById = asyncHandler(async (req, res) => {
   try {
     // Admin needs to see full details including hidden fields like aadhaarNumber
     const scrapper = await Scrapper.findById(req.params.id)
-      .select('+kyc.aadhaarNumber');
+      .select('+kyc.aadhaarNumber')
+      .lean();
 
     if (!scrapper) {
       return sendError(res, 'Scrapper not found', 404);
@@ -463,7 +464,7 @@ export const getScrapperById = asyncHandler(async (req, res) => {
 
     sendSuccess(res, 'Scrapper retrieved successfully', {
       scrapper: {
-        ...scrapper.toObject(),
+        ...scrapper,
         ordersCount
       }
     });
@@ -800,6 +801,43 @@ export const cancelOrder = asyncHandler(async (req, res) => {
   } catch (error) {
     logger.error('[Admin] Error cancelling order:', error);
     sendError(res, 'Failed to cancel order', 500);
+  }
+});
+
+// @desc    Get commission transactions
+// @route   GET /api/admin/earnings/commissions
+// @access  Private (Admin)
+export const getCommissionTransactions = asyncHandler(async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 20;
+    const skip = (page - 1) * limit;
+
+    const query = {
+      category: 'COMMISSION'
+    };
+
+    const total = await WalletTransaction.countDocuments(query);
+
+    const transactions = await WalletTransaction.find(query)
+      .populate('user', 'name email phone')
+      .populate('orderId', 'requestId totalAmount')
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
+
+    sendSuccess(res, 'Commission transactions retrieved successfully', {
+      transactions,
+      pagination: {
+        page,
+        limit,
+        total,
+        pages: Math.ceil(total / limit)
+      }
+    });
+  } catch (error) {
+    logger.error('[Admin] Error fetching commissions:', error);
+    sendError(res, 'Failed to fetch commissions', 500);
   }
 });
 

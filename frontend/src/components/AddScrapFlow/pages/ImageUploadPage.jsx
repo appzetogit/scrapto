@@ -12,7 +12,7 @@ const ImageUploadPage = () => {
     "Selected Categories:",
     "Drag & drop images here or click to browse",
     "Choose from Gallery",
-    "Take Photo",
+
     "Add More Images",
     "Uploading...",
     "Continue with",
@@ -134,13 +134,7 @@ const ImageUploadPage = () => {
     }
   };
 
-  const handleCameraClick = () => {
-    // Trigger file input with camera option (mobile)
-    if (fileInputRef.current) {
-      fileInputRef.current.setAttribute('capture', 'environment');
-      fileInputRef.current.click();
-    }
-  };
+
 
   return (
     <motion.div
@@ -248,28 +242,21 @@ const ImageUploadPage = () => {
               >
                 {getTranslatedText("Drag & drop images here or click to browse")}
               </p>
-              <div className="flex flex-col sm:flex-row gap-3">
+              <div className="flex flex-col sm:flex-row gap-3 justify-center">
                 <button
-                  onClick={() => fileInputRef.current?.click()}
+                  onClick={() => {
+                    // Ensure capture attribute is removed just in case
+                    if (fileInputRef.current) {
+                      fileInputRef.current.removeAttribute('capture');
+                      fileInputRef.current.click();
+                    }
+                  }}
                   className="px-4 py-2 md:px-6 md:py-3 rounded-full text-sm md:text-base font-semibold transition-all duration-300 transform hover:scale-105"
                   style={{ backgroundColor: '#64946e', color: '#ffffff' }}
                   onMouseEnter={(e) => e.target.style.backgroundColor = '#5a8263'}
                   onMouseLeave={(e) => e.target.style.backgroundColor = '#64946e'}
                 >
                   {getTranslatedText("Choose from Gallery")}
-                </button>
-                <button
-                  onClick={handleCameraClick}
-                  className="px-4 py-2 md:px-6 md:py-3 rounded-full text-sm md:text-base font-semibold transition-all duration-300 transform hover:scale-105 border-2"
-                  style={{ borderColor: '#64946e', color: '#64946e', backgroundColor: 'transparent' }}
-                  onMouseEnter={(e) => {
-                    e.target.style.backgroundColor = 'rgba(100, 148, 110, 0.1)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.target.style.backgroundColor = 'transparent';
-                  }}
-                >
-                  📷 {getTranslatedText("Take Photo")}
                 </button>
               </div>
             </motion.div>

@@ -208,10 +208,11 @@ export const getAllScrappersWithKyc = async (req, res) => {
 
     // Get scrappers with KYC info
     const scrappers = await Scrapper.find(query)
-      .select('name phone email kyc subscription status totalPickups earnings rating createdAt')
+      .select('name phone email subscription status totalPickups earnings rating createdAt vehicleInfo kyc.aadhaarNumber kyc.aadhaarPhotoUrl kyc.selfieUrl kyc.licenseUrl kyc.status kyc.verifiedAt kyc.rejectionReason')
       .sort({ createdAt: -1 })
       .skip(skip)
-      .limit(parseInt(limit));
+      .limit(parseInt(limit))
+      .lean();
 
     const total = await Scrapper.countDocuments(query);
 

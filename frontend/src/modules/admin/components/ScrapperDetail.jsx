@@ -87,8 +87,9 @@ const ScrapperDetail = () => {
 
       // Load earnings (unchanged logic)
       let earningsData = { today: 0, week: 0, month: 0, total: 0 };
+      let earningsResponse = null;
       try {
-        const earningsResponse = await earningsAPI.getScrapperEarnings(scrapperId);
+        earningsResponse = await earningsAPI.getScrapperEarnings(scrapperId);
         if (earningsResponse.success && earningsResponse.data?.summary) {
           earningsData = {
             today: earningsResponse.data.summary.today || 0,
