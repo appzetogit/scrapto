@@ -154,7 +154,7 @@ const OTPModal = ({ onClose }) => {
                 <p className="text-sm mb-4" style={{ color: "#718096" }}>
                   {getTranslatedText("Enter the 6-digit OTP sent to")} {phone}
                 </p>
-                <div className="flex gap-1.5 justify-between max-w-[260px] mx-auto">
+                <div className="flex justify-center gap-2 mt-4 px-1 sm:gap-3">
                   {otp.map((digit, index) => (
                     <input
                       key={index}
@@ -165,19 +165,16 @@ const OTPModal = ({ onClose }) => {
                       value={digit}
                       onChange={(e) => handleOtpChange(index, e.target.value)}
                       onKeyDown={(e) => handleKeyDown(index, e)}
-                      className="w-8 h-9 text-center text-base font-bold border-2 rounded-lg focus:outline-none transition-all"
+                      className="w-9 h-11 sm:w-11 sm:h-12 text-center text-lg sm:text-xl font-bold border rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500/20 transition-all"
                       style={{
                         borderColor: "#e5ddd4",
                         color: "#2d3748",
                       }}
                       onFocus={(e) => {
                         e.target.style.borderColor = "#64946e";
-                        e.target.style.boxShadow =
-                          "0 0 0 2px rgba(100, 148, 110, 0.2)";
                       }}
                       onBlur={(e) => {
                         e.target.style.borderColor = "#e5ddd4";
-                        e.target.style.boxShadow = "none";
                       }}
                     />
                   ))}

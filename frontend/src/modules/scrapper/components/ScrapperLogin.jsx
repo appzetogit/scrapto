@@ -643,8 +643,8 @@ const ScrapperLogin = () => {
                       <div className="grid grid-cols-2 gap-3">
                         <label
                           className={`flex items-center gap-3 p-3 rounded-xl border-2 cursor-pointer transition-all ${selectedServices.includes('scrap_pickup')
-                              ? 'border-emerald-500 bg-emerald-900/20'
-                              : 'border-zinc-700 bg-zinc-800/50 hover:border-zinc-600'
+                            ? 'border-emerald-500 bg-emerald-900/20'
+                            : 'border-zinc-700 bg-zinc-800/50 hover:border-zinc-600'
                             }`}
                         >
                           <input
@@ -664,8 +664,8 @@ const ScrapperLogin = () => {
 
                         <label
                           className={`flex items-center gap-3 p-3 rounded-xl border-2 cursor-pointer transition-all ${selectedServices.includes('home_cleaning')
-                              ? 'border-emerald-500 bg-emerald-900/20'
-                              : 'border-zinc-700 bg-zinc-800/50 hover:border-zinc-600'
+                            ? 'border-emerald-500 bg-emerald-900/20'
+                            : 'border-zinc-700 bg-zinc-800/50 hover:border-zinc-600'
                             }`}
                         >
                           <input
@@ -825,7 +825,7 @@ const ScrapperLogin = () => {
                     </p>
                   </div>
 
-                  <div className="flex justify-center flex-wrap gap-1.5 md:gap-3 px-2 max-w-xs mx-auto">
+                  <div className="flex justify-center flex-nowrap gap-2 md:gap-3 px-1 w-full max-w-sm mx-auto">
                     {otp.map((digit, index) => (
                       <motion.input
                         key={index}
@@ -839,9 +839,9 @@ const ScrapperLogin = () => {
                         initial={{ scale: 0.8, opacity: 0 }}
                         animate={{ scale: 1, opacity: 1 }}
                         transition={{ delay: 0.1 + index * 0.05 }}
-                        className={`w-9 h-11 text-lg md:w-12 md:h-12 md:text-2xl text-center font-bold rounded-lg md:rounded-xl border-2 focus:outline-none focus:ring-2 transition-all ${digit
+                        className={`w-10 h-12 text-xl md:w-14 md:h-14 md:text-2xl text-center font-bold rounded-lg md:rounded-xl border-2 focus:outline-none focus:ring-2 transition-all ${digit
                           ? 'border-emerald-500 bg-emerald-900/30 text-emerald-400'
-                          : 'border-zinc-700 bg-black text-gray-500'
+                          : 'border-zinc-700 bg-black text-white'
                           }`}
                       />
                     ))}

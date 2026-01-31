@@ -3,12 +3,12 @@ import { asyncHandler } from '../utils/asyncHandler.js';
 import { sendSuccess, sendError } from '../utils/responseHandler.js';
 import Payment from '../models/Payment.js';
 import Order from '../models/Order.js';
-import { 
-  getRazorpayClient, 
-  createOrder, 
-  verifyPayment as verifyPaymentAPI, 
+import {
+  getRazorpayClient,
+  createOrder,
+  verifyPayment as verifyPaymentAPI,
   verifyPaymentSignature,
-  refundPayment 
+  refundPayment
 } from '../services/paymentService.js';
 import { PAYMENT_STATUS, ORDER_STATUS } from '../config/constants.js';
 import logger from '../utils/logger.js';
@@ -87,7 +87,7 @@ export const createPaymentOrder = asyncHandler(async (req, res) => {
     logger.info('[Payment] Razorpay order created:', razorpayOrder.id);
   } catch (razorpayError) {
     logger.error('[Payment] Razorpay order creation error:', razorpayError);
-    
+
     let errorMessage = 'Failed to create payment order. Please try again later.';
     if (razorpayError.error?.description) {
       errorMessage = razorpayError.error.description;
@@ -159,10 +159,10 @@ export const verifyPayment = asyncHandler(async (req, res) => {
   }
 
   // Find payment record
-  const payment = await Payment.findOne({ 
-    order: orderId, 
+  const payment = await Payment.findOne({
+    order: orderId,
     user: userId,
-    razorpayOrderId: razorpay_order_id 
+    razorpayOrderId: razorpay_order_id
   });
 
   if (!payment) {
@@ -199,6 +199,58 @@ export const verifyPayment = asyncHandler(async (req, res) => {
       payment.paidAt = new Date();
       payment.razorpaySignature = razorpay_signature || null;
       await payment.save();
+
+      // --- CRITICAL: Credit Scrapper Wallet for Order Payment ---
+      if (order.scrapper) {
+        try {
+          // Dynamic import to avoid circular dependencies if any
+          const Scrapper = (await import('../models/Scrapper.js')).default;
+          const WalletTransaction = (await import('../models/WalletTransaction.js')).default;
+
+          const scrapper = await Scrapper.findById(order.scrapper);
+          if (scrapper) {
+            // Initialize wallet if missing
+            if (!scrapper.wallet) scrapper.wallet = { balance: 0, currency: 'INR', status: 'ACTIVE' };
+            if (typeof scrapper.wallet.balance !== 'number') scrapper.wallet.balance = 0;
+
+            const previousBalance = scrapper.wallet.balance;
+            const creditAmount = payment.amount;
+
+            // Update Balance
+            scrapper.wallet.balance += creditAmount;
+            await scrapper.save();
+
+            // Create Transaction Record
+            await WalletTransaction.create({
+              trxId: `TRX-ORD-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+              user: scrapper._id,
+              userType: 'Scrapper',
+              amount: creditAmount,
+              type: 'CREDIT',
+              balanceBefore: previousBalance,
+              balanceAfter: scrapper.wallet.balance,
+              category: 'PAYMENT_RECEIVED',
+              status: 'SUCCESS',
+              description: `Payment received for Order #${order._id}`,
+              metadata: {
+                orderId: order._id.toString(),
+                paymentId: payment._id.toString()
+              },
+              orderId: order._id,
+              gateway: {
+                provider: 'RAZORPAY',
+                paymentId: verificationResult.paymentId
+              }
+            });
+
+            logger.info(`[Payment] Credited ₹${creditAmount} to Scrapper ${scrapper._id} for Order ${order._id}`);
+          }
+        } catch (walletError) {
+          logger.error('[Payment] Failed to credit scrapper wallet:', walletError);
+          // Don't fail the verification response, but log heavily
+        }
+      }
+      // ----------------------------------------------------------
 
       // Update order payment status
       order.paymentStatus = PAYMENT_STATUS.COMPLETED;
@@ -378,9 +430,9 @@ export const getPaymentStatus = asyncHandler(async (req, res) => {
   const payment = await Payment.findOne({ order: orderId, user: userId });
 
   if (!payment) {
-    return sendSuccess(res, 'Payment not initiated', { 
+    return sendSuccess(res, 'Payment not initiated', {
       status: PAYMENT_STATUS.PENDING,
-      payment: null 
+      payment: null
     });
   }
 
@@ -388,7 +440,7 @@ export const getPaymentStatus = asyncHandler(async (req, res) => {
   if (payment.status === PAYMENT_STATUS.PENDING && payment.razorpayOrderId) {
     try {
       const verificationResult = await verifyPaymentAPI(payment.razorpayOrderId);
-      
+
       if (verificationResult.success && verificationResult.payment) {
         // Payment completed, update status
         payment.status = PAYMENT_STATUS.COMPLETED;
@@ -406,9 +458,9 @@ export const getPaymentStatus = asyncHandler(async (req, res) => {
     }
   }
 
-  sendSuccess(res, 'Payment status retrieved', { 
+  sendSuccess(res, 'Payment status retrieved', {
     status: payment.status,
-    payment 
+    payment
   });
 });
 
@@ -626,7 +678,7 @@ export const handleRazorpayWebhook = asyncHandler(async (req, res) => {
   const razorpayOrderId = paymentEntity.order_id;
   const amount = paymentEntity.amount ? paymentEntity.amount / 100 : null;
 
-  let payment = await Payment.findOne({ razorpayPaymentId: paymentId }) 
+  let payment = await Payment.findOne({ razorpayPaymentId: paymentId })
     || await Payment.findOne({ razorpayOrderId: razorpayOrderId });
 
   let order = null;
