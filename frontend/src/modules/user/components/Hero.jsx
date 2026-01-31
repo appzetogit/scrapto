@@ -9,7 +9,6 @@ import TrustSignals from "./TrustSignals";
 import Testimonials from "./Testimonials";
 import OTPModal from "./OTPModal";
 import CustomerSolutions from "./CustomerSolutions";
-import Profile from "./Profile";
 import { usePageTranslation } from "../../../hooks/usePageTranslation";
 import { useDynamicTranslation } from "../../../hooks/useDynamicTranslation";
 import scrapImage from "../assets/scrap3-Photoroom.png";
@@ -26,7 +25,6 @@ import { getEffectivePriceFeed, PRICE_TYPES } from "../../shared/utils/priceFeed
 const Hero = () => {
   const navigate = useNavigate();
   const [showOTPModal, setShowOTPModal] = useState(false);
-  const [showProfile, setShowProfile] = useState(false);
   const [currentBanner, setCurrentBanner] = useState(0);
   const [isWebView, setIsWebView] = useState(false);
   const [userLocation, setUserLocation] = useState({ lat: null, lng: null });
@@ -538,582 +536,580 @@ const Hero = () => {
   return (
     <>
       <AnimatePresence mode="wait">
-        {showProfile ? (
-          <Profile onClose={() => setShowProfile(false)} />
-        ) : (
-          <div
-            ref={heroRef}
-            className="min-h-screen relative z-0 pb-20 md:pb-0 overflow-x-hidden md:-mt-[1px]"
-            style={{ background: "linear-gradient(to bottom, #72c688ff, #dcfce7)" }}>
-            {/* Header */}
-            <Header />
+        <div
+          ref={heroRef}
+          className="min-h-screen relative z-0 pb-20 md:pb-0 overflow-x-hidden md:-mt-[1px]"
+          style={{ background: "linear-gradient(to bottom, #72c688ff, #dcfce7)" }}>
 
-            {/* Location Bar */}
-            <div className="px-4 md:px-6 lg:px-8 max-w-7xl mx-auto mb-4 md:mb-6">
-              <motion.div
-                initial={{ y: 5 }}
-                animate={{ y: 0 }}
-                transition={{ duration: 0.5, delay: 0.1 }}
-                className="relative">
-                <div
-                  className={`flex items-center rounded-full px-4 py-3 md:py-4 border transition-all ${isEditingLocation ? "" : "cursor-pointer"}`}
-                  style={{
-                    backgroundColor: "#ffffff",
-                    borderColor: isEditingLocation ? "#64946e" : "#e5ddd4",
-                  }}
-                  onClick={
-                    !isEditingLocation ? handleLocationClick : undefined
-                  }>
-                  <svg
-                    width="20"
-                    height="20"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    className="mr-3 flex-shrink-0"
-                    style={{ color: "#64946e" }}>
-                    <path
-                      d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"
-                      fill="currentColor"
-                    />
-                  </svg>
-                  <div className="flex-1 relative min-w-0">
-                    {isLoadingLocation ? (
-                      <div
-                        className="flex items-center gap-2 text-sm md:text-base"
-                        style={{ color: "#a0aec0" }}>
-                        <span className="animate-pulse">
-                          {getTranslatedText("Getting your location...")}
-                        </span>
-                      </div>
-                    ) : (
-                      <>
-                        {isEditingLocation ? (
-                          <input
-                            ref={locationInputRef}
-                            type="text"
-                            value={searchQuery}
-                            onChange={handleLocationChange}
-                            onBlur={handleLocationBlur}
-                            onKeyDown={handleLocationKeyPress}
-                            className="flex-1 bg-transparent border-none outline-none text-sm md:text-base w-full"
-                            style={{ color: "#2d3748" }}
-                            placeholder={getTranslatedText(
-                              "Type to search location..."
-                            )}
-                            autoComplete="off"
-                          />
-                        ) : (
-                          <div
-                            className="text-sm md:text-base truncate"
-                            style={{ color: "#2d3748" }}>
-                            {locationAddress ||
-                              getTranslatedText("Tap to set location")}
-                          </div>
-                        )}
-                      </>
-                    )}
-                  </div>
-                  {!isLoadingLocation && (
+          {/* Header */}
+          <Header />
+
+          {/* Location Bar */}
+          <div className="px-4 md:px-6 lg:px-8 max-w-7xl mx-auto mb-4 md:mb-6">
+            <motion.div
+              initial={{ y: 5 }}
+              animate={{ y: 0 }}
+              transition={{ duration: 0.5, delay: 0.1 }}
+              className="relative">
+              <div
+                className={`flex items-center rounded-full px-4 py-3 md:py-4 border transition-all ${isEditingLocation ? "" : "cursor-pointer"}`}
+                style={{
+                  backgroundColor: "#ffffff",
+                  borderColor: isEditingLocation ? "#64946e" : "#e5ddd4",
+                }}
+                onClick={
+                  !isEditingLocation ? handleLocationClick : undefined
+                }>
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  className="mr-3 flex-shrink-0"
+                  style={{ color: "#64946e" }}>
+                  <path
+                    d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"
+                    fill="currentColor"
+                  />
+                </svg>
+                <div className="flex-1 relative min-w-0">
+                  {isLoadingLocation ? (
+                    <div
+                      className="flex items-center gap-2 text-sm md:text-base"
+                      style={{ color: "#a0aec0" }}>
+                      <span className="animate-pulse">
+                        {getTranslatedText("Getting your location...")}
+                      </span>
+                    </div>
+                  ) : (
                     <>
                       {isEditingLocation ? (
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            getLiveLocation();
-                          }}
-                          className="ml-2 px-3 py-1.5 rounded-lg text-xs md:text-sm font-semibold flex items-center gap-1.5 transition-all flex-shrink-0"
-                          style={{
-                            backgroundColor: "#64946e",
-                            color: "#ffffff",
-                          }}
-                          title="Get current location">
-                          <svg
-                            width="14"
-                            height="14"
-                            viewBox="0 0 24 24"
-                            fill="none">
-                            <path
-                              d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"
-                              fill="currentColor"
-                            />
-                          </svg>
-                          <span className="hidden sm:inline">Live</span>
-                        </button>
+                        <input
+                          ref={locationInputRef}
+                          type="text"
+                          value={searchQuery}
+                          onChange={handleLocationChange}
+                          onBlur={handleLocationBlur}
+                          onKeyDown={handleLocationKeyPress}
+                          className="flex-1 bg-transparent border-none outline-none text-sm md:text-base w-full"
+                          style={{ color: "#2d3748" }}
+                          placeholder={getTranslatedText(
+                            "Type to search location..."
+                          )}
+                          autoComplete="off"
+                        />
                       ) : (
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            getLiveLocation();
-                          }}
-                          className="ml-2 p-1.5 rounded-lg transition-all flex-shrink-0"
-                          style={{
-                            backgroundColor: "transparent",
-                            color: "#64946e",
-                          }}
-                          title="Get current location">
-                          <svg
-                            width="18"
-                            height="18"
-                            viewBox="0 0 24 24"
-                            fill="none">
-                            <path
-                              d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"
-                              fill="currentColor"
-                            />
-                          </svg>
-                        </button>
+                        <div
+                          className="text-sm md:text-base truncate"
+                          style={{ color: "#2d3748" }}>
+                          {locationAddress ||
+                            getTranslatedText("Tap to set location")}
+                        </div>
                       )}
                     </>
                   )}
                 </div>
-
-                {/* Location Suggestions Dropdown */}
-                {showSuggestions && locationSuggestions.length > 0 && (
-                  <motion.div
-                    ref={suggestionsRef}
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    className="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-xl border z-50 max-h-64 overflow-y-auto"
-                    style={{ borderColor: "#e5ddd4" }}>
-                    {locationSuggestions.map((suggestion, index) => {
-                      const address =
-                        suggestion.display_name
-                          .split(",")
-                          .slice(0, 3)
-                          .join(", ") || suggestion.display_name;
-                      return (
-                        <motion.div
-                          key={suggestion.place_id || index}
-                          initial={{ opacity: 0, x: -10 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{ delay: index * 0.05 }}
-                          onClick={() => handleSelectSuggestion(suggestion)}
-                          className="px-4 py-3 hover:bg-gray-50 cursor-pointer transition-colors border-b last:border-b-0"
-                          style={{ borderColor: "#e5ddd4" }}>
-                          <div className="flex items-start gap-3">
-                            <svg
-                              width="18"
-                              height="18"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              className="mt-0.5 flex-shrink-0"
-                              style={{ color: "#64946e" }}>
-                              <path
-                                d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"
-                                fill="currentColor"
-                              />
-                            </svg>
-                            <div className="flex-1 min-w-0">
-                              <p
-                                className="text-sm font-medium truncate"
-                                style={{ color: "#2d3748" }}>
-                                {address}
-                              </p>
-                              {suggestion.address && (
-                                <p
-                                  className="text-xs mt-0.5 truncate"
-                                  style={{ color: "#718096" }}>
-                                  {suggestion.address.city ||
-                                    suggestion.address.town ||
-                                    suggestion.address.village ||
-                                    ""}
-                                  {suggestion.address.state
-                                    ? `, ${suggestion.address.state}`
-                                    : ""}
-                                </p>
-                              )}
-                            </div>
-                          </div>
-                        </motion.div>
-                      );
-                    })}
-                  </motion.div>
-                )}
-              </motion.div>
-            </div>
-
-            {/* Main Hero Content */}
-            <div className="px-4 md:px-6 lg:px-8 max-w-7xl mx-auto">
-              {/* Value Proposition Section with Image */}
-              <motion.div
-                initial={{ y: 20 }}
-                animate={{ y: 0 }}
-                transition={{ duration: 0.6, delay: 0.2 }}
-                className="mt-3 md:mt-6 lg:mt-12 xl:mt-16">
-                <div className="flex flex-row items-center md:items-start gap-3 md:gap-6 lg:gap-8">
-                  {/* Left Side - Text and Button */}
-                  <div className="flex-1 text-left">
-                    <h1
-                      className="text-2xl sm:text-3xl md:text-5xl lg:text-6xl xl:text-7xl font-bold mb-2 md:mb-4 lg:mb-6 leading-tight text-left"
-                      style={{
-                        color: "#2d3748",
-                      }}>
-                      {getTranslatedText("Sell Your Scrap")}
-                      <br />
-                      <span style={{ color: "#64946e" }}>
-                        {getTranslatedText("We'll Pick It Up")}
-                      </span>
-                    </h1>
-                    <p
-                      className="hidden md:block text-base md:text-lg lg:text-xl xl:text-2xl mb-4 md:mb-6 lg:mb-8 max-w-2xl"
-                      style={{ color: "#4a5568" }}>
-                      {getTranslatedText(
-                        "Real-time market prices. Verified scrappers. Cash on pickup."
-                      )}
-                      <br />
-                      <span
-                        className="text-sm md:text-base lg:text-lg mt-2 block"
-                        style={{ color: "#718096" }}>
-                        {getTranslatedText(
-                          "Learn how to get the best value for your scrap materials."
-                        )}
-                      </span>
-                    </p>
-
-                    {/* Primary CTA */}
-                    <motion.div
-                      initial={{ scale: 0.95 }}
-                      animate={{ scale: 1 }}
-                      transition={{ duration: 0.5, delay: 0.4 }}
-                      className="flex mb-4 md:mb-8 lg:mb-12 justify-start">
+                {!isLoadingLocation && (
+                  <>
+                    {isEditingLocation ? (
                       <button
-                        onClick={() => navigate("/add-scrap/category")}
-                        className="relative inline-flex items-center justify-center text-white font-semibold py-2 px-6 md:py-4 md:px-8 lg:py-5 lg:px-12 xl:py-6 xl:px-16 rounded-full text-sm md:text-lg lg:text-xl xl:text-2xl border-2 transform hover:-translate-y-0.5 hover:scale-105 transition-all duration-300 focus:outline-none focus:ring-4"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          getLiveLocation();
+                        }}
+                        className="ml-2 px-3 py-1.5 rounded-lg text-xs md:text-sm font-semibold flex items-center gap-1.5 transition-all flex-shrink-0"
                         style={{
-                          backgroundColor: "#000000",
-                          borderColor: "#22c55e",
-                          boxShadow: "0 10px 25px rgba(0,0,0,0.6)",
-                        }}>
-                        {getTranslatedText("Request Pickup Now")}
+                          backgroundColor: "#64946e",
+                          color: "#ffffff",
+                        }}
+                        title="Get current location">
+                        <svg
+                          width="14"
+                          height="14"
+                          viewBox="0 0 24 24"
+                          fill="none">
+                          <path
+                            d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"
+                            fill="currentColor"
+                          />
+                        </svg>
+                        <span className="hidden sm:inline">Live</span>
                       </button>
-                    </motion.div>
-                  </div>
+                    ) : (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          getLiveLocation();
+                        }}
+                        className="ml-2 p-1.5 rounded-lg transition-all flex-shrink-0"
+                        style={{
+                          backgroundColor: "transparent",
+                          color: "#64946e",
+                        }}
+                        title="Get current location">
+                        <svg
+                          width="18"
+                          height="18"
+                          viewBox="0 0 24 24"
+                          fill="none">
+                          <path
+                            d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"
+                            fill="currentColor"
+                          />
+                        </svg>
+                      </button>
+                    )}
+                  </>
+                )}
+              </div>
 
-                  {/* Image - No Container Div with Circular Rotation */}
-                  <motion.img
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{
-                      opacity: 1,
-                      x: 0,
-                      rotate: 360,
-                    }}
-                    transition={{
-                      opacity: { duration: 0.6, delay: 0.4 },
-                      x: { duration: 0.6, delay: 0.4 },
-                      rotate: {
-                        duration: 20,
-                        repeat: Infinity,
-                        ease: "linear",
-                      },
-                    }}
-                    src={scrapImage}
-                    alt="Scrap collection"
-                    className="flex-shrink-0 w-32 sm:w-40 md:w-48 lg:w-56 xl:w-64 h-auto object-cover"
+              {/* Location Suggestions Dropdown */}
+              {showSuggestions && locationSuggestions.length > 0 && (
+                <motion.div
+                  ref={suggestionsRef}
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  className="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-xl border z-50 max-h-64 overflow-y-auto"
+                  style={{ borderColor: "#e5ddd4" }}>
+                  {locationSuggestions.map((suggestion, index) => {
+                    const address =
+                      suggestion.display_name
+                        .split(",")
+                        .slice(0, 3)
+                        .join(", ") || suggestion.display_name;
+                    return (
+                      <motion.div
+                        key={suggestion.place_id || index}
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: index * 0.05 }}
+                        onClick={() => handleSelectSuggestion(suggestion)}
+                        className="px-4 py-3 hover:bg-gray-50 cursor-pointer transition-colors border-b last:border-b-0"
+                        style={{ borderColor: "#e5ddd4" }}>
+                        <div className="flex items-start gap-3">
+                          <svg
+                            width="18"
+                            height="18"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            className="mt-0.5 flex-shrink-0"
+                            style={{ color: "#64946e" }}>
+                            <path
+                              d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"
+                              fill="currentColor"
+                            />
+                          </svg>
+                          <div className="flex-1 min-w-0">
+                            <p
+                              className="text-sm font-medium truncate"
+                              style={{ color: "#2d3748" }}>
+                              {address}
+                            </p>
+                            {suggestion.address && (
+                              <p
+                                className="text-xs mt-0.5 truncate"
+                                style={{ color: "#718096" }}>
+                                {suggestion.address.city ||
+                                  suggestion.address.town ||
+                                  suggestion.address.village ||
+                                  ""}
+                                {suggestion.address.state
+                                  ? `, ${suggestion.address.state}`
+                                  : ""}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      </motion.div>
+                    );
+                  })}
+                </motion.div>
+              )}
+            </motion.div>
+          </div>
+
+          {/* Main Hero Content */}
+          <div className="px-4 md:px-6 lg:px-8 max-w-7xl mx-auto">
+            {/* Value Proposition Section with Image */}
+            <motion.div
+              initial={{ y: 20 }}
+              animate={{ y: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              className="mt-3 md:mt-6 lg:mt-12 xl:mt-16">
+              <div className="flex flex-row items-center md:items-start gap-3 md:gap-6 lg:gap-8">
+                {/* Left Side - Text and Button */}
+                <div className="flex-1 text-left">
+                  <h1
+                    className="text-2xl sm:text-3xl md:text-5xl lg:text-6xl xl:text-7xl font-bold mb-2 md:mb-4 lg:mb-6 leading-tight text-left"
                     style={{
-                      background: "transparent",
-                      transformOrigin: "center center",
-                    }}
-                  />
-                </div>
-              </motion.div>
-            </div>
+                      color: "#2d3748",
+                    }}>
+                    {getTranslatedText("Sell Your Scrap")}
+                    <br />
+                    <span style={{ color: "#64946e" }}>
+                      {getTranslatedText("We'll Pick It Up")}
+                    </span>
+                  </h1>
+                  <p
+                    className="hidden md:block text-base md:text-lg lg:text-xl xl:text-2xl mb-4 md:mb-6 lg:mb-8 max-w-2xl"
+                    style={{ color: "#4a5568" }}>
+                    {getTranslatedText(
+                      "Real-time market prices. Verified scrappers. Cash on pickup."
+                    )}
+                    <br />
+                    <span
+                      className="text-sm md:text-base lg:text-lg mt-2 block"
+                      style={{ color: "#718096" }}>
+                      {getTranslatedText(
+                        "Learn how to get the best value for your scrap materials."
+                      )}
+                    </span>
+                  </p>
 
-            {/* Scrap Categories */}
-            <div className="px-4 md:px-6 lg:px-8 max-w-7xl mx-auto">
-              <motion.div
-                initial={{ y: 10 }}
-                animate={{ y: 0 }}
-                transition={{ duration: 0.6, delay: 0.6 }}
-                className="mt-2 md:mt-4 mb-6 md:mb-8">
-                <div className="flex justify-between items-center mb-3 md:mb-4">
-                  <h3
-                    className="text-xl md:text-2xl font-bold"
-                    style={{ color: "#2d3748" }}>
-                    {getTranslatedText("Scrap Categories")}
-                  </h3>
-                  <button
-                    onClick={() => navigate("/categories")}
-                    className="text-sm md:text-base font-medium hover:opacity-80 transition-opacity"
-                    style={{ color: "#64946e" }}>
-                    {getTranslatedText("See all")}
-                  </button>
+                  {/* Primary CTA */}
+                  <motion.div
+                    initial={{ scale: 0.95 }}
+                    animate={{ scale: 1 }}
+                    transition={{ duration: 0.5, delay: 0.4 }}
+                    className="flex mb-4 md:mb-8 lg:mb-12 justify-start">
+                    <button
+                      onClick={() => navigate("/add-scrap/category")}
+                      className="relative inline-flex items-center justify-center text-white font-semibold py-2 px-6 md:py-4 md:px-8 lg:py-5 lg:px-12 xl:py-6 xl:px-16 rounded-full text-sm md:text-lg lg:text-xl xl:text-2xl border-2 transform hover:-translate-y-0.5 hover:scale-105 transition-all duration-300 focus:outline-none focus:ring-4"
+                      style={{
+                        backgroundColor: "#000000",
+                        borderColor: "#22c55e",
+                        boxShadow: "0 10px 25px rgba(0,0,0,0.6)",
+                      }}>
+                      {getTranslatedText("Request Pickup Now")}
+                    </button>
+                  </motion.div>
                 </div>
-                <div className="overflow-x-auto pb-4 scrollbar-hide">
-                  <div
-                    className="flex flex-col gap-3 md:gap-4"
-                    style={{ width: "max-content" }}>
-                    {/* Display dynamic categories in rows of 3 */}
-                    {Array.from({ length: Math.ceil(activeCategories.length / 3) }).map((_, rowIndex) => (
-                      <div key={rowIndex} className="flex gap-3 md:gap-4">
-                        {activeCategories.slice(rowIndex * 3, (rowIndex + 1) * 3).map((category, index) => (
-                          <motion.div
-                            key={category.name}
-                            initial={{ x: -20 }}
-                            animate={{ x: 0 }}
-                            transition={{
-                              duration: 0.5,
-                              delay: 0.7 + (rowIndex * 3 + index) * 0.1,
-                            }}
-                            className="flex-shrink-0 w-24 md:w-28 lg:w-32 cursor-pointer"
-                            onClick={() =>
-                              navigate("/add-scrap/category", {
-                                state: { preSelectedCategory: category.name },
-                              })
-                            }
-                            whileTap={{ scale: 0.95 }}>
-                            <div
-                              className="rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300"
-                              style={{ backgroundColor: "#ffffff" }}>
-                              <div
-                                className="aspect-square relative overflow-hidden bg-gray-100"
-                                style={{ width: "100%" }}>
-                                <img
-                                  src={category.image}
-                                  alt={category.name}
-                                  className="w-full h-full object-cover"
-                                  style={{ display: "block" }}
-                                  loading="lazy"
-                                />
-                              </div>
-                              <div className="p-2 md:p-2.5">
-                                <p
-                                  className="text-xs md:text-sm font-semibold text-center truncate"
-                                  style={{ color: "#2d3748" }}>
-                                  {category.name}
-                                </p>
-                              </div>
-                            </div>
-                          </motion.div>
-                        ))}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </motion.div>
-            </div>
 
-            {/* Cleaning Services Section */}
-            <div className="px-4 md:px-6 lg:px-8 max-w-7xl mx-auto mb-6 md:mb-8">
+                {/* Image - No Container Div with Circular Rotation */}
+                <motion.img
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{
+                    opacity: 1,
+                    x: 0,
+                    rotate: 360,
+                  }}
+                  transition={{
+                    opacity: { duration: 0.6, delay: 0.4 },
+                    x: { duration: 0.6, delay: 0.4 },
+                    rotate: {
+                      duration: 20,
+                      repeat: Infinity,
+                      ease: "linear",
+                    },
+                  }}
+                  src={scrapImage}
+                  alt="Scrap collection"
+                  className="flex-shrink-0 w-32 sm:w-40 md:w-48 lg:w-56 xl:w-64 h-auto object-cover"
+                  style={{
+                    background: "transparent",
+                    transformOrigin: "center center",
+                  }}
+                />
+              </div>
+            </motion.div>
+          </div>
+
+          {/* Scrap Categories */}
+          <div className="px-4 md:px-6 lg:px-8 max-w-7xl mx-auto">
+            <motion.div
+              initial={{ y: 10 }}
+              animate={{ y: 0 }}
+              transition={{ duration: 0.6, delay: 0.6 }}
+              className="mt-2 md:mt-4 mb-6 md:mb-8">
               <div className="flex justify-between items-center mb-3 md:mb-4">
                 <h3
                   className="text-xl md:text-2xl font-bold"
                   style={{ color: "#2d3748" }}>
-                  {getTranslatedText("Home Services")}
+                  {getTranslatedText("Scrap Categories")}
                 </h3>
-                <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700">
-                  {getTranslatedText("New")}
-                </span>
+                <button
+                  onClick={() => navigate("/categories")}
+                  className="text-sm md:text-base font-medium hover:opacity-80 transition-opacity"
+                  style={{ color: "#64946e" }}>
+                  {getTranslatedText("See all")}
+                </button>
               </div>
-
-              <motion.div
-                initial={{ y: 20, opacity: 0 }}
-                whileInView={{ y: 0, opacity: 1 }}
-                viewport={{ once: true }}
-                className="relative overflow-hidden rounded-2xl shadow-lg cursor-pointer group"
-                onClick={() => navigate("/book-service/details")}
-                style={{
-                  background:
-                    "linear-gradient(135deg, #111827 0%, #000000 100%)", // Black Gradient
-                }}
-                whileHover={{ scale: 1.01 }}
-                whileTap={{ scale: 0.98 }}
-                transition={{ type: "spring", stiffness: 300, damping: 20 }}>
-
-                {/* Abstract Patterns Overlay */}
-                <div className="absolute top-0 right-0 w-48 h-48 bg-white opacity-10 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2"></div>
-
-                <div className="relative z-10 p-4 md:p-6 flex items-center justify-between gap-4">
-                  {/* Text Content */}
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className="px-2 py-0.5 rounded-md bg-white/20 backdrop-blur-md text-[10px] md:text-xs font-bold text-white uppercase tracking-wider border border-white/10">
-                        {getTranslatedText("Premium")}
-                      </span>
-                      <h4 className="text-lg md:text-2xl font-bold text-white">
-                        {getTranslatedText("Home Cleaning")}
-                      </h4>
-                    </div>
-
-                    <p className="text-gray-300 text-xs md:text-sm mb-3 line-clamp-2 max-w-lg">
-                      {getTranslatedText(
-                        "Experience a spotless home with our professional deep cleaning. Verified experts & eco-friendly products."
-                      )}
-                    </p>
-
-                    {/* Features Badges - Compact */}
-                    <div className="flex items-center gap-3">
-                      <div className="flex items-center gap-1.5 text-white/90 text-xs md:text-sm font-medium">
-                        <span className="bg-white/20 p-1 rounded-full">
-                          <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                        </span>
-                        <span>₹1200</span>
-                      </div>
-                      <div className="flex items-center gap-1.5 text-white/90 text-xs md:text-sm font-medium">
-                        <span className="bg-white/20 p-1 rounded-full">
-                          <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" /></svg>
-                        </span>
-                        <span>{getTranslatedText("Verified")}</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Visual / CTA Side - Compact */}
-                  <div className="flex-shrink-0 flex flex-col items-center justify-center gap-2">
-                    <div className="w-12 h-12 md:w-16 md:h-16 bg-white rounded-xl flex items-center justify-center shadow-md text-black transform group-hover:rotate-6 transition-transform">
-                      <svg className="w-6 h-6 md:w-8 md:h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.384-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
-                      </svg>
-                    </div>
-                  </div>
-                </div>
-              </motion.div>
-            </div>
-
-            {/* Live Price Ticker */}
-            <div className="px-4 md:px-6 lg:px-8 max-w-7xl mx-auto mb-8">
-              <PriceTicker />
-            </div>
-
-            {/* Promotional Banner Carousel (New Section) */}
-            <div className="px-4 md:px-6 lg:px-8 max-w-7xl mx-auto mb-8">
-              <div className="relative">
-                <BannerSlider audience="user" />
-              </div>
-            </div>
-
-            {/* Customer Solutions */}
-            <div className="px-4 md:px-6 lg:px-8 max-w-7xl mx-auto">
-              <CustomerSolutions />
-            </div>
-
-            {/* Trust Signals */}
-            <div className="px-4 md:px-6 lg:px-8 max-w-7xl mx-auto">
-              <TrustSignals />
-            </div>
-
-            {/* Why Scrapto Section */}
-            <div className="px-4 md:px-6 lg:px-8 max-w-7xl mx-auto">
-              <motion.div
-                initial={{ y: 16, opacity: 0 }}
-                whileInView={{ y: 0, opacity: 1 }}
-                viewport={{ once: true, margin: "-80px" }}
-                transition={{ duration: 0.6, ease: "easeOut" }}
-                className="mt-8 md:mt-12 mb-8 md:mb-12">
-                <h3
-                  className="text-lg md:text-2xl font-bold mb-4 md:mb-8 text-center"
-                  style={{ color: "#2d3748" }}>
-                  Why Scrapto?
-                </h3>
-                <div className="flex flex-col gap-3 md:grid md:grid-cols-3 md:gap-6">
-                  {[
-                    {
-                      icon: (
-                        <svg
-                          width="18"
-                          height="18"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2">
-                          <polyline points="22 2 11 13 6 8"></polyline>
-                        </svg>
-                      ),
-                      title: "Free Pickup",
-                      desc: "No pickup charges. We reach your doorstep without any extra cost.",
-                    },
-                    {
-                      icon: (
-                        <svg
-                          width="18"
-                          height="18"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2">
-                          <line x1="12" y1="1" x2="12" y2="23"></line>
-                          <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
-                        </svg>
-                      ),
-                      title: "Best Rates",
-                      desc: "Highest market rates with real-time pricing so every deal stays fair.",
-                    },
-                    {
-                      icon: (
-                        <svg
-                          width="18"
-                          height="18"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2">
-                          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-                        </svg>
-                      ),
-                      title: "Verified & Safe",
-                      desc: "KYC-verified partners with reliable pickups for a worry-free experience.",
-                    },
-                  ].map((item, index) => (
-                    <motion.div
-                      key={index}
-                      initial={{ y: 12, opacity: 0 }}
-                      whileInView={{ y: 0, opacity: 1 }}
-                      viewport={{ once: true, margin: "-40px" }}
-                      transition={{
-                        duration: 0.45,
-                        delay: index * 0.12,
-                        ease: "easeOut",
-                      }}
-                      className="w-full">
-                      <div
-                        className="rounded-xl md:rounded-2xl p-4 md:p-6 h-full transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5"
-                        style={{
-                          backgroundColor: "#ffffff",
-                          border: "1px solid rgba(100, 148, 110, 0.15)",
-                        }}>
-                        <div className="flex items-start gap-3">
-                          {/* Icon Container */}
+              <div className="overflow-x-auto pb-4 scrollbar-hide">
+                <div
+                  className="flex flex-col gap-3 md:gap-4"
+                  style={{ width: "max-content" }}>
+                  {/* Display dynamic categories in rows of 3 */}
+                  {Array.from({ length: Math.ceil(activeCategories.length / 3) }).map((_, rowIndex) => (
+                    <div key={rowIndex} className="flex gap-3 md:gap-4">
+                      {activeCategories.slice(rowIndex * 3, (rowIndex + 1) * 3).map((category, index) => (
+                        <motion.div
+                          key={category.name}
+                          initial={{ x: -20 }}
+                          animate={{ x: 0 }}
+                          transition={{
+                            duration: 0.5,
+                            delay: 0.7 + (rowIndex * 3 + index) * 0.1,
+                          }}
+                          className="flex-shrink-0 w-24 md:w-28 lg:w-32 cursor-pointer"
+                          onClick={() =>
+                            navigate("/add-scrap/category", {
+                              state: { preSelectedCategory: category.name },
+                            })
+                          }
+                          whileTap={{ scale: 0.95 }}>
                           <div
-                            className="w-10 h-10 md:w-12 md:h-12 rounded-lg md:rounded-xl flex items-center justify-center flex-shrink-0"
-                            style={{
-                              backgroundColor: "rgba(100, 148, 110, 0.1)",
-                              color: "#64946e",
-                            }}>
-                            {item.icon}
+                            className="rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300"
+                            style={{ backgroundColor: "#ffffff" }}>
+                            <div
+                              className="aspect-square relative overflow-hidden bg-gray-100"
+                              style={{ width: "100%" }}>
+                              <img
+                                src={category.image}
+                                alt={category.name}
+                                className="w-full h-full object-cover"
+                                style={{ display: "block" }}
+                                loading="lazy"
+                              />
+                            </div>
+                            <div className="p-2 md:p-2.5">
+                              <p
+                                className="text-xs md:text-sm font-semibold text-center truncate"
+                                style={{ color: "#2d3748" }}>
+                                {category.name}
+                              </p>
+                            </div>
                           </div>
-
-                          {/* Content */}
-                          <div className="flex-1 min-w-0">
-                            <h4
-                              className="font-bold text-sm md:text-xl mb-1 md:mb-2"
-                              style={{ color: "#2d3748" }}>
-                              {getTranslatedText(item.title)}
-                            </h4>
-                            <p
-                              className="text-xs md:text-base leading-tight md:leading-relaxed"
-                              style={{ color: "#718096" }}>
-                              {getTranslatedText(item.desc)}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    </motion.div>
+                        </motion.div>
+                      ))}
+                    </div>
                   ))}
                 </div>
-              </motion.div>
-            </div>
-
-            {/* Social Proof - Testimonials */}
-            <div className="px-4 md:px-6 lg:px-8 max-w-7xl mx-auto">
-              <Testimonials />
-            </div>
-
-            {/* OTP Modal */}
-            {showOTPModal && (
-              <OTPModal onClose={() => setShowOTPModal(false)} />
-            )}
+              </div>
+            </motion.div>
           </div>
-        )}
+
+          {/* Cleaning Services Section */}
+          <div className="px-4 md:px-6 lg:px-8 max-w-7xl mx-auto mb-6 md:mb-8">
+            <div className="flex justify-between items-center mb-3 md:mb-4">
+              <h3
+                className="text-xl md:text-2xl font-bold"
+                style={{ color: "#2d3748" }}>
+                {getTranslatedText("Home Services")}
+              </h3>
+              <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700">
+                {getTranslatedText("New")}
+              </span>
+            </div>
+
+            <motion.div
+              initial={{ y: 20, opacity: 0 }}
+              whileInView={{ y: 0, opacity: 1 }}
+              viewport={{ once: true }}
+              className="relative overflow-hidden rounded-2xl shadow-lg cursor-pointer group"
+              onClick={() => navigate("/book-service/details")}
+              style={{
+                background:
+                  "linear-gradient(135deg, #111827 0%, #000000 100%)", // Black Gradient
+              }}
+              whileHover={{ scale: 1.01 }}
+              whileTap={{ scale: 0.98 }}
+              transition={{ type: "spring", stiffness: 300, damping: 20 }}>
+
+              {/* Abstract Patterns Overlay */}
+              <div className="absolute top-0 right-0 w-48 h-48 bg-white opacity-10 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2"></div>
+
+              <div className="relative z-10 p-4 md:p-6 flex items-center justify-between gap-4">
+                {/* Text Content */}
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="px-2 py-0.5 rounded-md bg-white/20 backdrop-blur-md text-[10px] md:text-xs font-bold text-white uppercase tracking-wider border border-white/10">
+                      {getTranslatedText("Premium")}
+                    </span>
+                    <h4 className="text-lg md:text-2xl font-bold text-white">
+                      {getTranslatedText("Home Cleaning")}
+                    </h4>
+                  </div>
+
+                  <p className="text-gray-300 text-xs md:text-sm mb-3 line-clamp-2 max-w-lg">
+                    {getTranslatedText(
+                      "Experience a spotless home with our professional deep cleaning. Verified experts & eco-friendly products."
+                    )}
+                  </p>
+
+                  {/* Features Badges - Compact */}
+                  <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-1.5 text-white/90 text-xs md:text-sm font-medium">
+                      <span className="bg-white/20 p-1 rounded-full">
+                        <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                      </span>
+                      <span>₹1200</span>
+                    </div>
+                    <div className="flex items-center gap-1.5 text-white/90 text-xs md:text-sm font-medium">
+                      <span className="bg-white/20 p-1 rounded-full">
+                        <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" /></svg>
+                      </span>
+                      <span>{getTranslatedText("Verified")}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Visual / CTA Side - Compact */}
+                <div className="flex-shrink-0 flex flex-col items-center justify-center gap-2">
+                  <div className="w-12 h-12 md:w-16 md:h-16 bg-white rounded-xl flex items-center justify-center shadow-md text-black transform group-hover:rotate-6 transition-transform">
+                    <svg className="w-6 h-6 md:w-8 md:h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.384-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+                    </svg>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+
+          {/* Live Price Ticker */}
+          <div className="px-4 md:px-6 lg:px-8 max-w-7xl mx-auto mb-8">
+            <PriceTicker />
+          </div>
+
+          {/* Promotional Banner Carousel (New Section) */}
+          <div className="px-4 md:px-6 lg:px-8 max-w-7xl mx-auto mb-8">
+            <div className="relative">
+              <BannerSlider audience="user" />
+            </div>
+          </div>
+
+          {/* Customer Solutions */}
+          <div className="px-4 md:px-6 lg:px-8 max-w-7xl mx-auto">
+            <CustomerSolutions />
+          </div>
+
+          {/* Trust Signals */}
+          <div className="px-4 md:px-6 lg:px-8 max-w-7xl mx-auto">
+            <TrustSignals />
+          </div>
+
+          {/* Why Scrapto Section */}
+          <div className="px-4 md:px-6 lg:px-8 max-w-7xl mx-auto">
+            <motion.div
+              initial={{ y: 16, opacity: 0 }}
+              whileInView={{ y: 0, opacity: 1 }}
+              viewport={{ once: true, margin: "-80px" }}
+              transition={{ duration: 0.6, ease: "easeOut" }}
+              className="mt-8 md:mt-12 mb-8 md:mb-12">
+              <h3
+                className="text-lg md:text-2xl font-bold mb-4 md:mb-8 text-center"
+                style={{ color: "#2d3748" }}>
+                Why Scrapto?
+              </h3>
+              <div className="flex flex-col gap-3 md:grid md:grid-cols-3 md:gap-6">
+                {[
+                  {
+                    icon: (
+                      <svg
+                        width="18"
+                        height="18"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2">
+                        <polyline points="22 2 11 13 6 8"></polyline>
+                      </svg>
+                    ),
+                    title: "Free Pickup",
+                    desc: "No pickup charges. We reach your doorstep without any extra cost.",
+                  },
+                  {
+                    icon: (
+                      <svg
+                        width="18"
+                        height="18"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2">
+                        <line x1="12" y1="1" x2="12" y2="23"></line>
+                        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                      </svg>
+                    ),
+                    title: "Best Rates",
+                    desc: "Highest market rates with real-time pricing so every deal stays fair.",
+                  },
+                  {
+                    icon: (
+                      <svg
+                        width="18"
+                        height="18"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                      </svg>
+                    ),
+                    title: "Verified & Safe",
+                    desc: "KYC-verified partners with reliable pickups for a worry-free experience.",
+                  },
+                ].map((item, index) => (
+                  <motion.div
+                    key={index}
+                    initial={{ y: 12, opacity: 0 }}
+                    whileInView={{ y: 0, opacity: 1 }}
+                    viewport={{ once: true, margin: "-40px" }}
+                    transition={{
+                      duration: 0.45,
+                      delay: index * 0.12,
+                      ease: "easeOut",
+                    }}
+                    className="w-full">
+                    <div
+                      className="rounded-xl md:rounded-2xl p-4 md:p-6 h-full transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5"
+                      style={{
+                        backgroundColor: "#ffffff",
+                        border: "1px solid rgba(100, 148, 110, 0.15)",
+                      }}>
+                      <div className="flex items-start gap-3">
+                        {/* Icon Container */}
+                        <div
+                          className="w-10 h-10 md:w-12 md:h-12 rounded-lg md:rounded-xl flex items-center justify-center flex-shrink-0"
+                          style={{
+                            backgroundColor: "rgba(100, 148, 110, 0.1)",
+                            color: "#64946e",
+                          }}>
+                          {item.icon}
+                        </div>
+
+                        {/* Content */}
+                        <div className="flex-1 min-w-0">
+                          <h4
+                            className="font-bold text-sm md:text-xl mb-1 md:mb-2"
+                            style={{ color: "#2d3748" }}>
+                            {getTranslatedText(item.title)}
+                          </h4>
+                          <p
+                            className="text-xs md:text-base leading-tight md:leading-relaxed"
+                            style={{ color: "#718096" }}>
+                            {getTranslatedText(item.desc)}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            </motion.div>
+          </div>
+
+          {/* Social Proof - Testimonials */}
+          <div className="px-4 md:px-6 lg:px-8 max-w-7xl mx-auto">
+            <Testimonials />
+          </div>
+
+          {/* OTP Modal */}
+          {showOTPModal && (
+            <OTPModal onClose={() => setShowOTPModal(false)} />
+          )}
+        </div>
+
       </AnimatePresence>
 
       {/* Bottom Navigation (Mobile Only - Fixed to Viewport) - Always visible */}
@@ -1126,15 +1122,15 @@ const Hero = () => {
           {/* Home Tab */}
           <div
             className="flex-1 flex flex-col items-center justify-center gap-1 cursor-pointer active:scale-95 transition-transform duration-200 py-2"
-            onClick={() => setShowProfile(false)}
+            onClick={() => navigate('/')}
           >
-            <div className={`p-1.5 rounded-xl transition-colors duration-300 ${!showProfile ? 'bg-gray-800 text-emerald-400' : 'text-gray-400 hover:text-emerald-400'}`}>
+            <div className="p-1.5 rounded-xl transition-colors duration-300 bg-gray-800 text-emerald-400">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
                 <polyline points="9 22 9 12 15 12 15 22"></polyline>
               </svg>
             </div>
-            <span className={`text-[10px] font-semibold tracking-wide ${!showProfile ? 'text-emerald-400' : 'text-gray-400'}`}>Home</span>
+            <span className="text-[10px] font-semibold tracking-wide text-emerald-400">Home</span>
           </div>
 
           {/* Price Tab */}
@@ -1182,15 +1178,15 @@ const Hero = () => {
           {/* Profile Tab */}
           <div
             className="flex-1 flex flex-col items-center justify-center gap-1 cursor-pointer active:scale-95 transition-transform duration-200 py-2"
-            onClick={() => setShowProfile(true)}
+            onClick={() => navigate('/my-profile')}
           >
-            <div className={`p-1.5 rounded-xl transition-colors duration-300 ${showProfile ? 'bg-gray-800 text-emerald-400' : 'text-gray-400 hover:text-emerald-400'}`}>
+            <div className="p-1.5 rounded-xl text-gray-400 hover:text-emerald-400 transition-colors duration-300">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
                 <circle cx="12" cy="7" r="4"></circle>
               </svg>
             </div>
-            <span className={`text-[10px] font-semibold tracking-wide ${showProfile ? 'text-emerald-400' : 'text-gray-400'}`}>Profile</span>
+            <span className="text-[10px] font-semibold tracking-wide text-gray-400">Profile</span>
           </div>
         </div>
       </div>

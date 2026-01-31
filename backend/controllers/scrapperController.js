@@ -35,23 +35,45 @@ export const getMyProfile = asyncHandler(async (req, res) => {
 
 export const updateMyProfile = asyncHandler(async (req, res) => {
     const { name, vehicleInfo, availability, isOnline } = req.body;
+    const userId = req.user.id || req.user._id;
 
-    const scrapper = await Scrapper.findById(req.user._id);
+    // 1. Update Scrapper Document
+    let scrapper = await Scrapper.findById(userId);
+
+    // Auto-provision if missing (Edge case protection)
     if (!scrapper) {
-        return sendError(res, 'Scrapper profile not found', 404);
+        const user = await User.findById(userId);
+        if (user && user.role === 'scrapper') {
+            scrapper = await Scrapper.create({
+                _id: userId,
+                phone: user.phone,
+                name: user.name || name || 'Scrapper',
+                email: user.email,
+                vehicleInfo: vehicleInfo || { type: 'bike', number: 'NA', capacity: 0 }
+            });
+        } else {
+            return sendError(res, 'Scrapper profile not found', 404);
+        }
+    } else {
+        if (name) scrapper.name = name;
+        if (vehicleInfo) scrapper.vehicleInfo = { ...scrapper.vehicleInfo, ...vehicleInfo };
+
+        // Update Online Status
+        if (availability !== undefined) scrapper.isOnline = availability;
+        if (isOnline !== undefined) scrapper.isOnline = isOnline;
+
+        await scrapper.save();
     }
 
-    if (name) scrapper.name = name;
-    if (vehicleInfo) scrapper.vehicleInfo = { ...scrapper.vehicleInfo, ...vehicleInfo };
+    // 2. Sync with User Document (Crucial for "har jagah update")
+    if (name) {
+        const user = await User.findById(userId);
+        if (user) {
+            user.name = name;
+            await user.save();
+        }
+    }
 
-    // Update Online Status
-    // Handle both 'availability' (often used in frontend toggles) and 'isOnline'
-    if (availability !== undefined) scrapper.isOnline = availability;
-    if (isOnline !== undefined) scrapper.isOnline = isOnline;
-
-    // Add other fields as needed
-
-    await scrapper.save();
     sendSuccess(res, 'Profile updated successfully', { scrapper });
 });
 

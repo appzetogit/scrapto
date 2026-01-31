@@ -3,8 +3,10 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../shared/context/AuthContext';
 import { walletService } from '../../shared/services/wallet.service';
+import { orderAPI } from '../../shared/utils/api';
 import { usePageTranslation } from "../../../hooks/usePageTranslation";
 import ReferAndEarn from './ReferAndEarn';
+import UserBottomNav from './UserBottomNav';
 import {
   FaCheckCircle,
   FaBox,
@@ -19,20 +21,27 @@ import {
   FaUser,
   FaPhone,
   FaSignOutAlt,
-  FaGift
+  FaGift,
+  FaCommentAlt,
+  FaBell,
+  FaQuestionCircle,
+  FaCog
 } from 'react-icons/fa';
 import {
   HiTrendingUp,
   HiCollection,
-  HiCash
+  HiCash,
+  HiLocationMarker
 } from 'react-icons/hi';
 import {
   MdCategory,
   MdPayment,
-  MdCheckCircleOutline
+  MdCheckCircleOutline,
+  MdAssignment
 } from 'react-icons/md';
 
 const MyProfilePage = () => {
+  // ... existing code ...
   const staticTexts = [
     "My Profile",
     "Verified",
@@ -77,6 +86,19 @@ const MyProfilePage = () => {
     "Plastic",
     "Electronics",
     "Paper",
+    "Saved Addresses",
+    "Manage pickup locations",
+    "My Requests",
+    "View pickup history & status",
+    "Chat",
+    "Messages with scrappers",
+    "Notifications",
+    "Manage notification settings",
+    "Help & Support",
+    "FAQ, contact support",
+    "Settings",
+    "Terms & Conditions",
+    "Quick Actions"
   ];
   const { getTranslatedText } = usePageTranslation(staticTexts);
   const navigate = useNavigate();
@@ -89,6 +111,10 @@ const MyProfilePage = () => {
     profilePicture: null,
   });
   const [walletBalance, setWalletBalance] = useState(0);
+  const [activities, setActivities] = useState([]);
+  const [loadingActivity, setLoadingActivity] = useState(false);
+  const [monthlyStats, setMonthlyStats] = useState([]);
+  const [categoryStats, setCategoryStats] = useState([]);
 
   useEffect(() => {
     if (user) {
@@ -98,10 +124,166 @@ const MyProfilePage = () => {
         profilePicture: null,
       });
 
-      // Fetch Wallet Balance
-      walletService.getWalletProfile()
-        .then(data => setWalletBalance(data.balance || 0))
-        .catch(err => console.error('Failed to fetch wallet:', err));
+      const fetchData = async () => {
+        setLoadingActivity(true);
+        try {
+          // 1. Fetch Wallet Profile (Balance + Transactions)
+          const walletData = await walletService.getWalletProfile();
+          if (walletData.success && walletData.data) {
+            setWalletBalance(walletData.data.balance || 0);
+          }
+
+          const transactions = walletData.data?.transactions || [];
+
+          // 2. Fetch Orders (Requests)
+          const ordersRes = await orderAPI.getMy();
+          const orders = ordersRes.success && ordersRes.data?.orders ? ordersRes.data.orders : [];
+
+          // 3. Calculate Stats
+          const completedOrders = orders.filter(o => o.status === 'completed');
+          const cancelledOrders = orders.filter(o => o.status === 'cancelled');
+
+          const calculatedTotalWeight = completedOrders.reduce((sum, o) => sum + (o.totalWeight || 0), 0);
+
+          // Calculate Total Earnings (Sum of CREDIT transactions)
+          const calculatedTotalEarnings = transactions
+            .filter(tx => tx.type === 'CREDIT')
+            .reduce((sum, tx) => sum + (tx.amount || 0), 0);
+
+          // Find Favorite Category
+          const categoryCount = {};
+          completedOrders.forEach(order => {
+            if (order.scrapItems) {
+              order.scrapItems.forEach(item => {
+                const cat = item.category || 'Other';
+                categoryCount[cat] = (categoryCount[cat] || 0) + 1;
+              });
+            }
+          });
+
+          let favCategory = "-";
+          let maxCount = 0;
+          Object.entries(categoryCount).forEach(([cat, count]) => {
+            if (count > maxCount) {
+              maxCount = count;
+              favCategory = cat;
+            }
+          });
+
+          setStats({
+            totalRequests: orders.length,
+            completedRequests: completedOrders.length,
+            totalEarnings: calculatedTotalEarnings,
+            averageRating: user?.rating || 5.0,
+            totalWeight: calculatedTotalWeight,
+            favoriteCategory: favCategory !== "-" ? favCategory.charAt(0).toUpperCase() + favCategory.slice(1) : "-"
+          });
+
+          // 4. Transform and Merge for Activity Feed
+          const mappedTransactions = transactions.map(tx => ({
+            id: tx._id || tx.trxId,
+            type: 'transaction',
+            title: tx.type === 'CREDIT' ? getTranslatedText("Payment Received") : getTranslatedText("Payment Sent"),
+            description: tx.description || getTranslatedText(tx.category),
+            amount: `₹${tx.amount}`,
+            timestamp: new Date(tx.createdAt),
+            displayTime: new Date(tx.createdAt).toLocaleDateString(),
+            icon: tx.type === 'CREDIT' ? FaWallet : FaCheckCircle,
+            color: tx.type === 'CREDIT' ? "#10b981" : "#ef4444"
+          }));
+
+          const mappedOrders = orders.map(order => ({
+            id: order._id,
+            type: 'order',
+            title: order.status === 'completed' ? getTranslatedText("Pickup Completed") : getTranslatedText("New Request Created"),
+            description: `${getTranslatedText("Status")}: ${order.status}`,
+            amount: order.totalAmount ? `₹${order.totalAmount}` : null,
+            timestamp: new Date(order.createdAt),
+            displayTime: new Date(order.createdAt).toLocaleDateString(),
+            icon: FaBox,
+            color: "#3b82f6"
+          }));
+
+          // Merge and Sort by Date (Newest First)
+          const allActivities = [...mappedTransactions, ...mappedOrders]
+            .sort((a, b) => b.timestamp - a.timestamp);
+
+          setActivities(allActivities);
+
+          // 5. Calculate Analysis Data (Monthly Stats & Category Dist)
+
+          // Monthly Stats (Last 6 Months)
+          const last6Months = [];
+          for (let i = 5; i >= 0; i--) {
+            const d = new Date();
+            d.setMonth(d.getMonth() - i);
+            last6Months.push({
+              month: d.toLocaleString('en-IN', { month: 'short' }),
+              year: d.getFullYear(),
+              monthIndex: d.getMonth(),
+              requests: 0,
+              earnings: 0
+            });
+          }
+
+          // Aggregate Requests
+          orders.forEach(order => {
+            const d = new Date(order.createdAt);
+            const mIndex = d.getMonth();
+            const year = d.getFullYear();
+            const period = last6Months.find(p => p.monthIndex === mIndex && p.year === year);
+            if (period) {
+              period.requests += 1;
+            }
+          });
+
+          // Aggregate Earnings (Credit Transactions)
+          transactions.forEach(tx => {
+            if (tx.type === 'CREDIT') {
+              const d = new Date(tx.createdAt);
+              const mIndex = d.getMonth();
+              const year = d.getFullYear();
+              const period = last6Months.find(p => p.monthIndex === mIndex && p.year === year);
+              if (period) {
+                period.earnings += (tx.amount || 0);
+              }
+            }
+          });
+
+          setMonthlyStats(last6Months);
+
+          // Category Distribution (Already calculated counts in step 3, refining here)
+          const catDist = [];
+          const totalItems = Object.values(categoryCount).reduce((a, b) => a + b, 0);
+
+          const colors = ["#64946e", "#5a8263", "#4a7c5a", "#3a6c4a", "#2d5a3f"];
+          let colorIndex = 0;
+
+          Object.entries(categoryCount).forEach(([cat, count]) => {
+            catDist.push({
+              name: getTranslatedText(cat.charAt(0).toUpperCase() + cat.slice(1)),
+              value: totalItems > 0 ? Math.round((count / totalItems) * 100) : 0,
+              count: count,
+              color: colors[colorIndex % colors.length]
+            });
+            colorIndex++;
+          });
+
+          // If empty, show default empty state or nothing
+          if (catDist.length === 0) {
+            catDist.push({ name: getTranslatedText("No Data"), value: 100, color: "#e2e8f0" });
+          }
+
+          setCategoryStats(catDist);
+
+        } catch (err) {
+          console.error('Failed to fetch profile data:', err);
+        } finally {
+          setLoadingActivity(false);
+        }
+      };
+
+      fetchData();
     }
   }, [user]);
 
@@ -110,85 +292,63 @@ const MyProfilePage = () => {
     setIsEditMode(false);
   };
 
-  // Mock data for activity feed
-  const activityFeed = [
-    {
-      id: 1,
-      type: "request_completed",
-      title: getTranslatedText("Pickup Completed"),
-      description: getTranslatedText("Metal scrap pickup completed successfully"),
-      amount: "₹450",
-      timestamp: "2 hours ago",
-      icon: FaCheckCircle,
-      color: "#64946e",
-    },
-    {
-      id: 2,
-      type: "request_created",
-      title: getTranslatedText("New Request Created"),
-      description: getTranslatedText("Plastic scrap pickup requested"),
-      amount: "₹180",
-      timestamp: "1 day ago",
-      icon: FaBox,
-      color: "#64946e",
-    },
-    {
-      id: 3,
-      type: "payment_received",
-      title: getTranslatedText("Payment Received"),
-      description: getTranslatedText("Amount credited to wallet"),
-      amount: "₹450",
-      timestamp: "2 days ago",
-      icon: FaWallet,
-      color: "#64946e",
-    },
-    {
-      id: 4,
-      type: "request_accepted",
-      title: getTranslatedText("Request Accepted"),
-      description: getTranslatedText("Scrapper accepted your pickup request"),
-      amount: null,
-      timestamp: "3 days ago",
-      icon: MdCheckCircleOutline,
-      color: "#64946e",
-    },
-    {
-      id: 5,
-      type: "request_completed",
-      title: getTranslatedText("Pickup Completed"),
-      description: getTranslatedText("Electronics scrap pickup completed"),
-      amount: "₹320",
-      timestamp: "5 days ago",
-      icon: FaCheckCircle,
-      color: "#64946e",
-    },
-  ];
+  // Activity feed is now managing state 'activities'
 
-  // Mock stats data
-  const stats = {
-    totalRequests: 24,
-    completedRequests: 18,
-    totalEarnings: 1250,
-    averageRating: 4.8,
-    totalWeight: 156, // kg
-    favoriteCategory: "Metal",
-  };
+  // Stats state
+  const [stats, setStats] = useState({
+    totalRequests: 0,
+    completedRequests: 0,
+    totalEarnings: 0,
+    averageRating: user?.rating || 4.8, // Default or user rating if available
+    totalWeight: 0,
+    favoriteCategory: "-"
+  });
 
-  // Mock analysis data
-  const monthlyData = [
-    { month: "Jan", requests: 3, earnings: 450 },
-    { month: "Feb", requests: 5, earnings: 680 },
-    { month: "Mar", requests: 4, earnings: 520 },
-    { month: "Apr", requests: 6, earnings: 890 },
-    { month: "May", requests: 5, earnings: 750 },
-    { month: "Jun", requests: 6, earnings: 920 },
-  ];
 
-  const categoryDistribution = [
-    { name: getTranslatedText("Metal"), value: 45, color: "#64946e" },
-    { name: getTranslatedText("Plastic"), value: 25, color: "#5a8263" },
-    { name: getTranslatedText("Electronics"), value: 20, color: "#4a7c5a" },
-    { name: getTranslatedText("Paper"), value: 10, color: "#3a6c4a" },
+
+  const quickActions = [
+    {
+      icon: <HiLocationMarker />,
+      title: getTranslatedText("Saved Addresses"),
+      desc: getTranslatedText("Manage pickup locations"),
+      action: () => navigate("/saved-addresses"),
+      color: "#10b981"
+    },
+    {
+      icon: <MdAssignment />,
+      title: getTranslatedText("My Requests"),
+      desc: getTranslatedText("View pickup history & status"),
+      action: () => navigate("/my-requests"),
+      color: "#10b981"
+    },
+    {
+      icon: <FaCommentAlt />,
+      title: getTranslatedText("Chat"),
+      desc: getTranslatedText("Messages with scrappers"),
+      action: () => navigate("/chats"),
+      color: "#10b981"
+    },
+    {
+      icon: <FaBell />,
+      title: getTranslatedText("Notifications"),
+      desc: getTranslatedText("Manage notification settings"),
+      action: () => navigate("/notifications"),
+      color: "#10b981"
+    },
+    {
+      icon: <FaQuestionCircle />,
+      title: getTranslatedText("Help & Support"),
+      desc: getTranslatedText("FAQ, contact support"),
+      action: () => navigate("/help"),
+      color: "#10b981"
+    },
+    {
+      icon: <FaCog />,
+      title: getTranslatedText("Terms & Conditions"),
+      desc: getTranslatedText("Read platform terms & conditions"),
+      action: () => navigate("/terms"),
+      color: "#10b981"
+    }
   ];
 
   return (
@@ -293,6 +453,7 @@ const MyProfilePage = () => {
                         {stats.averageRating} <FaStar size={8} />
                       </span>
                     </div>
+
                   </div>
 
                   {/* Edit Button */}
@@ -472,6 +633,86 @@ const MyProfilePage = () => {
               exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.3 }}
               className="space-y-3 md:space-y-6">
+
+              {/* Wallet Balance */}
+              <div
+                className="rounded-xl md:rounded-2xl p-3 md:p-6 shadow-sm bg-gradient-to-r from-emerald-500 to-emerald-600 text-white"
+              >
+                <div className="flex items-center justify-between mb-3">
+                  <h3
+                    className="font-bold text-sm md:text-lg"
+                    style={{ color: "#ffffff" }}>
+                    {getTranslatedText("Wallet Balance")}
+                  </h3>
+                  <button
+                    onClick={() => navigate('/wallet')}
+                    className="text-xs md:text-sm font-medium hover:underline text-white/90"
+                  >
+                    {getTranslatedText("View All")}
+                  </button>
+                </div>
+                <div className="flex items-center gap-3 md:gap-4">
+                  <div
+                    className="w-12 h-12 md:w-20 md:h-20 rounded-full flex items-center justify-center bg-white/20 backdrop-blur-sm"
+                  >
+                    <HiCash
+                      className="text-xl md:text-3xl text-white"
+                    />
+                  </div>
+                  <div>
+                    <p
+                      className="text-xl md:text-3xl font-bold text-white shadow-sm"
+                    >
+                      ₹{walletBalance.toFixed(2)}
+                    </p>
+                    <p
+                      className="text-xs md:text-base text-emerald-100"
+                    >
+                      {getTranslatedText("Available balance")}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Quick Actions - Merged from old Profile.jsx */}
+              <div
+                className="rounded-xl md:rounded-2xl p-3 md:p-6 shadow-sm"
+                style={{ backgroundColor: '#ffffff' }}
+              >
+                <h3
+                  className="font-bold text-sm md:text-lg mb-3"
+                  style={{ color: "#1e293b" }}>
+                  {getTranslatedText("Quick Actions")}
+                </h3>
+                <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
+                  {quickActions.map((action, index) => (
+                    <motion.button
+                      key={index}
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ delay: index * 0.05 }}
+                      onClick={action.action}
+                      className="p-3 rounded-xl border flex flex-col items-center justify-center gap-2 transition-all hover:shadow-md hover:border-emerald-200"
+                      style={{
+                        backgroundColor: "#f8fafc",
+                        borderColor: "#f1f5f9"
+                      }}
+                    >
+                      <div
+                        className="w-10 h-10 rounded-full flex items-center justify-center text-xl"
+                        style={{ backgroundColor: "#ecfdf5", color: "#10b981" }}
+                      >
+                        {action.icon}
+                      </div>
+                      <div className="text-center">
+                        <p className="text-xs font-bold text-slate-700">{action.title}</p>
+                        <p className="text-[10px] text-slate-400 hidden md:block">{action.desc}</p>
+                      </div>
+                    </motion.button>
+                  ))}
+                </div>
+              </div>
+
               {/* Quick Stats */}
               <div
                 className="rounded-xl md:rounded-2xl p-3 md:p-6 shadow-sm"
@@ -523,46 +764,6 @@ const MyProfilePage = () => {
                   })}
                 </div>
               </div>
-
-              {/* Wallet Balance */}
-              <div
-                className="rounded-xl md:rounded-2xl p-3 md:p-6 shadow-sm bg-gradient-to-r from-emerald-500 to-emerald-600 text-white"
-              >
-                <div className="flex items-center justify-between mb-3">
-                  <h3
-                    className="font-bold text-sm md:text-lg"
-                    style={{ color: "#ffffff" }}>
-                    {getTranslatedText("Wallet Balance")}
-                  </h3>
-                  <button
-                    onClick={() => navigate('/wallet')}
-                    className="text-xs md:text-sm font-medium hover:underline text-white/90"
-                  >
-                    {getTranslatedText("View All")}
-                  </button>
-                </div>
-                <div className="flex items-center gap-3 md:gap-4">
-                  <div
-                    className="w-12 h-12 md:w-20 md:h-20 rounded-full flex items-center justify-center bg-white/20 backdrop-blur-sm"
-                  >
-                    <HiCash
-                      className="text-xl md:text-3xl text-white"
-                    />
-                  </div>
-                  <div>
-                    <p
-                      className="text-xl md:text-3xl font-bold text-white shadow-sm"
-                    >
-                      ₹{walletBalance.toFixed(2)}
-                    </p>
-                    <p
-                      className="text-xs md:text-base text-emerald-100"
-                    >
-                      {getTranslatedText("Available balance")}
-                    </p>
-                  </div>
-                </div>
-              </div>
             </motion.div>
           )}
 
@@ -573,9 +774,13 @@ const MyProfilePage = () => {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.3 }}>
-              {activityFeed.length > 0 ? (
+              {loadingActivity ? (
+                <div className="text-center py-10">
+                  <p className="text-slate-500">{getTranslatedText("Loading activity...")}</p>
+                </div>
+              ) : activities.length > 0 ? (
                 <div className="space-y-3 md:space-y-4">
-                  {activityFeed.map((item, index) => (
+                  {activities.map((item, index) => (
                     <motion.div
                       key={item.id}
                       initial={{ opacity: 0, x: -20 }}
@@ -604,7 +809,7 @@ const MyProfilePage = () => {
                             <span
                               className="text-[10px] md:text-xs whitespace-nowrap"
                               style={{ color: "#94a3b8" }}>
-                              {item.timestamp}
+                              {item.displayTime}
                             </span>
                           </div>
                           <p
@@ -666,7 +871,7 @@ const MyProfilePage = () => {
                   {getTranslatedText("Monthly Requests & Earnings")}
                 </h3>
                 <div className="h-60 flex items-end justify-between gap-2 md:gap-4 mt-6">
-                  {monthlyData.map((data, index) => (
+                  {monthlyStats.map((data, index) => (
                     <div
                       key={index}
                       className="flex-1 flex flex-col justify-end items-center group relative">
@@ -680,14 +885,14 @@ const MyProfilePage = () => {
                         <div
                           className="w-full max-w-[12px] md:max-w-[20px] rounded-t-sm opacity-50 transition-all group-hover:opacity-80"
                           style={{
-                            height: `${(data.requests / 10) * 100}%`,
+                            height: `${Math.max((data.requests / 10) * 100, 5)}%`, // Mimimum height for visibility
                             backgroundColor: "#10b981",
                           }}
                         />
                         <div
                           className="w-full max-w-[12px] md:max-w-[20px] rounded-t-sm transition-all group-hover:opacity-90"
                           style={{
-                            height: `${(data.earnings / 1000) * 100}%`,
+                            height: `${Math.max((data.earnings / 1000) * 100, 5)}%`, // Minimum height for visibility
                             backgroundColor: "#10b981",
                           }}
                         />
@@ -733,7 +938,7 @@ const MyProfilePage = () => {
                   {getTranslatedText("Category Distribution")}
                 </h3>
                 <div className="space-y-4">
-                  {categoryDistribution.map((item, index) => (
+                  {categoryStats.map((item, index) => (
                     <div key={index}>
                       <div className="flex justify-between items-center mb-1">
                         <span
@@ -790,6 +995,7 @@ const MyProfilePage = () => {
           </button>
         </div>
       </div>
+      <UserBottomNav />
     </motion.div>
   );
 };

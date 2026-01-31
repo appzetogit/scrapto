@@ -31,8 +31,19 @@ const getBypassOtp = (phone) => {
 // @route   POST /api/auth/register
 // @access  Public
 export const register = asyncHandler(async (req, res) => {
-  const { name, email, phone, password, role } = req.body;
+  const { name, email, phone, password, role, referralCode } = req.body;
   const userRole = role || USER_ROLES.USER;
+
+  // Validate referral code if provided
+  let referrerId = null;
+  if (referralCode) {
+    const referrer = await User.findOne({ referralCode });
+    if (!referrer) {
+      return sendError(res, 'Invalid referral code', 400);
+    }
+    // Prevent self-referral logic (though difficult here since user doesn't exist yet, but ensure code isn't same as what we might generate? actually we don't know our own code yet. Unlikely collision).
+    referrerId = referrer._id;
+  }
 
   // Check if phone number is already registered in opposite role
   if (userRole === USER_ROLES.USER) {
@@ -65,7 +76,8 @@ export const register = asyncHandler(async (req, res) => {
     email,
     phone,
     password,
-    role: userRole
+    role: userRole,
+    referredBy: referrerId
   });
 
   // If registering as scrapper, also create scrapper profile (if not already created)

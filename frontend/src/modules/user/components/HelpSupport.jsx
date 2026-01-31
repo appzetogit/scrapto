@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { useAuth } from "../../shared/context/AuthContext";
 import { createTicket, TICKET_ROLE } from "../../shared/utils/helpSupportUtils";
 import { usePageTranslation } from "../../../hooks/usePageTranslation";
+import { FaArrowLeft } from "react-icons/fa";
 
 const UserHelpSupport = () => {
   const navigate = useNavigate();
@@ -87,12 +88,19 @@ const UserHelpSupport = () => {
         <div
           className="flex items-center justify-between pb-3 md:pb-6 border-b"
           style={{ borderColor: "rgba(255, 255, 255, 0.3)" }}>
+          <button
+            onClick={() => navigate(-1)}
+            className="p-2 -ml-2 rounded-full hover:bg-white/10 text-white transition-colors"
+            aria-label="Go back"
+          >
+            <FaArrowLeft size={20} />
+          </button>
           <h2
             className="text-lg md:text-2xl font-bold"
             style={{ color: "#ffffff" }}>
             {getTranslatedText("Help & Support")}
           </h2>
-          <div className="w-10" />
+          <div className="w-8" />
         </div>
         <motion.div
           initial={{ opacity: 0, y: 10 }}

@@ -178,22 +178,12 @@ const KYCStatusPage = () => {
           transition={{ delay: 0.1 }}
           className="mb-6"
         >
-          <div className="flex items-center gap-4 mb-2">
-            <button
-              onClick={() => navigate('/scrapper')}
-              className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-zinc-800 transition-colors flex-shrink-0 bg-zinc-900"
-            >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" className="text-white">
-                <path d="M19 12H5M12 19l-7-7 7-7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            </button>
-            <div className="flex-1">
-              <h1 className="text-2xl md:text-3xl font-bold text-white">
-                {getTranslatedText("KYC Status")}
-              </h1>
-            </div>
+          <div className="mb-2">
+            <h1 className="text-2xl md:text-3xl font-bold text-white">
+              {getTranslatedText("KYC Status")}
+            </h1>
           </div>
-          <p className="text-sm md:text-base ml-14 text-gray-400">
+          <p className="text-sm md:text-base text-gray-400">
             {getTranslatedText("Track your KYC verification status")}
           </p>
         </motion.div>

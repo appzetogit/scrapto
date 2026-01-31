@@ -1,10 +1,12 @@
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../shared/context/AuthContext';
 import { kycAPI, subscriptionAPI, reviewAPI, scrapperProfileAPI } from '../../shared/utils/api';
 import RatingDisplay from '../../shared/components/RatingDisplay';
 import { usePageTranslation } from '../../../hooks/usePageTranslation';
+import EditProfileModal from './EditProfileModal';
+import ScrapperBottomNav from './ScrapperBottomNav';
 
 const ScrapperProfile = () => {
   const staticTexts = [
@@ -55,6 +57,29 @@ const ScrapperProfile = () => {
   const [loading, setLoading] = useState(true);
   const [scrapperUser, setScrapperUser] = useState(user);
   const [rating, setRating] = useState({ average: 0, count: 0, breakdown: null });
+  const [showKycInfo, setShowKycInfo] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+
+  const handleProfileUpdate = (updatedScrapper) => {
+    // 1. Update local state
+    setScrapperUser(prev => ({
+      ...prev,
+      ...updatedScrapper
+    }));
+
+    // 2. Update LocalStorage (so Navbar/Header updates immediately on refresh/reload)
+    // Merge with existing user data in storage to avoid losing irrelevant keys
+    try {
+      const storedUser = JSON.parse(localStorage.getItem('scrapperUser') || '{}');
+      const newStoredUser = { ...storedUser, ...updatedScrapper };
+      localStorage.setItem('scrapperUser', JSON.stringify(newStoredUser));
+    } catch (e) {
+      console.error("Local storage update error", e);
+    }
+
+    // 3. Close Modal
+    setIsEditModalOpen(false);
+  };
 
   useEffect(() => {
     const fetchScrapperData = async () => {
@@ -143,13 +168,13 @@ const ScrapperProfile = () => {
   const getKycLabel = () => {
     switch (kycStatus) {
       case 'verified':
-        return { label: getTranslatedText('Verified'), className: 'bg-green-900/30 text-green-400' };
+        return { label: getTranslatedText('Verified'), className: 'bg-emerald-100 text-emerald-700' };
       case 'pending':
-        return { label: getTranslatedText('Pending'), className: 'bg-orange-900/30 text-orange-400' };
+        return { label: getTranslatedText('Pending'), className: 'bg-orange-100 text-orange-700' };
       case 'rejected':
-        return { label: getTranslatedText('Rejected'), className: 'bg-red-900/30 text-red-400' };
+        return { label: getTranslatedText('Rejected'), className: 'bg-red-100 text-red-700' };
       default:
-        return { label: getTranslatedText('Not Submitted'), className: 'bg-zinc-800 text-gray-400' };
+        return { label: getTranslatedText('Not Submitted'), className: 'bg-slate-100 text-slate-500' };
     }
   };
 
@@ -183,12 +208,7 @@ const ScrapperProfile = () => {
           >
             {getTranslatedText("Scrapper Profile")}
           </h1>
-          <button
-            onClick={() => navigate('/scrapper')}
-            className="px-3 py-1.5 rounded-full text-xs md:text-sm font-semibold hover:bg-white/20 transition-all text-white bg-white/10 backdrop-blur-md shadow-sm border border-white/20"
-          >
-            {getTranslatedText("Close")}
-          </button>
+
         </div>
       </div>
 
@@ -290,9 +310,7 @@ const ScrapperProfile = () => {
               <button
                 type="button"
                 className="text-[11px] md:text-xs font-semibold px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-700 hover:bg-emerald-200"
-                onClick={() => {
-                  alert(getTranslatedText('Profile editing will be available soon.'));
-                }}
+                onClick={() => setIsEditModalOpen(true)}
               >
                 {getTranslatedText("Edit profile")}
               </button>
@@ -328,25 +346,79 @@ const ScrapperProfile = () => {
           {/* All actions / links in one list */}
           <div className="rounded-2xl border border-slate-200 bg-white/95 backdrop-blur-sm divide-y divide-slate-100 shadow-sm">
             {/* KYC status */}
-            <button
-              type="button"
-              onClick={() => navigate('/scrapper/kyc-status')}
-              className="w-full flex items-center justify-between px-3 md:px-4 py-3 md:py-3.5 text-left hover:bg-slate-50 transition-colors rounded-t-2xl"
-            >
-              <div>
-                <p className="text-xs md:text-sm font-semibold text-slate-800">
-                  {getTranslatedText("KYC status")}
-                </p>
-                <p className="text-[11px] md:text-xs text-slate-500">
-                  {kycConfig.label}
-                </p>
-              </div>
-              <span
-                className={`px-2.5 py-1 rounded-full text-[11px] font-semibold ${kycConfig.className}`}
+            <div className="flex flex-col border-b border-slate-100 last:border-0">
+              <button
+                type="button"
+                onClick={() => {
+                  if (kycStatus === 'not_submitted') {
+                    navigate('/scrapper/kyc');
+                  } else {
+                    setShowKycInfo(!showKycInfo);
+                  }
+                }}
+                className="w-full flex items-center justify-between px-3 md:px-4 py-3 md:py-3.5 text-left hover:bg-slate-50 transition-colors bg-white rounded-t-2xl"
               >
-                {getTranslatedText("View")}
-              </span>
-            </button>
+                <div>
+                  <p className="text-xs md:text-sm font-semibold text-slate-800">
+                    {getTranslatedText("KYC status")}
+                  </p>
+                  <p className="text-[11px] md:text-xs text-slate-500">
+                    {kycConfig.label}
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span
+                    className={`px-2.5 py-1 rounded-full text-[11px] font-semibold ${kycConfig.className}`}
+                  >
+                    {getTranslatedText("View")}
+                  </span>
+                </div>
+              </button>
+
+              {/* Inline KYC Details Card */}
+              {showKycInfo && kycStatus !== 'not_submitted' && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: 'auto', opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  className="px-4 pb-4 bg-slate-50/50 overflow-hidden"
+                >
+                  <div className="p-3 mt-1 bg-white rounded-xl border border-slate-200 shadow-sm space-y-3">
+                    <div className="flex justify-between items-center text-xs">
+                      <span className="text-slate-500">{getTranslatedText("Status")}</span>
+                      <span className={`font-bold ${kycConfig.className.replace('bg-', 'text-').split(' ')[1]}`}>
+                        {kycConfig.label}
+                      </span>
+                    </div>
+
+                    <div className="pt-2 border-t border-slate-100">
+                      <p className="text-[10px] uppercase tracking-wider text-slate-400 font-bold mb-2">
+                        {getTranslatedText("Submitted Documents")}
+                      </p>
+                      <div className="grid grid-cols-2 gap-2">
+                        <div className="flex items-center gap-1.5 text-xs text-slate-700 bg-slate-50 p-2 rounded-lg border border-slate-100">
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                          {getTranslatedText("Aadhaar Card")}
+                        </div>
+                        <div className="flex items-center gap-1.5 text-xs text-slate-700 bg-slate-50 p-2 rounded-lg border border-slate-100">
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                          {getTranslatedText("PAN Card")}
+                        </div>
+                      </div>
+                    </div>
+
+                    {kycStatus === 'rejected' && (
+                      <button
+                        onClick={() => navigate('/scrapper/kyc')}
+                        className="w-full mt-2 py-2 text-xs font-semibold bg-red-50 text-red-600 rounded-lg border border-red-200 hover:bg-red-100 transition-colors"
+                      >
+                        {getTranslatedText("Resubmit KYC")}
+                      </button>
+                    )}
+                  </div>
+                </motion.div>
+              )}
+            </div>
 
             {/* Subscription */}
             <button
@@ -464,6 +536,17 @@ const ScrapperProfile = () => {
             </button>
           </div>
         </div>
+      </div>
+      {/* Edit Profile Modal */}
+      <EditProfileModal
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        initialData={scrapperUser}
+        onSuccess={handleProfileUpdate}
+      />
+
+      <div className="md:hidden">
+        <ScrapperBottomNav />
       </div>
     </motion.div>
   );

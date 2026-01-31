@@ -98,6 +98,18 @@ const userSchema = new mongoose.Schema({
   fcmTokenMobile: {
     type: [String],
     default: []
+  },
+  // Referral System
+  referralCode: {
+    type: String,
+    unique: true,
+    sparse: true,
+    uppercase: true
+  },
+  referredBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    default: null
   }
 }, {
   timestamps: true
@@ -138,6 +150,7 @@ userSchema.methods.verifyOTP = function (otp) {
   return this.phoneVerificationOTP === otp;
 };
 
+
 // Remove password and sensitive data from JSON output
 userSchema.methods.toJSON = function () {
   const obj = this.toObject();
@@ -147,6 +160,34 @@ userSchema.methods.toJSON = function () {
   delete obj.verificationToken;
   return obj;
 };
+
+// Pre-save hook to generate referral code
+userSchema.pre('save', async function (next) {
+  if (!this.referralCode) {
+    // Generate a unique referral code
+    // Format: USER-XXXXXX or SCRAP-XXXXXX depending on role
+    const prefix = this.role === 'scrapper' ? 'SCRAP' : 'USER';
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let unique = false;
+    let code = '';
+
+    while (!unique) {
+      let randomStr = '';
+      for (let i = 0; i < 6; i++) {
+        randomStr += chars.charAt(Math.floor(Math.random() * chars.length));
+      }
+      code = `${prefix}-${randomStr}`;
+
+      // Check uniqueness
+      const existing = await mongoose.models.User.findOne({ referralCode: code });
+      if (!existing) {
+        unique = true;
+      }
+    }
+    this.referralCode = code;
+  }
+  next();
+});
 
 const User = mongoose.model('User', userSchema);
 

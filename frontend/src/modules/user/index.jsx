@@ -30,6 +30,7 @@ import TrackOrderPage from "./components/TrackOrderPage";
 import { FaHome, FaList, FaRegComments, FaUser } from "react-icons/fa";
 import WebViewHeader from "../shared/components/WebViewHeader";
 import TermsAndConditions from "./components/TermsAndConditions";
+import NotificationsPage from "./components/NotificationsPage";
 
 const UserModule = () => {
   const { isAuthenticated } = useAuth();
@@ -91,6 +92,7 @@ const UserModule = () => {
         <Route path="/track-order/:orderId" element={<TrackOrderPage />} />
         <Route path="/help" element={<HelpSupport />} />
         <Route path="/terms" element={<TermsAndConditions />} />
+        <Route path="/notifications" element={<NotificationsPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </div>

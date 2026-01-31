@@ -6,7 +6,7 @@ import {
   FaEdit,
   FaTrash,
   FaPlus,
-  FaTimes,
+  FaArrowLeft,
   FaHome,
   FaBuilding,
   FaMapPin,
@@ -45,30 +45,8 @@ const staticTexts = [
 const SavedAddressesPage = () => {
   const navigate = useNavigate();
   const { getTranslatedText } = usePageTranslation(staticTexts);
-  const [addresses, setAddresses] = useState([
-    {
-      id: 1,
-      label: "Home",
-      address: "123 Main Street, Sector 5",
-      city: "New Delhi",
-      state: "Delhi",
-      pincode: "110001",
-      landmark: "Near Metro Station",
-      type: "home",
-      isDefault: true,
-    },
-    {
-      id: 2,
-      label: "Office",
-      address: "456 Business Park, Floor 3",
-      city: "Gurgaon",
-      state: "Haryana",
-      pincode: "122001",
-      landmark: "Opposite Mall",
-      type: "office",
-      isDefault: false,
-    },
-  ]);
+  /* Addresses state - initialized empty as per requirement */
+  const [addresses, setAddresses] = useState([]);
 
   const [isAddMode, setIsAddMode] = useState(false);
   const [editingId, setEditingId] = useState(null);
@@ -201,10 +179,10 @@ const SavedAddressesPage = () => {
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
             <button
-              onClick={() => navigate("/")}
+              onClick={() => navigate(-1)}
               className="p-2 rounded-full hover:opacity-70 transition-opacity bg-white/20 backdrop-blur-sm shadow-sm"
               style={{ color: "#ffffff" }}>
-              <FaTimes size={20} />
+              <FaArrowLeft size={20} />
             </button>
             <h1
               className="text-xl md:text-2xl font-bold"

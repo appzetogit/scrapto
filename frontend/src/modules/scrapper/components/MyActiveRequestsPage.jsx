@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { scrapperOrdersAPI } from '../../shared/utils/api';
 import { usePageTranslation } from '../../../hooks/usePageTranslation';
+import ScrapperBottomNav from './ScrapperBottomNav';
 
 const MyActiveRequestsPage = () => {
   const staticTexts = [
@@ -221,14 +222,7 @@ const MyActiveRequestsPage = () => {
       <div className="sticky top-0 z-40 px-4 md:px-6 lg:px-8 py-4 md:py-6 border-b border-transparent bg-transparent">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <button
-              onClick={() => navigate('/scrapper')}
-              className="w-10 h-10 rounded-full flex items-center justify-center shadow-md bg-white text-slate-800"
-            >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" className="text-slate-800">
-                <path d="M19 12H5M12 19l-7-7 7-7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            </button>
+
             <div>
               <h1 className="text-xl md:text-2xl font-bold text-slate-800">
                 {getTranslatedText("My Active Requests")}
@@ -412,6 +406,9 @@ const MyActiveRequestsPage = () => {
             })}
           </div>
         )}
+      </div>
+      <div className="md:hidden">
+        <ScrapperBottomNav />
       </div>
     </motion.div>
   );

@@ -196,6 +196,7 @@ const ScrapperModule = () => {
         {/* Public routes (no scrapper auth required) */}
         <Route path="/login" element={<ScrapperLogin />} />
         <Route path="/kyc" element={<KYCUploadPage />} />
+        <Route path="/terms" element={<ScrapperTerms />} />
 
         {/* Default redirect to login */}
         <Route path="/" element={<Navigate to="/scrapper/login" replace />} />
@@ -247,7 +248,7 @@ const ScrapperModule = () => {
 
         {/* Profile */}
         <Route path="/profile" element={<ScrapperProfile />} />
-  <Route path="/terms" element={<ScrapperTerms />} />
+        <Route path="/terms" element={<ScrapperTerms />} />
 
         {/* Refer & Earn Route */}
         <Route path="/refer" element={<ReferAndEarn />} />

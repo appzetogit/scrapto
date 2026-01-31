@@ -11,6 +11,7 @@ import {
 import { scrapperOrdersAPI, orderAPI, scrapperProfileAPI } from '../../shared/utils/api';
 import socketClient from '../../shared/utils/socketClient';
 import { usePageTranslation } from '../../../hooks/usePageTranslation';
+import ScrapperBottomNav from './ScrapperBottomNav';
 
 const ActiveRequestsPage = () => {
   const staticTexts = [
@@ -462,14 +463,7 @@ const ActiveRequestsPage = () => {
     >
       {/* Header with Back Button and Status */}
       <div className="absolute top-0 left-0 right-0 z-20 p-4 flex items-center justify-between bg-black/95 backdrop-blur-sm border-b border-white/10">
-        <button
-          onClick={handleGoOffline}
-          className="w-10 h-10 rounded-full flex items-center justify-center shadow-md bg-zinc-900 text-white hover:bg-zinc-800 transition-colors"
-        >
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" className="text-current">
-            <path d="M19 12H5M12 19l-7-7 7-7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-        </button>
+
 
         <div className="flex items-center gap-3">
           {/* Active Requests Button */}
@@ -721,6 +715,12 @@ const ActiveRequestsPage = () => {
             })}
           </div>
         </motion.div>
+      )}
+      {/* Bottom Navigation - Only show when no incoming request overlay */}
+      {!incomingRequest && (
+        <div className="md:hidden">
+          <ScrapperBottomNav />
+        </div>
       )}
     </motion.div>
   );

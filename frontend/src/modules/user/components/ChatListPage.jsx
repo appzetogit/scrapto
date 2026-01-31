@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../shared/context/AuthContext";
 import { chatAPI } from "../../shared/utils/api";
-import { FaComments, FaSpinner, FaSearch } from "react-icons/fa";
+import { FaComments, FaSpinner, FaSearch, FaArrowLeft } from "react-icons/fa";
 import { usePageTranslation } from "../../../hooks/usePageTranslation";
 import { useDynamicTranslation } from "../../../hooks/useDynamicTranslation";
 
@@ -139,7 +139,13 @@ const ChatListPage = () => {
     <div className="min-h-screen" style={{ background: "linear-gradient(to bottom, #72c688ff, #dcfce7)" }}>
       <div className="p-4 md:p-6 space-y-4">
         {/* Header */}
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-3 mb-4">
+          <button
+            onClick={() => navigate(-1)}
+            className="p-2 rounded-full hover:opacity-70 transition-opacity bg-white/20 backdrop-blur-sm shadow-sm"
+            style={{ color: "#ffffff" }}>
+            <FaArrowLeft size={20} />
+          </button>
           <h1
             className="text-2xl md:text-3xl font-bold"
             style={{ color: "#ffffff" }}>

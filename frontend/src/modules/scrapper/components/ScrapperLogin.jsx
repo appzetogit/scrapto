@@ -1,6 +1,6 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useRef, useEffect } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { useAuth } from '../../shared/context/AuthContext';
 import { validateReferralCode, createReferral, processSignupBonus, getReferralSettings } from '../../shared/utils/referralUtils';
 import { linkLeadToScrapper } from '../../shared/utils/leadUtils';
@@ -71,7 +71,9 @@ const ScrapperLogin = () => {
     "Terms of Service",
     "Privacy Policy",
     "✓ You were referred by {name}",
-    "By continuing, you agree to our Terms & Conditions"
+    "✓ You were referred by {name}",
+    "By continuing, you agree to our Terms & Conditions",
+    "Resend in {seconds}s"
   ];
   const { getTranslatedText } = usePageTranslation(staticTexts);
   const navigate = useNavigate();
@@ -94,12 +96,25 @@ const ScrapperLogin = () => {
   const [shouldRedirect, setShouldRedirect] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [resendTimer, setResendTimer] = useState(0);
   const inputRefs = useRef([]);
   const { login, isAuthenticated, user } = useAuth();
+
+  // Handle resend timer
+  useEffect(() => {
+    let interval;
+    if (resendTimer > 0) {
+      interval = setInterval(() => {
+        setResendTimer((prev) => prev - 1);
+      }, 1000);
+    }
+    return () => clearInterval(interval);
+  }, [resendTimer]);
 
   // Note: Auth verification is handled by ScrapperModule
   // This component only handles login/signup flow
 
+  // Validate referral code input
   // Validate referral code input
   const validateReferralCodeInput = (code) => {
     if (!code || code.trim() === '') {
@@ -108,25 +123,16 @@ const ScrapperLogin = () => {
       return;
     }
 
-    const validation = validateReferralCode(code.toUpperCase());
-    if (!validation.valid) {
-      setReferralCodeError(validation.error);
-      setReferrerName('');
-    } else {
-      // Check if cross-referrals are allowed
-      const settings = getReferralSettings();
-      if (!settings.allowCrossReferrals && validation.referrerType !== 'scrapper') {
-        setReferralCodeError(getTranslatedText('This code is for users only. Please use a scrapper referral code.'));
-        setReferrerName('');
-      } else {
-        setReferralCodeError('');
-        if (validation.referrerType === 'user') {
-          setReferrerName(getTranslatedText('User Friend')); // Cross-referral
-        } else {
-          setReferrerName(getTranslatedText('Scrapper Friend'));
-        }
-      }
+    // Basic format validation (e.g. USER-XXXXXX or SCRAP-XXXXXX)
+    const pattern = /^(USER|SCRAP)-[A-Z0-9]{6}$/;
+    if (!pattern.test(code.toUpperCase())) {
+      setReferralCodeError(getTranslatedText('Invalid code format. Format: USER-XXXXXX'));
+      return;
     }
+
+    // Clear error - validation happens on backend onSubmit
+    setReferralCodeError('');
+    setReferrerName(getTranslatedText('Valid Code Format')); // Generic success message until API check
   };
 
   // Check for referral code in URL
@@ -262,6 +268,7 @@ const ScrapperLogin = () => {
         const response = await authAPI.sendLoginOTP(phone, 'scrapper');
         if (response.success) {
           setOtpSent(true);
+          setResendTimer(60);
           setTimeout(() => {
             inputRefs.current[0]?.focus();
           }, 100);
@@ -276,12 +283,14 @@ const ScrapperLogin = () => {
           phone,
           password,
           role: 'scrapper',
-          services: selectedServices
+          services: selectedServices,
+          referralCode: referralCode // Send referral code to backend
         });
 
         if (response.success) {
           // OTP is sent automatically on registration
           setOtpSent(true);
+          setResendTimer(60);
           setTimeout(() => {
             inputRefs.current[0]?.focus();
           }, 100);
@@ -292,6 +301,31 @@ const ScrapperLogin = () => {
       console.error('Error:', err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handlePaste = (e) => {
+    e.preventDefault();
+    const pastedData = e.clipboardData.getData('text/plain').slice(0, 6);
+
+    // Check if pasted content is numeric
+    if (!/^\d+$/.test(pastedData)) return;
+
+    const newOtp = [...otp];
+    pastedData.split('').forEach((char, index) => {
+      if (index < 6) newOtp[index] = char;
+    });
+    setOtp(newOtp);
+
+    // Focus on the next empty input or the last one
+    const nextIndex = Math.min(pastedData.length, 5);
+    inputRefs.current[nextIndex]?.focus();
+
+    // Auto-submit if full code is pasted
+    if (newOtp.every((digit) => digit !== '')) {
+      setTimeout(() => {
+        handleRegistration(newOtp);
+      }, 300);
     }
   };
 
@@ -329,6 +363,7 @@ const ScrapperLogin = () => {
       const response = await authAPI.resendOTP(phone);
       if (response.success) {
         setOtp(['', '', '', '', '', '']);
+        setResendTimer(60);
         setTimeout(() => {
           inputRefs.current[0]?.focus();
         }, 100);
@@ -413,7 +448,7 @@ const ScrapperLogin = () => {
 
   return (
     <div
-      className="min-h-screen w-full flex items-stretch sm:items-center justify-center p-4 relative overflow-hidden bg-gradient-to-br from-zinc-900 via-gray-900 to-black"
+      className="min-h-screen w-full flex items-stretch sm:items-center justify-center p-4 relative bg-gradient-to-br from-zinc-900 via-gray-900 to-black overflow-y-auto"
     >
       {/* Soft glow circles */}
       <div className="pointer-events-none absolute -top-24 -left-24 w-72 h-72 rounded-full bg-emerald-500/10 blur-3xl" />
@@ -423,7 +458,7 @@ const ScrapperLogin = () => {
         initial={{ opacity: 0, y: 24 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, ease: 'easeOut' }}
-        className="relative w-full max-w-4xl grid md:grid-cols-2 gap-0 bg-black/80 backdrop-blur-2xl rounded-3xl shadow-2xl overflow-hidden border border-white/10 max-h-[calc(100vh-2rem)] overflow-y-auto md:max-h-none md:overflow-visible"
+        className="relative w-full max-w-4xl grid md:grid-cols-2 gap-0 bg-black/80 backdrop-blur-2xl rounded-3xl shadow-2xl border border-white/10 my-auto"
       >
         {/* Left panel - hero content */}
         <div className="hidden md:flex flex-col justify-between p-8 lg:p-10 bg-zinc-900 text-white relative overflow-hidden">
@@ -825,7 +860,7 @@ const ScrapperLogin = () => {
                     </p>
                   </div>
 
-                  <div className="flex justify-center flex-nowrap gap-2 md:gap-3 px-1 w-full max-w-sm mx-auto">
+                  <div className="flex justify-center flex-nowrap gap-1 sm:gap-2 md:gap-3 px-1 w-full max-w-sm mx-auto">
                     {otp.map((digit, index) => (
                       <motion.input
                         key={index}
@@ -836,10 +871,11 @@ const ScrapperLogin = () => {
                         value={digit}
                         onChange={(e) => handleOtpChange(index, e.target.value)}
                         onKeyDown={(e) => handleKeyDown(index, e)}
+                        onPaste={handlePaste}
                         initial={{ scale: 0.8, opacity: 0 }}
                         animate={{ scale: 1, opacity: 1 }}
                         transition={{ delay: 0.1 + index * 0.05 }}
-                        className={`w-10 h-12 text-xl md:w-14 md:h-14 md:text-2xl text-center font-bold rounded-lg md:rounded-xl border-2 focus:outline-none focus:ring-2 transition-all ${digit
+                        className={`w-9 h-11 text-lg sm:w-10 sm:h-12 sm:text-xl md:w-14 md:h-14 md:text-2xl text-center font-bold rounded-lg md:rounded-xl border-2 focus:outline-none focus:ring-2 transition-all ${digit
                           ? 'border-emerald-500 bg-emerald-900/30 text-emerald-400'
                           : 'border-zinc-700 bg-black text-white'
                           }`}
@@ -861,10 +897,15 @@ const ScrapperLogin = () => {
                   <div className="text-center">
                     <button
                       onClick={handleResendOtp}
-                      disabled={loading}
-                      className="text-sm font-semibold transition-colors disabled:opacity-50 text-green-600 hover:text-green-700 hover:underline"
+                      disabled={loading || resendTimer > 0}
+                      className="text-sm font-semibold transition-colors disabled:opacity-50 text-green-600 hover:text-green-700 hover:underline disabled:text-gray-500 disabled:no-underline"
                     >
-                      {loading ? getTranslatedText('Sending...') : getTranslatedText('Resend OTP')}
+                      {loading
+                        ? getTranslatedText('Sending...')
+                        : resendTimer > 0
+                          ? getTranslatedText('Resend in {seconds}s', { seconds: resendTimer })
+                          : getTranslatedText('Resend OTP')
+                      }
                     </button>
                   </div>
 
@@ -896,7 +937,10 @@ const ScrapperLogin = () => {
             transition={{ delay: 0.5 }}
             className="text-center mt-4 text-xs md:text-sm text-gray-400"
           >
-            {getTranslatedText("By continuing, you agree to our Terms & Conditions")}
+            {getTranslatedText("By continuing, you agree to our ")}
+            <Link to="/scrapper/terms" className="underline hover:text-emerald-400 transition-colors">
+              {getTranslatedText("Terms & Conditions")}
+            </Link>
           </motion.div>
         </motion.div>
       </motion.div >

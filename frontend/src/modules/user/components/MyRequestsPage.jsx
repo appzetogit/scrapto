@@ -1,3 +1,4 @@
+
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
@@ -9,7 +10,7 @@ import {
   FaMapMarkerAlt,
   FaCalendarAlt,
   FaFilter,
-  FaTimes,
+  FaTimes, // Keeping unused icons or remove if totally unused
   FaImage,
   FaWeight,
   FaRupeeSign,
@@ -17,6 +18,7 @@ import {
   FaComments,
   FaStar,
   FaPhone,
+  FaArrowLeft,
 } from "react-icons/fa";
 import { HiClock, HiCheckCircle, HiXCircle } from "react-icons/hi";
 import { MdPending, MdLocalShipping, MdDone } from "react-icons/md";
@@ -102,7 +104,7 @@ const MyRequestsPage = () => {
       addressParts.join(", ") || getTranslatedText("Address not provided");
 
     // Generate requestId from order _id
-    const requestId = `REQ-${order._id.toString().slice(-6).toUpperCase()}`;
+    const requestId = `REQ - ${order._id.toString().slice(-6).toUpperCase()} `;
 
     // Map status: confirmed -> accepted for UI
     let displayStatus = order.status;
@@ -114,7 +116,7 @@ const MyRequestsPage = () => {
     let scrapperPhone = null;
     if (order.scrapper?.phone) {
       const phone = order.scrapper.phone.toString();
-      scrapperPhone = phone.length === 10 ? `+91 ${phone}` : phone;
+      scrapperPhone = phone.length === 10 ? `+ 91 ${phone} ` : phone;
     }
 
     return {
@@ -142,8 +144,8 @@ const MyRequestsPage = () => {
       setError(null);
       const queryParams =
         selectedFilter !== "all"
-          ? `status=${selectedFilter === "accepted" ? "confirmed" : selectedFilter
-          }`
+          ? `status = ${selectedFilter === "accepted" ? "confirmed" : selectedFilter
+          } `
           : "";
       const response = await orderAPI.getMy(queryParams);
 
@@ -278,7 +280,7 @@ const MyRequestsPage = () => {
 
     if (diffDays === 0) return getTranslatedText("Today");
     if (diffDays === 1) return getTranslatedText("Yesterday");
-    if (diffDays < 7) return `${diffDays} ${getTranslatedText("days ago")}`;
+    if (diffDays < 7) return `${diffDays} ${getTranslatedText("days ago")} `;
     return date.toLocaleDateString("en-IN", {
       day: "numeric",
       month: "short",
@@ -392,15 +394,13 @@ const MyRequestsPage = () => {
               <button
                 key={filter.id}
                 onClick={() => setSelectedFilter(filter.id)}
-                className={`px-4 py-2 md:px-6 md:py-2.5 rounded-full font-semibold text-xs md:text-sm whitespace-nowrap transition-all shadow-sm ${selectedFilter === filter.id ? "text-white shadow-md" : "text-slate-600 hover:bg-slate-50"
+                className={`flex-shrink-0 px-4 py-2 md:px-6 md:py-2.5 rounded-full font-semibold text-xs md:text-sm whitespace-nowrap transition-all shadow-sm border ${selectedFilter === filter.id
+                    ? "text-white shadow-md border-transparent"
+                    : "text-slate-600 hover:bg-slate-50 border-slate-200"
                   }`}
                 style={{
                   backgroundColor:
                     selectedFilter === filter.id ? "#059669" : "#ffffff",
-                  border:
-                    selectedFilter === filter.id
-                      ? "none"
-                      : "1px solid #e2e8f0",
                 }}>
                 {filter.label}
               </button>
@@ -564,7 +564,7 @@ const MyRequestsPage = () => {
                             style={{ backgroundColor: "#f1f5f9" }}>
                             <img
                               src={img}
-                              alt={`Request ${imgIndex + 1}`}
+                              alt={`Request ${imgIndex + 1} `}
                               className="w-full h-full object-cover"
                               onError={(e) => {
                                 e.target.style.display = "none";
@@ -739,7 +739,7 @@ const MyRequestsPage = () => {
                           style={{ borderColor: "rgba(100, 148, 110, 0.15)" }}>
                           {request.status === "in_progress" && (
                             <button
-                              onClick={() => navigate(`/track-order/${request.id}`)}
+                              onClick={() => navigate(`/ track - order / ${request.id} `)}
                               className="flex-1 py-2 px-4 rounded-lg text-sm font-semibold text-white text-center transition-all flex items-center justify-center gap-2"
                               style={{ backgroundColor: "#ea580c" }} // Orange for Track
                               onMouseEnter={(e) => {
@@ -754,7 +754,7 @@ const MyRequestsPage = () => {
                           )}
                           <button
                             onClick={() =>
-                              navigate(`/chat`, {
+                              navigate(`/ chat`, {
                                 state: { orderId: request.id },
                               })
                             }
@@ -774,7 +774,8 @@ const MyRequestsPage = () => {
                               href={`tel:${request.scrapperPhone.replace(
                                 /\s/g,
                                 ""
-                              )}`}
+                              )
+                                } `}
                               className="flex-1 py-2 px-4 rounded-lg text-sm font-semibold text-white text-center transition-all flex items-center justify-center gap-2"
                               style={{ backgroundColor: "#8b5cf6" }} // Purple for Call
                               onMouseEnter={(e) => {
@@ -806,7 +807,7 @@ const MyRequestsPage = () => {
                         ) : (
                           <button
                             onClick={() =>
-                              navigate(`/review-order/${request.id}`)
+                              navigate(`/ review - order / ${request.id} `)
                             }
                             className="flex-1 py-2 px-4 rounded-lg text-sm font-semibold text-white text-center transition-all flex items-center justify-center gap-2"
                             style={{ backgroundColor: "#f59e0b" }}
@@ -822,7 +823,7 @@ const MyRequestsPage = () => {
                         )}
                         <button
                           onClick={() =>
-                            navigate(`/chat`, {
+                            navigate(`/ chat`, {
                               state: { orderId: request.id },
                             })
                           }

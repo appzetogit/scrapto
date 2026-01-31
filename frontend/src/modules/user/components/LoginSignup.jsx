@@ -1,6 +1,7 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useRef, useEffect } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams, useLocation } from "react-router-dom";
+import TermsAndConditions from "./TermsAndConditions";
 import { useAuth } from "../../shared/context/AuthContext";
 import {
   validateReferralCode,
@@ -17,7 +18,9 @@ import bgLeafImage from "../../../assets/earth-removebg-preview.png";
 
 const LoginSignup = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [searchParams] = useSearchParams();
+
   const [isLogin, setIsLogin] = useState(true);
   const [isLangOpen, setIsLangOpen] = useState(false);
   const { language, languages, changeLanguage } = useLanguage();
@@ -91,6 +94,18 @@ const LoginSignup = () => {
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [otpSent, setOtpSent] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
+  const [resendTimer, setResendTimer] = useState(0);
+  const [termsAccepted, setTermsAccepted] = useState(false);
+
+  useEffect(() => {
+    let interval;
+    if (resendTimer > 0) {
+      interval = setInterval(() => {
+        setResendTimer((prev) => prev - 1);
+      }, 1000);
+    }
+    return () => clearInterval(interval);
+  }, [resendTimer]);
   const [shouldRedirect, setShouldRedirect] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -114,6 +129,10 @@ const LoginSignup = () => {
       setShouldRedirect(false);
     }
   }, [isAuthenticated, shouldRedirect, navigate]);
+
+  if (location.pathname === '/terms') {
+    return <TermsAndConditions />;
+  }
 
   const handlePhoneSubmit = async (e) => {
     e.preventDefault();
@@ -147,6 +166,7 @@ const LoginSignup = () => {
         const response = await authAPI.sendLoginOTP(phone, "user");
         if (response.success) {
           setOtpSent(true);
+          setResendTimer(30);
           setTimeout(() => {
             inputRefs.current[0]?.focus();
           }, 100);
@@ -161,11 +181,13 @@ const LoginSignup = () => {
           phone,
           password,
           role: "user",
+          referralCode: referralCode // Send referral code to backend
         });
 
         if (response.success) {
           // OTP is sent automatically on registration
           setOtpSent(true);
+          setResendTimer(30);
           setTimeout(() => {
             inputRefs.current[0]?.focus();
           }, 100);
@@ -179,6 +201,25 @@ const LoginSignup = () => {
       console.error("Error:", err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handlePaste = (e) => {
+    e.preventDefault();
+    const pastedData = e.clipboardData.getData("text").slice(0, 6).replace(/\D/g, "");
+    if (pastedData) {
+      const newOtp = [...otp];
+      for (let i = 0; i < pastedData.length; i++) {
+        newOtp[i] = pastedData[i];
+      }
+      setOtp(newOtp);
+
+      const nextIndex = Math.min(pastedData.length, 5);
+      inputRefs.current[nextIndex]?.focus();
+
+      if (pastedData.length === 6) {
+        // Optional: Auto-submit if needed, but user can click button
+      }
     }
   };
 
@@ -217,29 +258,16 @@ const LoginSignup = () => {
       return;
     }
 
-    const validation = validateReferralCode(code.toUpperCase());
-    if (!validation.valid) {
-      setReferralCodeError(validation.error);
-      setReferrerName("");
-    } else {
-      // Check if cross-referrals are allowed
-      const settings = getReferralSettings();
-      if (!settings.allowCrossReferrals && validation.referrerType !== "user") {
-        setReferralCodeError(
-          getTranslatedText(
-            "This code is for scrappers only. Please use a user referral code."
-          )
-        );
-        setReferrerName("");
-      } else {
-        setReferralCodeError("");
-        if (validation.referrerType === "scrapper") {
-          setReferrerName(getTranslatedText("Scrapper Friend")); // Cross-referral
-        } else {
-          setReferrerName(getTranslatedText("User Friend"));
-        }
-      }
+    // Basic format validation (e.g. USER-XXXXXX or SCRAP-XXXXXX)
+    const pattern = /^(USER|SCRAP)-[A-Z0-9]{6}$/;
+    if (!pattern.test(code.toUpperCase())) {
+      setReferralCodeError(getTranslatedText("Invalid code format. Format: USER-XXXXXX"));
+      return;
     }
+
+    // Clear error - validation happens on backend onSubmit
+    setReferralCodeError("");
+    setReferrerName(getTranslatedText("Valid Code Format")); // Generic success message until API check
   };
 
   const handleReferralCodeChange = (e) => {
@@ -314,7 +342,7 @@ const LoginSignup = () => {
 
   return (
     <div
-      className="min-h-screen w-full flex items-center justify-center px-4 py-6 md:px-6 md:py-10 lg:py-12 relative overflow-hidden"
+      className="min-h-screen w-full flex items-center justify-center px-4 py-6 md:px-6 md:py-10 lg:py-12 relative overflow-y-auto"
       style={{
         backgroundImage:
           "radial-gradient(circle at top left, #bbf7d0 0, transparent 50%), radial-gradient(circle at bottom right, #86efac 0, transparent 55%), linear-gradient(135deg, #022c22 0%, #064e3b 40%, #052e16 100%)",
@@ -833,7 +861,7 @@ const LoginSignup = () => {
                     <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
                     <path d="M7 11V7a5 5 0 0 1 10 0v4" />
                   </svg>
-                  <div className="flex-1 flex flex-wrap justify-between gap-1.5 max-w-xs mx-auto">
+                  <div className="flex-1 flex justify-between gap-1 max-w-xs mx-auto">
                     {otp.map((digit, index) => (
                       <input
                         key={index}
@@ -844,7 +872,8 @@ const LoginSignup = () => {
                         value={digit}
                         onChange={(e) => handleOtpChange(index, e.target.value)}
                         onKeyDown={(e) => handleKeyDown(index, e)}
-                        className="w-9 h-10 md:w-11 md:h-11 text-center text-lg md:text-2xl font-bold border-2 rounded-lg focus:outline-none transition-all bg-white"
+                        onPaste={handlePaste}
+                        className="w-8 h-10 md:w-11 md:h-11 text-center text-lg md:text-2xl font-bold border-2 rounded-lg focus:outline-none transition-all bg-white"
                         style={{
                           borderColor: digit ? "#64946e" : "#e5ddd4",
                           color: "#2d3748",
@@ -907,6 +936,7 @@ const LoginSignup = () => {
                     try {
                       const response = await authAPI.resendOTP(phone);
                       if (response.success) {
+                        setResendTimer(30);
                         setOtp(["", "", "", "", "", ""]);
                         setTimeout(() => {
                           inputRefs.current[0]?.focus();
@@ -920,13 +950,35 @@ const LoginSignup = () => {
                       setLoading(false);
                     }
                   }}
-                  disabled={loading}
+                  disabled={loading || resendTimer > 0}
                   className="text-sm font-medium hover:opacity-80 transition-opacity disabled:opacity-50"
                   style={{ color: "#64946e" }}>
-                  {loading ? getTranslatedText("Sending...") : getTranslatedText("Resend OTP?")}
+                  {loading ? getTranslatedText("Sending...") : resendTimer > 0 ? getTranslatedText("Resend in {seconds}s", { seconds: resendTimer }) : getTranslatedText("Resend OTP?")}
                 </button>
               )}
             </div>
+
+            {/* Terms and Conditions (Signup only) */}
+            {!isLogin && !otpSent && (
+              <div className="flex items-start gap-2 px-1 mb-4 text-left">
+                <input
+                  type="checkbox"
+                  checked={termsAccepted}
+                  onChange={(e) => setTermsAccepted(e.target.checked)}
+                  className="mt-1 w-4 h-4 text-emerald-600 rounded border-gray-300 focus:ring-emerald-500 cursor-pointer accent-emerald-600 shrink-0"
+                />
+                <p className="text-xs text-gray-600">
+                  {getTranslatedText("I agree to the")}{" "}
+                  <button
+                    type="button"
+                    onClick={() => navigate('/terms')}
+                    className="font-semibold text-emerald-600 hover:underline"
+                  >
+                    {getTranslatedText("Terms & Conditions")}
+                  </button>
+                </p>
+              </div>
+            )}
 
             {/* Error Message */}
             {error && (
@@ -945,7 +997,7 @@ const LoginSignup = () => {
                 loading ||
                 (!otpSent &&
                   (phone.length !== 10 ||
-                    (!isLogin && (!name.trim() || !email.trim())))) ||
+                    (!isLogin && (!name.trim() || !email.trim() || !termsAccepted)))) ||
                 (otpSent && otp.some((d) => d === ""))
               }
               className="w-full text-white font-bold py-4 md:py-4.5 rounded-xl disabled:cursor-not-allowed disabled:opacity-50 transition-all text-base md:text-lg shadow-lg"
@@ -953,7 +1005,7 @@ const LoginSignup = () => {
                 backgroundColor:
                   (!otpSent &&
                     phone.length === 10 &&
-                    (isLogin || (name.trim() && email.trim()))) ||
+                    (isLogin || (name.trim() && email.trim() && termsAccepted))) ||
                     (otpSent && otp.every((d) => d !== ""))
                     ? "#64946e"
                     : "#cbd5e0",
@@ -962,7 +1014,7 @@ const LoginSignup = () => {
                 if (
                   (!otpSent &&
                     phone.length === 10 &&
-                    (isLogin || (name.trim() && email.trim()))) ||
+                    (isLogin || (name.trim() && email.trim() && termsAccepted))) ||
                   (otpSent && otp.every((d) => d !== ""))
                 ) {
                   e.target.style.backgroundColor = "#5a8263";
@@ -972,7 +1024,7 @@ const LoginSignup = () => {
                 if (
                   (!otpSent &&
                     phone.length === 10 &&
-                    (isLogin || (name.trim() && email.trim()))) ||
+                    (isLogin || (name.trim() && email.trim() && termsAccepted))) ||
                   (otpSent && otp.every((d) => d !== ""))
                 ) {
                   e.target.style.backgroundColor = "#64946e";
