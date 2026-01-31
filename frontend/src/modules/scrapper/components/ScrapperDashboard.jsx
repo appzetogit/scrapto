@@ -6,7 +6,7 @@ import { FaGift, FaChartLine, FaCheck } from 'react-icons/fa';
 import PriceTicker from '../../user/components/PriceTicker';
 import ScrapperSolutions from './ScrapperSolutions';
 import { getActiveRequestsCount, getScrapperAssignedRequests, migrateOldActiveRequest } from '../../shared/utils/scrapperRequestUtils';
-import { earningsAPI, scrapperOrdersAPI, subscriptionAPI, kycAPI } from '../../shared/utils/api';
+import { earningsAPI, scrapperOrdersAPI, subscriptionAPI, kycAPI, scrapperProfileAPI } from '../../shared/utils/api';
 import BannerSlider from '../../shared/components/BannerSlider';
 import { usePageTranslation } from '../../../hooks/usePageTranslation';
 import LanguageSelector from '../../shared/components/LanguageSelector';
@@ -226,15 +226,23 @@ const ScrapperDashboard = () => {
   };
 
   // Handle availability toggle
-  const handleAvailabilityToggle = () => {
+  const handleAvailabilityToggle = async () => {
     const newAvailability = !isAvailable;
     setIsAvailable(newAvailability);
+
+    // Sync with backend
+    try {
+      await scrapperProfileAPI.updateMyProfile({ isOnline: newAvailability });
+    } catch (error) {
+      console.error('Failed to update availability status:', error);
+      // Optional: revert state if failed, but for better UX we often just log it 
+      // as the user might be offline and we want optimistic UI
+    }
 
     // If turning ON, navigate to active requests page
     if (newAvailability) {
       navigate('/scrapper/active-requests', { replace: false });
     }
-    // If turning OFF, stay on dashboard (or you can add logic to go back)
   };
 
   // Verify authentication and fetch KYC/Subscription status from backend

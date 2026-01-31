@@ -34,7 +34,7 @@ export const getMyProfile = asyncHandler(async (req, res) => {
 });
 
 export const updateMyProfile = asyncHandler(async (req, res) => {
-    const { name, vehicleInfo, availability } = req.body;
+    const { name, vehicleInfo, availability, isOnline } = req.body;
 
     const scrapper = await Scrapper.findById(req.user._id);
     if (!scrapper) {
@@ -43,6 +43,12 @@ export const updateMyProfile = asyncHandler(async (req, res) => {
 
     if (name) scrapper.name = name;
     if (vehicleInfo) scrapper.vehicleInfo = { ...scrapper.vehicleInfo, ...vehicleInfo };
+
+    // Update Online Status
+    // Handle both 'availability' (often used in frontend toggles) and 'isOnline'
+    if (availability !== undefined) scrapper.isOnline = availability;
+    if (isOnline !== undefined) scrapper.isOnline = isOnline;
+
     // Add other fields as needed
 
     await scrapper.save();

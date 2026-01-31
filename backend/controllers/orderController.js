@@ -7,6 +7,8 @@ import Payment from '../models/Payment.js';
 import WalletTransaction from '../models/WalletTransaction.js';
 import { ORDER_STATUS, PAYMENT_STATUS } from '../config/constants.js';
 import logger from '../utils/logger.js';
+import { notifyUser } from '../services/socketService.js';
+import { sendNotificationToUser } from '../utils/pushNotificationHelper.js';
 
 // @desc    Create new order
 // @route   POST /api/orders
@@ -85,6 +87,55 @@ export const createOrder = asyncHandler(async (req, res) => {
 
   logger.info(`Order created: ${order._id} by user: ${userId} (Type: ${order.orderType || 'scrap'})`);
 
+  // --- NOTIFY ONLINE SCRAPPERS ---
+  try {
+    // 1. Find Scrappers who are Online, Active, and Verified
+    const onlineScrappers = await Scrapper.find({
+      isOnline: true,
+      status: 'active',
+      'kyc.status': 'verified'
+    }).select('_id fcmTokens fcmTokenMobile');
+
+    if (onlineScrappers.length > 0) {
+      const notificationPayload = {
+        title: 'New Order Request 🔔',
+        body: 'A new pickup request is available near you!',
+        data: {
+          orderId: order._id.toString(),
+          type: 'new_order'
+        }
+      };
+
+      // Loop through scrappers to send notifications
+      // We use Promise.allSettled to ensure one failure doesn't stop others
+      await Promise.allSettled(onlineScrappers.map(async (scrapper) => {
+        // A. Send Socket Event
+        notifyUser(scrapper._id.toString(), 'new_order_request', {
+          orderId: order._id,
+          pickupAddress: order.pickupAddress,
+          orderType: order.orderType || 'scrap_pickup',
+          totalAmount: order.totalAmount,
+          message: 'New pickup request available!'
+        });
+
+        // B. Send Push Notification
+        // We reuse the helper which handles fetching tokens again, 
+        // passing the ID is enough as the helper fetches the user/scrapper model.
+        // Optimization: The helper fetches the model again. 
+        // Since we already found them, we could optimize, but using the helper 
+        // ensures consistency with how tokens are handled (web vs mobile).
+        await sendNotificationToUser(scrapper._id.toString(), notificationPayload, 'scrapper');
+      }));
+
+      logger.info(`Notified ${onlineScrappers.length} online scrappers for Order ${order._id}`);
+    } else {
+      logger.info(`No online scrappers found for Order ${order._id}`);
+    }
+  } catch (notifyError) {
+    logger.error('Error notifying scrappers:', notifyError);
+    // Do not fail the request if notification fails
+  }
+
   sendSuccess(res, 'Order created successfully', { order }, 201);
 });
 
@@ -151,8 +202,8 @@ export const getAvailableOrders = asyncHandler(async (req, res) => {
   const allowedOrderTypes = [];
 
   if (services.includes('scrap_pickup')) {
-    // Regular scrap orders usually don't have orderType or is 'scrap_pickup'
-    allowedOrderTypes.push(null, undefined, 'scrap_pickup');
+    // Regular scrap orders usually don't have orderType or is 'scrap_pickup' or 'scrap'
+    allowedOrderTypes.push(null, undefined, 'scrap_pickup', 'scrap', 'scrap_sell');
   }
 
   if (services.includes('home_cleaning')) {

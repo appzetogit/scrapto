@@ -8,7 +8,8 @@ import {
   getScrapperAssignedRequests,
   migrateOldActiveRequest
 } from '../../shared/utils/scrapperRequestUtils';
-import { scrapperOrdersAPI, orderAPI } from '../../shared/utils/api';
+import { scrapperOrdersAPI, orderAPI, scrapperProfileAPI } from '../../shared/utils/api';
+import socketClient from '../../shared/utils/socketClient';
 import { usePageTranslation } from '../../../hooks/usePageTranslation';
 
 const ActiveRequestsPage = () => {
@@ -189,9 +190,17 @@ const ActiveRequestsPage = () => {
 
           const conflictCheckList = currentAssigned.length > 0 ? currentAssigned : existingRequests;
 
-          // If there are available orders, show the first one
-          if (orders.length > 0 && !incomingRequest) {
+          // If there are available orders, force show the first one (most recent usually)
+          // We removed the !incomingRequest check to allow updates or instant show on socket trigger
+          if (orders.length > 0) {
             const order = orders[0];
+
+            // Avoid re-setting the same order to prevent re-renders or loops if already showing
+            if (incomingRequest && (incomingRequest.id === order._id || incomingRequest.id === order.id)) {
+              return;
+            }
+
+            console.log('✨ Displaying new available order:', order._id);
 
             // Map backend order to frontend request format
             const mappedRequest = {
@@ -200,7 +209,7 @@ const ActiveRequestsPage = () => {
               userName: order.user?.name || 'User',
               userPhone: order.user?.phone || '',
               userEmail: order.user?.email || '',
-              scrapType: order.scrapItems?.map(item => item.category).join(', ') || 'Scrap',
+              scrapType: order.orderType === 'cleaning_service' ? 'Cleaning Service' : (order.scrapItems?.map(item => item.category).join(', ') || 'Scrap'),
               weight: order.totalWeight,
               pickupSlot: order.pickupSlot || null,
               preferredTime: order.preferredTime || null,
@@ -244,9 +253,46 @@ const ActiveRequestsPage = () => {
     loadAvailableOrders();
 
     // Poll every 10 seconds for new orders
-    const pollInterval = setInterval(loadAvailableOrders, 10000);
+    // const pollInterval = setInterval(loadAvailableOrders, 10000); // Polling as backup
 
-    return () => clearInterval(pollInterval);
+    // SOCKET INTEGRATION
+    const setupSocket = async () => {
+      const token = localStorage.getItem('token');
+      if (token) {
+        socketClient.connect(token);
+
+        // Listen for new order requests
+        if (socketClient.socket) {
+          socketClient.socket.on('new_order_request', (data) => {
+            console.log('🔔 New Order Request via Socket:', data);
+            // Limit full refresh to avoid spam, but trigger load
+            loadAvailableOrders();
+          });
+        }
+      }
+    };
+    setupSocket();
+
+    // Set Online Status in Backend
+    const setOnlineInBackend = async () => {
+      try {
+        await scrapperProfileAPI.updateMyProfile({ isOnline: true });
+        console.log('✅ Scrapper status set to Online in Backend');
+      } catch (err) {
+        console.error('Failed to set online status:', err);
+      }
+    };
+    setOnlineInBackend();
+
+    // Still keep polling as a backup mechanism (every 15s)
+    const pollInterval = setInterval(loadAvailableOrders, 15000);
+
+    return () => {
+      clearInterval(pollInterval);
+      if (socketClient.socket) {
+        socketClient.socket.off('new_order_request');
+      }
+    };
   }, [isOnline, incomingRequest]);
 
   // Handle sound playback - Voice alert + vibration instead of ringtone
@@ -329,9 +375,17 @@ const ActiveRequestsPage = () => {
   }, [audioPlaying, incomingRequest]);
 
   // Handle going offline
-  const handleGoOffline = () => {
+  const handleGoOffline = async () => {
     setIsOnline(false);
     setAudioPlaying(false);
+
+    // Update backend status
+    try {
+      await scrapperProfileAPI.updateMyProfile({ isOnline: false });
+    } catch (err) {
+      console.error('Failed to set offline status:', err);
+    }
+
     navigate('/scrapper', { replace: true });
   };
 
