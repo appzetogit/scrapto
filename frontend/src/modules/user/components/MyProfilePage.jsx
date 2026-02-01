@@ -17,7 +17,7 @@ import {
   FaTrophy,
   FaChartLine,
   FaEdit,
-  FaTimes,
+
   FaUser,
   FaPhone,
   FaSignOutAlt,
@@ -369,13 +369,7 @@ const MyProfilePage = () => {
             style={{ color: "#ffffff" }}>
             {getTranslatedText("My Profile")}
           </h1>
-          <button
-            onClick={() => navigate("/")}
-            className="p-1.5 rounded-full hover:opacity-70 transition-opacity bg-white/20 backdrop-blur-sm shadow-sm"
-            style={{ color: "#ffffff" }}
-            aria-label={getTranslatedText("Go back")}>
-            <FaTimes size={18} />
-          </button>
+
         </div>
       </div>
 

@@ -14,7 +14,7 @@ export const setupGlobalErrorHandlers = () => {
       // Suppress extension errors
       return true; // Prevents default error handling
     }
-    
+
     // Call original handler for actual app errors
     if (originalErrorHandler) {
       return originalErrorHandler(message, source, lineno, colno, error);
@@ -26,7 +26,7 @@ export const setupGlobalErrorHandlers = () => {
   const originalUnhandledRejection = window.onunhandledrejection;
   window.onunhandledrejection = (event) => {
     const error = event.reason;
-    
+
     // Check if error is from a browser extension
     if (
       error?.message?.includes('chrome-extension://') ||
@@ -37,7 +37,7 @@ export const setupGlobalErrorHandlers = () => {
       event.preventDefault();
       return;
     }
-    
+
     // Call original handler for actual app errors
     if (originalUnhandledRejection) {
       return originalUnhandledRejection(event);
@@ -48,7 +48,7 @@ export const setupGlobalErrorHandlers = () => {
   const originalConsoleError = console.error;
   console.error = (...args) => {
     const errorString = args.join(' ');
-    
+
     // Check if error is from a browser extension
     if (
       errorString.includes('chrome-extension://') ||
@@ -60,7 +60,7 @@ export const setupGlobalErrorHandlers = () => {
       // Suppress extension errors - don't log them
       return;
     }
-    
+
     // Log actual app errors
     originalConsoleError.apply(console, args);
   };

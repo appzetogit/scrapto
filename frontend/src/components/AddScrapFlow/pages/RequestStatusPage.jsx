@@ -609,14 +609,20 @@ const RequestStatusPage = () => {
                 <span className="text-xs md:text-sm font-semibold" style={{ color: '#2d3748' }}>
                   {requestData.orderType === 'cleaning_service'
                     ? getTranslatedText(requestData.serviceDetails?.serviceType)
-                    : requestData.categories?.map(c => getTranslatedText(c.name)).join(', ')}
+                    : (requestData.categories
+                      ? requestData.categories.map(c => getTranslatedText(c.name)).join(', ')
+                      : (requestData.scrapItems
+                        ? requestData.scrapItems.map(item => getTranslatedText(item.category.charAt(0).toUpperCase() + item.category.slice(1))).join(', ')
+                        : '')
+                    )
+                  }
                 </span>
               </div>
               {requestData.orderType !== 'cleaning_service' && (
                 <div className="flex justify-between items-center">
                   <span className="text-xs md:text-sm" style={{ color: '#718096' }}>{getTranslatedText("Weight:")}</span>
                   <span className="text-xs md:text-sm font-semibold" style={{ color: '#2d3748' }}>
-                    {requestData.weight} {getTranslatedText("kg")}
+                    {requestData.weight || requestData.totalWeight || 0} {getTranslatedText("kg")}
                   </span>
                 </div>
               )}

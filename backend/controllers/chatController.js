@@ -10,7 +10,7 @@ import logger from '../utils/logger.js';
 export const getMyChats = asyncHandler(async (req, res) => {
   const userId = req.user.id;
   const userType = req.user.role === 'scrapper' ? 'scrapper' : 'user';
-  
+
   const { status = 'active', page = 1, limit = 20 } = req.query;
 
   const result = await chatService.getMyChats(userId, userType, {
@@ -29,7 +29,7 @@ export const getChatMessages = asyncHandler(async (req, res) => {
   const { chatId } = req.params;
   const userId = req.user.id;
   const userType = req.user.role === 'scrapper' ? 'scrapper' : 'user';
-  
+
   const { page = 1, limit = 50 } = req.query;
 
   const result = await chatService.getChatMessages(chatId, userId, userType, {
@@ -47,7 +47,7 @@ export const getChatById = asyncHandler(async (req, res) => {
   const { chatId } = req.params;
   const userId = req.user.id;
   const userType = req.user.role === 'scrapper' ? 'scrapper' : 'user';
-  
+
   const { page = 1, limit = 50 } = req.query;
 
   const result = await chatService.getChatById(chatId, userId, userType, {
@@ -115,6 +115,7 @@ export const sendMessage = asyncHandler(async (req, res) => {
 
   // Broadcast message via Socket.io
   try {
+    broadcastToChat(chatId, 'newMessage', newMessage);
     broadcastToChat(chatId, 'new_message', {
       message: newMessage
     });

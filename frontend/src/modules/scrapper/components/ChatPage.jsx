@@ -120,8 +120,13 @@ const ChatPage = () => {
         // Listen for new messages
         socketClient.onMessage((message) => {
           // Backend sends message object directly, check if it belongs to this chat
-          if (message && message.chat && message.chat.toString() === currentChatId) {
+          if (message && (message.chatId || message.chat) && (message.chatId || message.chat).toString() === currentChatId) {
             setMessages(prev => {
+              // Check if message is from self (already handled by optimistic update)
+              if (message.senderId?._id === user?._id || message.senderId === user?._id) {
+                return prev;
+              }
+
               // Check if message already exists
               const exists = prev.some(m => m._id === message._id);
               if (!exists) {
