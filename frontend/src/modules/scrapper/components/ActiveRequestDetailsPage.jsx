@@ -113,7 +113,9 @@ const ActiveRequestDetailsPage = () => {
     const fetchWallet = async () => {
       try {
         const data = await walletService.getWalletProfile();
-        setWalletBalance(data.balance || 0);
+        if (data.success && data.data) {
+          setWalletBalance(data.data.balance || 0);
+        }
       } catch (error) {
         console.error('Failed to fetch wallet:', error);
       }
