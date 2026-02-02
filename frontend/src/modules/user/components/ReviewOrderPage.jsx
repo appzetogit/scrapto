@@ -151,7 +151,17 @@ const ReviewOrderPage = () => {
         scrapperId = order.scrapper;
       } else if (order.scrapper && (order.scrapper._id || order.scrapper.id)) {
         scrapperId = order.scrapper._id || order.scrapper.id;
-      } else {
+      } else if (order.assignmentHistory && order.assignmentHistory.length > 0) {
+        // Fallback: Try to get scrapper ID from assignment history
+        // The last assignment should be the current/completed one
+        const lastAssignment =
+          order.assignmentHistory[order.assignmentHistory.length - 1];
+        if (lastAssignment?.scrapper) {
+          scrapperId = lastAssignment.scrapper;
+        }
+      }
+
+      if (!scrapperId) {
         throw new Error("Scrapper information missing");
       }
 
@@ -164,7 +174,7 @@ const ReviewOrderPage = () => {
         tags,
         images,
       });
-      navigate("/user/my-requests"); // Go back to orders
+      navigate("/my-requests"); // Go back to orders
     } catch (err) {
       setError(err.message || getTranslatedText("Failed to submit review"));
       setSubmitting(false);
@@ -310,45 +320,7 @@ const ReviewOrderPage = () => {
               />
             </div>
 
-            {/* Photos */}
-            <div>
-              <label className="block text-sm font-semibold mb-2 text-slate-700">
-                Add Photos (Optional)
-              </label>
-              <div className="flex gap-4 overflow-x-auto pb-2">
-                <label className="w-20 h-20 flex flex-col items-center justify-center border-2 border-dashed border-slate-300 rounded-xl cursor-pointer hover:border-emerald-500 hover:text-emerald-500 transition-colors bg-slate-50 hover:bg-emerald-50/50">
-                  <FaCloudUploadAlt size={24} />
-                  <span className="text-xs mt-1">Add</span>
-                  <input
-                    type="file"
-                    multiple
-                    accept="image/*"
-                    className="hidden"
-                    onChange={handleImageUpload}
-                  />
-                </label>
-                {previewImages.map((src, idx) => (
-                  <div key={idx} className="w-20 h-20 relative flex-shrink-0">
-                    <img
-                      src={src}
-                      alt="Preview"
-                      className="w-full h-full object-cover rounded-xl border border-slate-200"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setPreviewImages((prev) =>
-                          prev.filter((_, i) => i !== idx)
-                        );
-                        // In real app, remove from 'images' state too if already uploaded
-                      }}
-                      className="absolute -top-2 -right-2 bg-white rounded-full p-1 shadow-md text-red-500 border border-slate-100">
-                      <FaTimes size={10} />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </div>
+
 
             {/* Submit Button */}
             <button

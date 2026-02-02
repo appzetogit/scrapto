@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useAuth } from "../../shared/context/AuthContext";
-import { createTicket, TICKET_ROLE } from "../../shared/utils/helpSupportUtils";
+import { supportAPI } from "../../shared/utils/api";
 import { usePageTranslation } from "../../../hooks/usePageTranslation";
 import { FaArrowLeft } from "react-icons/fa";
 
@@ -50,27 +50,66 @@ const UserHelpSupport = () => {
     }
   }, [success, navigate]);
 
-  const handleSubmit = (e) => {
+
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!category || !message.trim()) return;
     if (submitting) return;
 
     setSubmitting(true);
     setStatusMessage(getTranslatedText("Submitting your ticket..."));
+
+    // Map frontend specific categories to backend generic types
+    // Backend Allowed types: ['issue', 'feedback', 'general', 'payment', 'account']
+    let backendType = 'general';
+    let subject = 'Support Request';
+
+    switch (category) {
+      case 'pickup_issue':
+        backendType = 'issue';
+        subject = 'Pickup Issue';
+        break;
+      case 'payment_issue':
+        backendType = 'payment';
+        subject = 'Payment/Payout Issue';
+        break;
+      case 'app_bug':
+        backendType = 'issue';
+        subject = 'App Bug Report';
+        break;
+      case 'scrapper_behavior':
+        backendType = 'issue';
+        subject = 'Scrapper Behavior Report';
+        break;
+      case 'other':
+        backendType = 'general';
+        subject = 'General Support Request';
+        break;
+      default:
+        backendType = 'general';
+        subject = 'Support Request';
+    }
+
     try {
-      createTicket({
-        role: TICKET_ROLE.USER,
-        userId: user?.id || user?.phone,
-        name: user?.name || "User",
-        phone: user?.phone || "",
-        category,
+      await supportAPI.create({
+        subject: subject,
+        type: backendType,
         message: message.trim(),
+        // Backend will populate name/email/role/user_id from the auth token
       });
       setSuccess(true);
       setMessage("");
       setCategory("");
+    } catch (error) {
+      console.error("Failed to submit ticket:", error);
+      setStatusMessage(getTranslatedText("Failed to submit. Please try again."));
+      // Reset submitting status after a delay so user can try again
+      setTimeout(() => setSubmitting(false), 2000);
     } finally {
-      setSubmitting(false);
+      if (!success) {
+        setSubmitting(false);
+      }
     }
   };
 

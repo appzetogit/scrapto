@@ -102,7 +102,8 @@ const MyActiveRequestsPage = () => {
       distance: null,
       estimatedEarnings: estimatedAmount,
       status: uiStatus,
-      acceptedAt: order.acceptedAt
+      acceptedAt: order.acceptedAt,
+      notes: order.notes || ''
     };
   };
 

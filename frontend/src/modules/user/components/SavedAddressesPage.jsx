@@ -63,8 +63,6 @@ const SavedAddressesPage = () => {
 
   const addressTypes = [
     { value: "home", label: getTranslatedText("Home"), icon: FaHome },
-    { value: "office", label: getTranslatedText("Office"), icon: FaBuilding },
-    { value: "other", label: getTranslatedText("Other"), icon: FaMapPin },
   ];
 
   const handleAddNew = () => {

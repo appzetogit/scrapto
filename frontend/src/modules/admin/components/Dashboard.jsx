@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   FaUsers,
   FaTruck,
@@ -15,6 +16,7 @@ import { adminAPI } from '../../shared/utils/api';
 import { usePageTranslation } from '../../../hooks/usePageTranslation';
 
 const Dashboard = () => {
+  const navigate = useNavigate();
   const [stats, setStats] = useState({
     totalUsers: 0,
     totalScrappers: 0,
@@ -147,7 +149,8 @@ const Dashboard = () => {
       color: '#3b82f6',
       bgColor: '#dbeafe',
       change: '+12%',
-      trend: 'up'
+      trend: 'up',
+      path: '/admin/users'
     },
     {
       title: getTranslatedText('Total Scrappers'),
@@ -156,7 +159,8 @@ const Dashboard = () => {
       color: '#10b981',
       bgColor: '#d1fae5',
       change: '+5%',
-      trend: 'up'
+      trend: 'up',
+      path: '/admin/scrappers'
     },
     {
       title: getTranslatedText('Active Requests'),
@@ -165,7 +169,8 @@ const Dashboard = () => {
       color: '#f59e0b',
       bgColor: '#fef3c7',
       change: '-3%',
-      trend: 'down'
+      trend: 'down',
+      path: '/admin/requests'
     },
     {
       title: getTranslatedText('KYC Pending'),
@@ -174,7 +179,8 @@ const Dashboard = () => {
       color: '#ef4444',
       bgColor: '#fee2e2',
       change: '+2',
-      trend: 'up'
+      trend: 'up',
+      path: '/admin/kyc'
     },
     {
       title: getTranslatedText('Total Revenue'),
@@ -183,7 +189,8 @@ const Dashboard = () => {
       color: '#8b5cf6',
       bgColor: '#ede9fe',
       change: '+18%',
-      trend: 'up'
+      trend: 'up',
+      path: '/admin/earnings'
     },
     {
       title: getTranslatedText("Today's Pickups"),
@@ -192,7 +199,8 @@ const Dashboard = () => {
       color: '#06b6d4',
       bgColor: '#cffafe',
       change: '+8%',
-      trend: 'up'
+      trend: 'up',
+      path: '/admin/completed-orders'
     }
   ];
 
@@ -223,6 +231,7 @@ const Dashboard = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.1 }}
               whileHover={{ y: -4 }}
+              onClick={() => navigate(card.path)} // Navigate on click
               className="bg-white rounded-xl md:rounded-2xl shadow-lg p-3 md:p-6 cursor-pointer"
             >
               <div className="flex items-start justify-between mb-2 md:mb-4">

@@ -78,18 +78,48 @@ const AddressInputPage = () => {
         setLocationError('');
 
         navigator.geolocation.getCurrentPosition(
-            (position) => {
+            async (position) => {
                 console.log("Location detected:", position.coords);
                 const coords = {
                     lat: position.coords.latitude,
                     lng: position.coords.longitude
                 };
                 setCoordinates(coords);
-                setIsGettingLocation(false);
 
-                // Reverse geocode to get address (optional - using a simple format)
-                // In production, you can use Google Geocoding API
-                setAddress(`Lat: ${coords.lat.toFixed(6)}, Lng: ${coords.lng.toFixed(6)}`);
+                // Reverse geocode using Photon (Komoot) API - Free & High Detail
+                try {
+                    const response = await fetch(`https://photon.komoot.io/reverse?lat=${coords.lat}&lon=${coords.lng}`);
+                    const data = await response.json();
+
+                    if (data && data.features && data.features.length > 0) {
+                        const props = data.features[0].properties;
+
+                        // Construct address from available fields
+                        const parts = [
+                            props.housenumber,    // House/Building Number
+                            props.street,         // Street Name
+                            props.name,           // Building/Landmark Name
+                            props.district,
+                            props.city,           // City
+                            props.state,          // State
+                            props.postcode,       // Pincode
+                            props.country         // Country
+                        ].filter(Boolean); // Remove empty values
+
+                        // Remove duplicates and join
+                        const uniqueParts = [...new Set(parts)];
+                        setAddress(uniqueParts.join(', '));
+                    } else {
+                        // Fallback if API returns no features
+                        setAddress(`Lat: ${coords.lat.toFixed(6)}, Lng: ${coords.lng.toFixed(6)}`);
+                    }
+                } catch (error) {
+                    console.error("Reverse geocoding error:", error);
+                    // Fallback if API call fails
+                    setAddress(`Lat: ${coords.lat.toFixed(6)}, Lng: ${coords.lng.toFixed(6)}`);
+                } finally {
+                    setIsGettingLocation(false);
+                }
             },
             (error) => {
                 console.error("Geolocation Error:", error);
@@ -114,8 +144,8 @@ const AddressInputPage = () => {
                 }
             },
             {
-                enableHighAccuracy: false, // Changed to false for faster, more reliable Wi-Fi/IP location
-                timeout: 30000,            // Increased timeout to 30 seconds
+                enableHighAccuracy: true,  // Enabling high accuracy for better street detail
+                timeout: 30000,
                 maximumAge: 0
             }
         );

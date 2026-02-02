@@ -457,20 +457,7 @@ const SubscriptionPlanManagement = () => {
               </div>
 
               <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-semibold mb-2" style={{ color: '#2d3748' }}>
-                    {getTranslatedText("Plan Type *")}
-                  </label>
-                  <select
-                    value={formData.type}
-                    onChange={(e) => setFormData({ ...formData, type: e.target.value })}
-                    className="w-full px-4 py-2 rounded-lg border-2 focus:outline-none focus:ring-2"
-                    style={{ borderColor: '#e2e8f0', focusBorderColor: '#64946e' }}
-                  >
-                    <option value="general">{getTranslatedText("General Subscription")}</option>
-                    <option value="market_price">{getTranslatedText("Market Price Subscription")}</option>
-                  </select>
-                </div>
+
                 <div>
                   <label className="block text-sm font-semibold mb-2" style={{ color: '#2d3748' }}>
                     {getTranslatedText("Duration Type *")}

@@ -1033,8 +1033,8 @@ const ScrapperDashboard = () => {
                   })
                   : 'Date not available';
 
-                const amount = order.paidAmount || order.finalAmount || order.estimatedEarnings || '₹0';
-                const amountValue = typeof amount === 'string' ? amount.replace(/[₹,\s]/g, '') : amount.toString();
+                const amount = order.amount !== undefined ? order.amount : 0;
+                const amountValue = amount;
 
                 return (
                   <motion.div
@@ -1109,7 +1109,7 @@ const ScrapperDashboard = () => {
                       </div>
                       <div className="text-right flex-shrink-0">
                         <p className="text-base font-bold mb-1 text-emerald-400">
-                          {typeof amount === 'string' && amount.includes('₹') ? amount : `₹${amountValue}`}
+                          {`₹${amountValue}`}
                         </p>
                         <div className="flex items-center justify-end gap-1">
                           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" className="text-emerald-400">

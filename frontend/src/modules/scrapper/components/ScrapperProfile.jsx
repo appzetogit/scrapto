@@ -464,7 +464,7 @@ const ScrapperProfile = () => {
 
             <button
               type="button"
-              onClick={() => navigate('/scrapper')}
+              onClick={() => navigate('/scrapper/earnings')}
               className="w-full flex items-center justify-between px-3 md:px-4 py-3 md:py-3.5 text-left hover:bg-slate-50 transition-colors"
             >
               <div>

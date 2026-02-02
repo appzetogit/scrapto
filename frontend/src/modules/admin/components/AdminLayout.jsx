@@ -38,7 +38,7 @@ const AdminLayout = () => {
     "All Subscriptions",
     "Manage Plans",
     "Referrals",
-    "Settings",
+    "Help & Support",
     "Milestone Rewards",
     "Tier Management",
     "Leaderboard",
@@ -99,7 +99,7 @@ const AdminLayout = () => {
     { icon: FaGift, label: getTranslatedText('Coupons'), path: '/admin/coupons' },
     { icon: FaChartBar, label: getTranslatedText('Reports'), path: '/admin/reports' },
     { icon: FaBullhorn, label: getTranslatedText('Ad Banners'), path: '/admin/banners' },
-    { icon: FaCog, label: getTranslatedText('Settings'), path: '/admin/settings' }
+    { icon: FaCog, label: getTranslatedText('Help & Support'), path: '/admin/help-support' }
   ];
 
   const isActive = (item) => {

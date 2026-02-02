@@ -11,10 +11,7 @@ import {
   FaCheckCircle,
   FaBox,
   FaWallet,
-  FaCheck,
-  FaWeight,
   FaStar,
-  FaTrophy,
   FaChartLine,
   FaEdit,
 
@@ -41,7 +38,6 @@ import {
 } from 'react-icons/md';
 
 const MyProfilePage = () => {
-  // ... existing code ...
   const staticTexts = [
     "My Profile",
     "Verified",
@@ -594,7 +590,7 @@ const MyProfilePage = () => {
           {[
             { id: "overview", label: getTranslatedText("Overview") },
             { id: "activity", label: getTranslatedText("Activity") },
-            { id: "analysis", label: getTranslatedText("Analysis") },
+
             {
               id: "refer",
               label: getTranslatedText("Refer & Earn"),
@@ -706,58 +702,6 @@ const MyProfilePage = () => {
                   ))}
                 </div>
               </div>
-
-              {/* Quick Stats */}
-              <div
-                className="rounded-xl md:rounded-2xl p-3 md:p-6 shadow-sm"
-                style={{ backgroundColor: '#ffffff' }}
-              >
-                <h3
-                  className="font-bold text-sm md:text-lg mb-3"
-                  style={{ color: "#1e293b" }}>
-                  {getTranslatedText("Quick Stats")}
-                </h3>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-2 md:gap-4">
-                  {[
-                    { label: getTranslatedText('Total Requests'), value: stats.totalRequests, icon: FaBox, color: '#10b981' },
-                    { label: getTranslatedText('Completed'), value: stats.completedRequests, icon: FaCheck, color: '#10b981' },
-                    { label: getTranslatedText('Total Earnings'), value: `₹${walletBalance.toFixed(0)}`, icon: HiCash, color: '#10b981' },
-                    { label: getTranslatedText('Total Weight'), value: `${stats.totalWeight} kg`, icon: FaWeight, color: '#10b981' },
-                    { label: getTranslatedText('Avg Rating'), value: `${stats.averageRating}`, icon: FaStar, color: '#10b981' },
-                    { label: getTranslatedText('Top Category'), value: getTranslatedText(stats.favoriteCategory), icon: FaTrophy, color: '#10b981' },
-                  ].map((stat, index) => {
-                    const IconComponent = stat.icon;
-                    return (
-                      <motion.div
-                        key={index}
-                        initial={{ opacity: 0, scale: 0.9 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{ duration: 0.3, delay: index * 0.05 }}
-                        className="p-2 md:p-4 rounded-lg md:rounded-xl text-center border border-slate-100"
-                        style={{
-                          backgroundColor: "#f8fafc",
-                        }}>
-                        <div className="flex justify-center mb-1.5">
-                          <IconComponent
-                            className="text-lg md:text-3xl"
-                            style={{ color: stat.color }}
-                          />
-                        </div>
-                        <p
-                          className="text-base md:text-xl font-bold mb-0.5"
-                          style={{ color: "#059669" }}>
-                          {stat.value}
-                        </p>
-                        <p
-                          className="text-[10px] md:text-sm leading-tight"
-                          style={{ color: "#64748b" }}>
-                          {stat.label}
-                        </p>
-                      </motion.div>
-                    );
-                  })}
-                </div>
-              </div>
             </motion.div>
           )}
 
@@ -846,121 +790,6 @@ const MyProfilePage = () => {
             </motion.div>
           )}
 
-          {activeTab === "analysis" && (
-            <motion.div
-              key="analysis"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.3 }}
-              className="space-y-4 md:space-y-6">
-              {/* Monthly Overview */}
-              <div
-                className="rounded-2xl p-4 md:p-6 shadow-sm border border-slate-100"
-                style={{ backgroundColor: "#ffffff" }}>
-                <h3
-                  className="font-bold text-base md:text-lg mb-4 flex items-center gap-2"
-                  style={{ color: "#1e293b" }}>
-                  <HiTrendingUp className="text-xl text-[#10b981]" />
-                  {getTranslatedText("Monthly Requests & Earnings")}
-                </h3>
-                <div className="h-60 flex items-end justify-between gap-2 md:gap-4 mt-6">
-                  {monthlyStats.map((data, index) => (
-                    <div
-                      key={index}
-                      className="flex-1 flex flex-col justify-end items-center group relative">
-                      {/* Tooltip */}
-                      <div className="absolute -top-12 opacity-0 group-hover:opacity-100 transition-opacity bg-slate-800 text-white text-xs p-2 rounded pointer-events-none z-10 whitespace-nowrap shadow-lg">
-                        <p>{data.requests} {getTranslatedText("Requests")}</p>
-                        <p>₹{data.earnings} {getTranslatedText("Earnings")}</p>
-                      </div>
-
-                      <div className="w-full flex gap-1 items-end justify-center h-full">
-                        <div
-                          className="w-full max-w-[12px] md:max-w-[20px] rounded-t-sm opacity-50 transition-all group-hover:opacity-80"
-                          style={{
-                            height: `${Math.max((data.requests / 10) * 100, 5)}%`, // Mimimum height for visibility
-                            backgroundColor: "#10b981",
-                          }}
-                        />
-                        <div
-                          className="w-full max-w-[12px] md:max-w-[20px] rounded-t-sm transition-all group-hover:opacity-90"
-                          style={{
-                            height: `${Math.max((data.earnings / 1000) * 100, 5)}%`, // Minimum height for visibility
-                            backgroundColor: "#10b981",
-                          }}
-                        />
-                      </div>
-                      <p
-                        className="text-xs mt-2 font-medium"
-                        style={{ color: "#64748b" }}>
-                        {data.month}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-                <div className="flex justify-center gap-4 mt-6">
-                  <div className="flex items-center gap-2">
-                    <div
-                      className="w-3 h-3 rounded-full opacity-50"
-                      style={{ backgroundColor: "#10b981" }}
-                    />
-                    <span className="text-xs" style={{ color: "#64748b" }}>
-                      {getTranslatedText("Requests")}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div
-                      className="w-3 h-3 rounded-full"
-                      style={{ backgroundColor: "#10b981" }}
-                    />
-                    <span className="text-xs" style={{ color: "#64748b" }}>
-                      {getTranslatedText("Earnings")}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Category Distribution */}
-              <div
-                className="rounded-2xl p-4 md:p-6 shadow-sm border border-slate-100"
-                style={{ backgroundColor: "#ffffff" }}>
-                <h3
-                  className="font-bold text-base md:text-lg mb-4 flex items-center gap-2"
-                  style={{ color: "#1e293b" }}>
-                  <MdCategory className="text-xl text-[#10b981]" />
-                  {getTranslatedText("Category Distribution")}
-                </h3>
-                <div className="space-y-4">
-                  {categoryStats.map((item, index) => (
-                    <div key={index}>
-                      <div className="flex justify-between items-center mb-1">
-                        <span
-                          className="text-sm font-medium"
-                          style={{ color: "#1e293b" }}>
-                          {item.name}
-                        </span>
-                        <span
-                          className="text-sm font-bold"
-                          style={{ color: item.color }}>
-                          {item.value}%
-                        </span>
-                      </div>
-                      <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
-                        <motion.div
-                          initial={{ width: 0 }}
-                          animate={{ width: `${item.value}%` }}
-                          transition={{ duration: 0.8, delay: index * 0.1 }}
-                          className="h-full rounded-full"
-                          style={{ backgroundColor: item.color }}
-                        />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </motion.div>
-          )}
 
           {activeTab === "refer" && (
             <motion.div

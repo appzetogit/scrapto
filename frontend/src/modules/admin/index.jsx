@@ -100,11 +100,11 @@ const AdminModuleRoutes = () => {
         {/* Coupons */}
         <Route path="coupons" element={<CouponsList />} />
         {/* Help & Support */}
-        <Route path="support" element={<HelpSupport />} />
+        <Route path="help-support" element={<HelpSupport />} />
         {/* Profile */}
         <Route path="profile" element={<AdminProfile />} />
         {/* Placeholder routes for future pages */}
-        <Route path="settings" element={<div className="p-6 text-center">{getTranslatedText("App Settings - Coming Soon")}</div>} />
+
         <Route path="*" element={<Navigate to="/admin" replace />} />
       </Route>
       <Route path="*" element={<Navigate to="/admin" replace />} />

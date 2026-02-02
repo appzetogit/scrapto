@@ -57,7 +57,7 @@ const CategorySelectionPage = () => {
         if (response.success && response.data?.prices && response.data.prices.length > 0) {
           const mappedCategories = response.data.prices.map(price => ({
             id: price.category.toLowerCase().replace(/\s+/g, '-'),
-            name: price.category,
+            name: price.category.charAt(0).toUpperCase() + price.category.slice(1).toLowerCase(),
             image: price.image || getCategoryImage(price.category),
             price: price.pricePerKg
           }));
@@ -71,7 +71,7 @@ const CategorySelectionPage = () => {
         const defaultFeed = getEffectivePriceFeed();
         const mappedCategories = defaultFeed.map(item => ({
           id: item.category.toLowerCase().replace(/\s+/g, '-'),
-          name: item.category,
+          name: item.category.charAt(0).toUpperCase() + item.category.slice(1).toLowerCase(),
           image: getCategoryImage(item.category),
           price: item.pricePerKg
         }));

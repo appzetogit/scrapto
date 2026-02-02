@@ -23,7 +23,7 @@ export const getEarningsSummary = asyncHandler(async (req, res) => {
     status: ORDER_STATUS.COMPLETED
   }).select('totalAmount completedDate createdAt');
 
-  // Calculate earnings
+  // Calculate earnings (Cash Flow)
   let todayEarnings = 0;
   let weekEarnings = 0;
   let monthEarnings = 0;
@@ -31,7 +31,16 @@ export const getEarningsSummary = asyncHandler(async (req, res) => {
 
   completedOrders.forEach((order) => {
     const orderDate = order.completedDate || order.createdAt;
-    const amount = order.totalAmount || 0;
+    let amount = order.totalAmount || 0;
+
+    // Logic: 
+    // Cleaning Service: Scrapper RECEIVES money (Positive)
+    // Scrap Pickup: Scrapper PAYS money (Negative)
+    if (order.orderType === 'cleaning_service') {
+      amount = Math.abs(amount); // Income
+    } else {
+      amount = -Math.abs(amount); // Expense
+    }
 
     totalEarnings += amount;
 
@@ -105,20 +114,34 @@ export const getEarningsHistory = asyncHandler(async (req, res) => {
   const total = await Order.countDocuments(query);
 
   // Map orders to earnings history format
-  const history = orders.map((order) => ({
-    id: order._id,
-    orderId: order._id,
-    userName: order.user?.name || 'User',
-    userPhone: order.user?.phone || '',
-    scrapType: order.scrapItems?.map((item) => item.category).join(', ') || 'Scrap',
-    weight: order.totalWeight,
-    amount: order.totalAmount,
-    location: order.pickupAddress
-      ? `${order.pickupAddress.street || ''}, ${order.pickupAddress.city || ''}, ${order.pickupAddress.state || ''} ${order.pickupAddress.pincode || ''}`.trim()
-      : 'Address not available',
-    completedAt: order.completedDate || order.createdAt,
-    createdAt: order.createdAt
-  }));
+  const history = orders.map((order) => {
+    let finalAmount = order.totalAmount || 0;
+
+    // Logic: 
+    // Cleaning Service: Scrapper RECEIVES money (Positive)
+    // Scrap Pickup: Scrapper PAYS money (Negative)
+    if (order.orderType === 'cleaning_service') {
+      finalAmount = Math.abs(finalAmount);
+    } else {
+      finalAmount = -Math.abs(finalAmount);
+    }
+
+    return {
+      id: order._id,
+      orderId: order._id,
+      userName: order.user?.name || 'User',
+      userPhone: order.user?.phone || '',
+      scrapType: order.scrapItems?.map((item) => item.category).join(', ') || 'Scrap',
+      weight: order.totalWeight,
+      amount: finalAmount, // Updated signed amount
+      location: order.pickupAddress
+        ? `${order.pickupAddress.street || ''}, ${order.pickupAddress.city || ''}, ${order.pickupAddress.state || ''} ${order.pickupAddress.pincode || ''}`.trim()
+        : 'Address not available',
+      completedAt: order.completedDate || order.createdAt,
+      createdAt: order.createdAt,
+      orderType: order.orderType // Useful for frontend styling if needed
+    };
+  });
 
   sendSuccess(res, 'Earnings history retrieved successfully', {
     history,

@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { uploadAPI } from '../../../modules/shared/utils/api';
 import { useAuth } from '../../../modules/shared/context/AuthContext';
 import { usePageTranslation } from '../../../hooks/usePageTranslation';
+import { compressImages } from '../../../modules/shared/utils/imageCompressor';
 
 const ImageUploadPage = () => {
   const staticTexts = [
@@ -102,18 +103,25 @@ const ImageUploadPage = () => {
     setUploadedImages(prev => prev.filter(img => img.id !== imageId));
   };
 
+
+
   const handleContinue = async () => {
     if (uploadedImages.length === 0 || isUploading) return;
     setIsUploading(true);
 
     try {
-      const files = uploadedImages.map((img) => img.file).filter(Boolean);
+      const rawFiles = uploadedImages.map((img) => img.file).filter(Boolean);
+
+      // Compress images before upload
+      const files = await compressImages(rawFiles);
+
       const res = await uploadAPI.uploadOrderImages(files);
       const uploaded = res.data?.files || [];
 
       const imagesData = uploaded.map((file, idx) => ({
         id: uploadedImages[idx]?.id || file.publicId || file.url,
-        preview: uploadedImages[idx]?.preview || file.url,
+        // Use the remote URL for preview to save sessionStorage space (avoid QuotaExceededError)
+        preview: file.url,
         name: uploadedImages[idx]?.name || file.publicId || 'image',
         url: file.url,
         publicId: file.publicId
@@ -280,7 +288,7 @@ const ImageUploadPage = () => {
                   />
                   <button
                     onClick={() => handleRemoveImage(image.id)}
-                    className="absolute top-2 right-2 w-6 h-6 md:w-8 md:h-8 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                    className="absolute top-2 right-2 w-6 h-6 md:w-8 md:h-8 rounded-full flex items-center justify-center shadow-md transition-transform hover:scale-110"
                     style={{ backgroundColor: 'rgba(229, 62, 62, 0.9)' }}
                   >
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" className="text-white md:w-4 md:h-4">

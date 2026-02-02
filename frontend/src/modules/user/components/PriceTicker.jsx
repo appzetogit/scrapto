@@ -8,7 +8,7 @@ import { useDynamicTranslation } from "../../../hooks/useDynamicTranslation";
 const PriceTicker = () => {
   const [prices, setPrices] = useState([]);
   const { getTranslatedText } = usePageTranslation([
-    "Live Market Prices",
+    "Price",
     "Source: Admin price feed",
     "No prices found",
     "Failed to fetch live prices, using default:",
@@ -67,7 +67,7 @@ const PriceTicker = () => {
           <h3
             className="text-lg md:text-xl font-bold"
             style={{ color: "#2d3748" }}>
-            {getTranslatedText("Live Market Prices")}
+            {getTranslatedText("Price")}
           </h3>
           <span className="text-xs md:text-sm" style={{ color: "#718096" }}>
             {getTranslatedText("Source: Admin price feed")}

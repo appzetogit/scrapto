@@ -169,9 +169,12 @@ const ActiveRequestDetailsPage = () => {
               url: img.url
             })) || [],
             location: {
-              address: order.pickupAddress?.street
-                ? `${order.pickupAddress.street}, ${order.pickupAddress.city || ''}, ${order.pickupAddress.state || ''} ${order.pickupAddress.pincode || ''}`.trim()
-                : 'Address not available',
+              address: [
+                order.pickupAddress?.street,
+                order.pickupAddress?.city,
+                order.pickupAddress?.state,
+                order.pickupAddress?.pincode
+              ].filter(Boolean).join(', ') || 'Address not available',
               lat: order.pickupAddress?.coordinates?.lat || 19.0760,
               lng: order.pickupAddress?.coordinates?.lng || 72.8777
             },
@@ -182,7 +185,8 @@ const ActiveRequestDetailsPage = () => {
             paymentStatus: order.paymentStatus,
             // Backend fields
             assignmentStatus: order.assignmentStatus,
-            acceptedAt: order.acceptedAt
+            acceptedAt: order.acceptedAt,
+            notes: order.notes || ''
           };
 
           setRequestData(mappedRequest);
@@ -267,9 +271,12 @@ const ActiveRequestDetailsPage = () => {
               url: img.url
             })) || [],
             location: {
-              address: order.pickupAddress?.street
-                ? `${order.pickupAddress.street}, ${order.pickupAddress.city || ''}, ${order.pickupAddress.state || ''} ${order.pickupAddress.pincode || ''}`.trim()
-                : 'Address not available',
+              address: [
+                order.pickupAddress?.street,
+                order.pickupAddress?.city,
+                order.pickupAddress?.state,
+                order.pickupAddress?.pincode
+              ].filter(Boolean).join(', ') || 'Address not available',
               lat: order.pickupAddress?.coordinates?.lat || 19.0760,
               lng: order.pickupAddress?.coordinates?.lng || 72.8777
             },
@@ -277,7 +284,8 @@ const ActiveRequestDetailsPage = () => {
               ? `₹${order.serviceFee || 0}`
               : `₹${order.totalAmount || 0}`,
             status: order.status,
-            paymentStatus: order.paymentStatus
+            paymentStatus: order.paymentStatus,
+            notes: order.notes || ''
           };
 
           setRequestData(mappedRequest);
@@ -491,9 +499,15 @@ const ActiveRequestDetailsPage = () => {
                 ...response,
                 amount: amount
               });
+
+              // FIX: Now that wallet is recharged, actually PAY the order
+              // This transfers from Scrapper -> User
+              await walletService.payOrderViaWallet((requestData._id || requestData.id), amount);
+
               completePaymentSuccess(amount);
             } catch (err) {
-              alert('Payment Verification Failed');
+              console.error("Payment Error:", err);
+              alert(err.response?.data?.message || 'Payment processing failed. If money was deducted, it is in your wallet.');
               setIsProcessingPayment(false);
             }
           },
@@ -906,6 +920,20 @@ const ActiveRequestDetailsPage = () => {
                   </div>
 
                   {renderPickupSlot()}
+
+                  {/* User Notes */}
+                  {requestData.notes && (
+                    <div className="mb-4">
+                      <p className="text-xs md:text-sm mb-1" style={{ color: '#718096' }}>
+                        {getTranslatedText("Note from User:")}
+                      </p>
+                      <div className="bg-slate-50 p-3 rounded-lg border border-slate-100">
+                        <p className="text-sm md:text-base italic" style={{ color: '#4a5568' }}>
+                          "{requestData.notes}"
+                        </p>
+                      </div>
+                    </div>
+                  )}
 
                   {/* Scrap Images */}
                   {requestData.images && requestData.images.length > 0 && (

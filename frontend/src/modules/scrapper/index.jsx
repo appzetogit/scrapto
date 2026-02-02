@@ -16,6 +16,7 @@ import ScrapperTerms from './components/ScrapperTerms';
 import ChatPage from './components/ChatPage';
 import ChatListPage from './components/ChatListPage';
 import ScrapperWallet from './components/ScrapperWallet';
+import ScrapperEarningsPage from './components/ScrapperEarningsPage';
 import { authAPI } from '../shared/utils/api';
 import { FaHome, FaList, FaRegComments, FaUser, FaWallet } from 'react-icons/fa';
 import WebViewHeader from '../shared/components/WebViewHeader';
@@ -260,6 +261,9 @@ const ScrapperModule = () => {
 
         {/* Wallet Route */}
         <Route path="/wallet" element={<ScrapperWallet />} />
+
+        {/* Earnings Route */}
+        <Route path="/earnings" element={<ScrapperEarningsPage />} />
 
         {/* Redirect logic based on KYC and Subscription status */}
         <Route path="*" element={

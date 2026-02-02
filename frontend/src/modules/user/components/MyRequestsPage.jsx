@@ -395,8 +395,8 @@ const MyRequestsPage = () => {
                 key={filter.id}
                 onClick={() => setSelectedFilter(filter.id)}
                 className={`flex-shrink-0 px-4 py-2 md:px-6 md:py-2.5 rounded-full font-semibold text-xs md:text-sm whitespace-nowrap transition-all shadow-sm border ${selectedFilter === filter.id
-                    ? "text-white shadow-md border-transparent"
-                    : "text-slate-600 hover:bg-slate-50 border-slate-200"
+                  ? "text-white shadow-md border-transparent"
+                  : "text-slate-600 hover:bg-slate-50 border-slate-200"
                   }`}
                 style={{
                   backgroundColor:
@@ -739,7 +739,9 @@ const MyRequestsPage = () => {
                           style={{ borderColor: "rgba(100, 148, 110, 0.15)" }}>
                           {request.status === "in_progress" && (
                             <button
-                              onClick={() => navigate(`/ track - order / ${request.id} `)}
+                              onClick={() =>
+                                navigate(`/track-order/${request.id}`)
+                              }
                               className="flex-1 py-2 px-4 rounded-lg text-sm font-semibold text-white text-center transition-all flex items-center justify-center gap-2"
                               style={{ backgroundColor: "#ea580c" }} // Orange for Track
                               onMouseEnter={(e) => {
@@ -754,7 +756,7 @@ const MyRequestsPage = () => {
                           )}
                           <button
                             onClick={() =>
-                              navigate(`/ chat`, {
+                              navigate(`/chat`, {
                                 state: { orderId: request.id },
                               })
                             }
@@ -796,6 +798,7 @@ const MyRequestsPage = () => {
                       <div
                         className="flex gap-2 mt-3 pt-3 border-t"
                         style={{ borderColor: "rgba(100, 148, 110, 0.15)" }}>
+                        {/* Rating option hidden as per user request
                         {request.hasReview ? (
                           <button
                             disabled
@@ -807,7 +810,7 @@ const MyRequestsPage = () => {
                         ) : (
                           <button
                             onClick={() =>
-                              navigate(`/ review - order / ${request.id} `)
+                              navigate(`/review-order/${request.id}`)
                             }
                             className="flex-1 py-2 px-4 rounded-lg text-sm font-semibold text-white text-center transition-all flex items-center justify-center gap-2"
                             style={{ backgroundColor: "#f59e0b" }}
@@ -820,10 +823,11 @@ const MyRequestsPage = () => {
                             <FaStar size={14} />
                             {getTranslatedText("Rate & Review")}
                           </button>
-                        )}
+                        )} 
+                        */}
                         <button
                           onClick={() =>
-                            navigate(`/ chat`, {
+                            navigate(`/chat`, {
                               state: { orderId: request.id },
                             })
                           }

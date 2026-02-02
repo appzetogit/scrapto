@@ -376,12 +376,6 @@ export const updateOrderStatus = asyncHandler(async (req, res) => {
       return sendError(res, 'Invalid payment status', 400);
     }
     order.paymentStatus = paymentStatus;
-
-    // Set paidAt if completed
-    if (paymentStatus === PAYMENT_STATUS.COMPLETED) {
-      // Create a dummy payment record for tracking if one doesn't exist? 
-      // For now, just update order level status
-    }
   }
 
   // Update totalAmount if provided (e.g. final negotiated price)
@@ -394,15 +388,20 @@ export const updateOrderStatus = asyncHandler(async (req, res) => {
   if (status === ORDER_STATUS.COMPLETED) {
     order.completedDate = new Date();
 
-    // Commission Deduction Logic (1%)
-    // Case A: Cleaning Service (User pays 1 Rupee commission)
+    // ---------------------------------------------------------
+    // WALLET & COMMISSION LOGIC
+    // ---------------------------------------------------------
+
+    // Case A: Cleaning Service (User pays Scrapper)
+    // Commission: User pays 1% platform fee
     if (order.orderType === 'cleaning_service') {
       const user = await User.findById(order.user);
       if (user) {
-        const commissionAmount = 1; // Fixed ₹1 commission per request
+        // Calculate 1% Commission
+        const commissionAmount = Math.max(1, Math.round(order.totalAmount * 0.01));
         const balanceBefore = user.wallet.balance;
 
-        // Deduct from wallet
+        // Deduct Commission from User Wallet
         user.wallet.balance -= commissionAmount;
         await user.save();
 
@@ -419,49 +418,68 @@ export const updateOrderStatus = asyncHandler(async (req, res) => {
           balanceAfter: balanceAfter,
           category: 'COMMISSION',
           status: 'SUCCESS',
-          description: `Service Fee (₹1) for Cleaning Request #${order._id}`,
+          description: `Platform Fee (1%) for Cleaning Request #${order._id}`,
           orderId: order._id,
-          gateway: {
-            provider: 'SYSTEM'
-          }
+          gateway: { provider: 'SYSTEM' }
         });
 
-        logger.info(`[Commission] Deducted ₹${commissionAmount} from User ${user._id} for Cleaning Order ${order._id}. New Balance: ${balanceAfter}`);
+        logger.info(`[Commission] Deducted ₹${commissionAmount} from User ${user._id} for Cleaning Order ${order._id}`);
       }
     }
-    // Case B: Scrap Sell (Scrapper pays 1 Rupee commission)
+    // Case B: Scrap Sell (Scrapper pays User)
+    // Action 1: Deduct Order Amount from Scrapper Wallet (Payment to User)
+    // Action 2: Deduct 1% Commission from Scrapper Wallet (Platform Fee)
     else if (order.scrapper) {
       const scrapper = await Scrapper.findById(order.scrapper);
       if (scrapper) {
-        const commissionAmount = 1; // Fixed ₹1 commission per request
+        // 1. Deduct Order Amount (Payment to User)
+        const orderAmount = order.totalAmount || 0;
+        if (orderAmount > 0) {
+          const balanceBeforePay = scrapper.wallet.balance;
+          scrapper.wallet.balance -= orderAmount;
+          await scrapper.save();
 
-        const balanceBefore = scrapper.wallet.balance;
+          await WalletTransaction.create({
+            trxId: `TRX-PAY-${Date.now()}-${order._id.toString().slice(-4)}`,
+            user: scrapper._id,
+            userType: 'Scrapper',
+            amount: orderAmount,
+            type: 'DEBIT',
+            balanceBefore: balanceBeforePay,
+            balanceAfter: scrapper.wallet.balance, // Updated balance
+            category: 'PAYMENT_SENT', // Indicates money went OUT to User
+            status: 'SUCCESS',
+            description: `Payment to User for Order #${order._id}`,
+            orderId: order._id,
+            gateway: { provider: 'WALLET' }
+          });
+          logger.info(`[Wallet] Deducted ₹${orderAmount} from Scrapper ${scrapper._id} for Order Payment`);
+        }
 
-        // Deduct from wallet
+        // 2. Deduct 1% Commission
+        // Reload scrapper to be safe or use current object? Using object is fine as we awaited save
+        const commissionAmount = Math.max(1, Math.round(orderAmount * 0.01));
+        const balanceBeforeComm = scrapper.wallet.balance;
+
         scrapper.wallet.balance -= commissionAmount;
         await scrapper.save();
 
-        const balanceAfter = scrapper.wallet.balance;
-
-        // Log the commission transaction
         await WalletTransaction.create({
           trxId: `TRX-COMM-${Date.now()}-${order._id.toString().slice(-4)}`,
           user: scrapper._id,
           userType: 'Scrapper',
           amount: commissionAmount,
           type: 'DEBIT',
-          balanceBefore: balanceBefore,
-          balanceAfter: balanceAfter,
+          balanceBefore: balanceBeforeComm,
+          balanceAfter: scrapper.wallet.balance,
           category: 'COMMISSION',
           status: 'SUCCESS',
-          description: `Commission (₹1) for completed Order #${order._id}`,
+          description: `Platform Fee (1%) for Order #${order._id}`,
           orderId: order._id,
-          gateway: {
-            provider: 'SYSTEM'
-          }
+          gateway: { provider: 'SYSTEM' }
         });
 
-        logger.info(`[Commission] Deducted ₹${commissionAmount} from Scrapper ${scrapper._id} for Order ${order._id}. New Balance: ${balanceAfter}`);
+        logger.info(`[Commission] Deducted ₹${commissionAmount} from Scrapper ${scrapper._id} for Order #${order._id}`);
       }
     }
   }

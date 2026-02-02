@@ -220,9 +220,12 @@ const ActiveRequestsPage = () => {
                 url: img.url
               })) || [],
               location: {
-                address: order.pickupAddress?.street
-                  ? `${order.pickupAddress.street}, ${order.pickupAddress.city || ''}, ${order.pickupAddress.state || ''} ${order.pickupAddress.pincode || ''}`.trim()
-                  : getTranslatedText('Address not available'),
+                address: [
+                  order.pickupAddress?.street,
+                  order.pickupAddress?.city,
+                  order.pickupAddress?.state,
+                  order.pickupAddress?.pincode
+                ].filter(Boolean).join(', ') || getTranslatedText('Address not available'),
                 lat: order.pickupAddress?.coordinates?.lat || 19.0760,
                 lng: order.pickupAddress?.coordinates?.lng || 72.8777
               },
@@ -230,7 +233,8 @@ const ActiveRequestsPage = () => {
               estimatedEarnings: `₹${order.totalAmount || 0}`,
               // Backend fields
               status: order.status,
-              assignmentStatus: order.assignmentStatus
+              assignmentStatus: order.assignmentStatus,
+              notes: order.notes || ''
             };
 
             setIncomingRequest(mappedRequest);
@@ -511,7 +515,7 @@ const ActiveRequestsPage = () => {
           {/* Request Content - Compact - Scrollable */}
           <div
             className="p-4 pb-2 overflow-y-auto flex-1 pb-24 md:pb-2"
-            style={{ minHeight: 0, WebkitOverflowScrolling: 'touch' }}
+            style={{ minHeight: 0, WebkitOverflowScrolling: 'touch', overscrollBehaviorY: 'contain' }}
           >
             <div className="flex items-center justify-between mb-3">
               <h2 className="text-lg font-bold text-slate-100">{getTranslatedText("New Request")}</h2>
@@ -578,6 +582,14 @@ const ActiveRequestsPage = () => {
                 </div>
               )}
 
+              {/* User Notes */}
+              {incomingRequest.notes && (
+                <div className="mt-2 p-2 rounded-lg bg-slate-800/80 border border-slate-700/50">
+                  <p className="text-xs text-slate-400 font-semibold mb-1">{getTranslatedText("Note")}:</p>
+                  <p className="text-xs text-slate-200 italic">"{incomingRequest.notes}"</p>
+                </div>
+              )}
+
               {/* Time Conflict Warning */}
               {timeConflict && (
                 <div className="mt-2 p-2 rounded-lg flex items-start gap-2" style={{ backgroundColor: 'rgba(239, 68, 68, 0.15)', border: '1px solid rgba(239, 68, 68, 0.3)' }}>
@@ -624,105 +636,110 @@ const ActiveRequestsPage = () => {
             </motion.button>
           </div>
         </motion.div>
-      )}
+      )
+      }
 
       {/* Active Requests Panel - Floating */}
-      {existingRequests.length > 0 && (
-        <motion.div
-          initial={{ x: showActiveRequestsPanel ? 0 : '100%' }}
-          animate={{ x: showActiveRequestsPanel ? 0 : '100%' }}
-          transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-          className="absolute top-20 right-4 z-30 w-80 max-w-[calc(100%-2rem)] rounded-2xl shadow-2xl bg-zinc-900 border border-white/10"
-          style={{ maxHeight: 'calc(100vh - 6rem)' }}
-        >
-          <div className="p-4 border-b border-white/10" >
-            <div className="flex items-center justify-between">
-              <h3 className="text-base font-bold text-white">
-                {getTranslatedText("Active Requests ({count})", { count: existingRequests.length })}
-              </h3>
-              <button
-                onClick={() => setShowActiveRequestsPanel(false)}
-                className="w-6 h-6 rounded-full flex items-center justify-center"
-                style={{ backgroundColor: 'rgba(239, 68, 68, 0.2)' }}
-              >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style={{ color: '#ef4444' }}>
-                  <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                </svg>
-              </button>
-            </div>
-          </div>
-          <div className="p-2 overflow-y-auto" style={{ maxHeight: 'calc(100vh - 10rem)' }}>
-            {existingRequests.map((request) => {
-              const statusColors = {
-                accepted: { bg: 'rgba(59, 130, 246, 0.1)', color: '#2563eb', label: getTranslatedText('Accepted') },
-                picked_up: { bg: 'rgba(234, 179, 8, 0.1)', color: '#ca8a04', label: getTranslatedText('Picked Up') },
-                payment_pending: { bg: 'rgba(249, 115, 22, 0.1)', color: '#f97316', label: getTranslatedText('Payment Pending') }
-              };
-              const statusConfig = statusColors[request.status] || statusColors.accepted;
-              const pickupTime = request.pickupSlot
-                ? `${request.pickupSlot.dayName}, ${request.pickupSlot.date} • ${request.pickupSlot.slot}`
-                : request.preferredTime || getTranslatedText('Time not specified');
-
-              return (
-                <motion.div
-                  key={request.id}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={() => {
-                    setShowActiveRequestsPanel(false);
-                    navigate(`/scrapper/active-request/${request.id}`, { state: { request } });
-                  }}
-                  className="p-3 mb-2 rounded-xl border cursor-pointer transition-all bg-black border-white/10 hover:border-emerald-500/30"
+      {
+        existingRequests.length > 0 && (
+          <motion.div
+            initial={{ x: showActiveRequestsPanel ? 0 : '100%' }}
+            animate={{ x: showActiveRequestsPanel ? 0 : '100%' }}
+            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+            className="absolute top-20 right-4 z-30 w-80 max-w-[calc(100%-2rem)] rounded-2xl shadow-2xl bg-zinc-900 border border-white/10"
+            style={{ maxHeight: 'calc(100vh - 6rem)' }}
+          >
+            <div className="p-4 border-b border-white/10" >
+              <div className="flex items-center justify-between">
+                <h3 className="text-base font-bold text-white">
+                  {getTranslatedText("Active Requests ({count})", { count: existingRequests.length })}
+                </h3>
+                <button
+                  onClick={() => setShowActiveRequestsPanel(false)}
+                  className="w-6 h-6 rounded-full flex items-center justify-center"
+                  style={{ backgroundColor: 'rgba(239, 68, 68, 0.2)' }}
                 >
-                  <div className="flex items-start justify-between gap-2 mb-2">
-                    <div className="flex items-center gap-2 flex-1 min-w-0">
-                      <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 bg-emerald-900/30">
-                        <span className="text-xs font-bold text-emerald-400">
-                          {request.userName?.[0]?.toUpperCase() || 'U'}
-                        </span>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style={{ color: '#ef4444' }}>
+                    <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+            <div className="p-2 overflow-y-auto" style={{ maxHeight: 'calc(100vh - 10rem)', overscrollBehaviorY: 'contain' }}>
+              {existingRequests.map((request) => {
+                const statusColors = {
+                  accepted: { bg: 'rgba(59, 130, 246, 0.1)', color: '#2563eb', label: getTranslatedText('Accepted') },
+                  picked_up: { bg: 'rgba(234, 179, 8, 0.1)', color: '#ca8a04', label: getTranslatedText('Picked Up') },
+                  payment_pending: { bg: 'rgba(249, 115, 22, 0.1)', color: '#f97316', label: getTranslatedText('Payment Pending') }
+                };
+                const statusConfig = statusColors[request.status] || statusColors.accepted;
+                const pickupTime = request.pickupSlot
+                  ? `${request.pickupSlot.dayName}, ${request.pickupSlot.date} • ${request.pickupSlot.slot}`
+                  : request.preferredTime || getTranslatedText('Time not specified');
+
+                return (
+                  <motion.div
+                    key={request.id}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => {
+                      setShowActiveRequestsPanel(false);
+                      navigate(`/scrapper/active-request/${request.id}`, { state: { request } });
+                    }}
+                    className="p-3 mb-2 rounded-xl border cursor-pointer transition-all bg-black border-white/10 hover:border-emerald-500/30"
+                  >
+                    <div className="flex items-start justify-between gap-2 mb-2">
+                      <div className="flex items-center gap-2 flex-1 min-w-0">
+                        <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 bg-emerald-900/30">
+                          <span className="text-xs font-bold text-emerald-400">
+                            {request.userName?.[0]?.toUpperCase() || 'U'}
+                          </span>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-semibold truncate text-white">
+                            {request.userName || getTranslatedText('Unknown User')}
+                          </p>
+                          <p className="text-xs truncate text-gray-400">
+                            {getTranslatedText(request.scrapType) || getTranslatedText('Scrap')}
+                          </p>
+                        </div>
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-semibold truncate text-white">
-                          {request.userName || getTranslatedText('Unknown User')}
-                        </p>
-                        <p className="text-xs truncate text-gray-400">
-                          {getTranslatedText(request.scrapType) || getTranslatedText('Scrap')}
-                        </p>
-                      </div>
+                      <span
+                        className="text-[10px] px-2 py-0.5 rounded-full font-semibold flex-shrink-0"
+                        style={{ backgroundColor: statusConfig.bg, color: statusConfig.color }}
+                      >
+                        {statusConfig.label}
+                      </span>
                     </div>
-                    <span
-                      className="text-[10px] px-2 py-0.5 rounded-full font-semibold flex-shrink-0"
-                      style={{ backgroundColor: statusConfig.bg, color: statusConfig.color }}
-                    >
-                      {statusConfig.label}
-                    </span>
-                  </div>
-                  <div className="ml-10 space-y-1">
-                    <p className="text-xs font-bold text-emerald-600">
-                      {request.estimatedEarnings || '₹0'}
-                    </p>
-                    {request.location?.address && (
-                      <p className="text-xs truncate text-gray-500">
-                        📍 {request.location.address}
+                    <div className="ml-10 space-y-1">
+                      <p className="text-xs font-bold text-emerald-600">
+                        {request.estimatedEarnings || '₹0'}
                       </p>
-                    )}
-                    <p className="text-xs truncate text-gray-500">
-                      🕐 {pickupTime}
-                    </p>
-                  </div>
-                </motion.div>
-              );
-            })}
-          </div>
-        </motion.div>
-      )}
+                      {request.location?.address && (
+                        <p className="text-xs truncate text-gray-500">
+                          📍 {request.location.address}
+                        </p>
+                      )}
+                      <p className="text-xs truncate text-gray-500">
+                        🕐 {pickupTime}
+                      </p>
+                    </div>
+                  </motion.div>
+                );
+              })}
+            </div>
+          </motion.div>
+        )
+      }
       {/* Bottom Navigation - Only show when no incoming request overlay */}
-      {!incomingRequest && (
-        <div className="md:hidden">
-          <ScrapperBottomNav />
-        </div>
-      )}
-    </motion.div>
+      {
+        !incomingRequest && (
+          <div className="md:hidden">
+            <ScrapperBottomNav />
+          </div>
+        )
+      }
+    </motion.div >
   );
 };
 
