@@ -434,7 +434,10 @@ export const updateOrderStatus = asyncHandler(async (req, res) => {
       if (scrapper) {
         // 1. Deduct Order Amount (Payment to User)
         const orderAmount = order.totalAmount || 0;
-        if (orderAmount > 0) {
+
+        // FIX: Only deduct if payment has NOT been completed yet
+        // If paid via wallet/online, paymentStatus is already 'completed', so we skip this
+        if (orderAmount > 0 && order.paymentStatus !== 'completed') {
           const balanceBeforePay = scrapper.wallet.balance;
           scrapper.wallet.balance -= orderAmount;
           await scrapper.save();

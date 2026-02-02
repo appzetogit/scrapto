@@ -63,6 +63,23 @@ const UserWallet = () => {
     const [couponCode, setCouponCode] = useState('');
     const [applyingCoupon, setApplyingCoupon] = useState(false);
     const [showCouponSection, setShowCouponSection] = useState(false);
+    const [showCouponsList, setShowCouponsList] = useState(false);
+    const [availableCoupons, setAvailableCoupons] = useState([]);
+    const [loadingCoupons, setLoadingCoupons] = useState(false);
+
+    const fetchCoupons = async () => {
+        setLoadingCoupons(true);
+        try {
+            const res = await walletAPI.getAvailableCoupons();
+            if (res.success) {
+                setAvailableCoupons(res.data);
+            }
+        } catch (error) {
+            console.error("Failed to fetch coupons:", error);
+        } finally {
+            setLoadingCoupons(false);
+        }
+    };
 
     const fetchWalletData = async () => {
         try {
@@ -300,14 +317,26 @@ const UserWallet = () => {
                                 <p className="text-xs text-gray-500">Apply code to get instant credit</p>
                             </div>
                         </div>
-                        <svg
-                            className={`w-5 h-5 text-gray-400 transition-transform ${showCouponSection ? 'rotate-180' : ''}`}
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                        >
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                        </svg>
+                        <div className="flex items-center gap-3">
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    setShowCouponsList(true);
+                                    fetchCoupons();
+                                }}
+                                className="text-xs font-semibold text-emerald-600 hover:text-emerald-700 bg-emerald-50 hover:bg-emerald-100 px-3 py-1.5 rounded-lg transition-colors"
+                            >
+                                View Offers
+                            </button>
+                            <svg
+                                className={`w-5 h-5 text-gray-400 transition-transform ${showCouponSection ? 'rotate-180' : ''}`}
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                            >
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </div>
                     </button>
 
                     <AnimatePresence>
@@ -348,6 +377,66 @@ const UserWallet = () => {
                         )}
                     </AnimatePresence>
                 </motion.div>
+
+                {/* Offers Modal */}
+                <AnimatePresence>
+                    {showCouponsList && (
+                        <motion.div
+                            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+                        >
+                            <motion.div
+                                initial={{ scale: 0.95 }} animate={{ scale: 1 }} exit={{ scale: 0.95 }}
+                                className="bg-white rounded-2xl w-full max-w-md p-6 border border-slate-200 shadow-2xl max-h-[80vh] overflow-y-auto"
+                            >
+                                <div className="flex justify-between items-center mb-6">
+                                    <h3 className="text-xl font-bold text-slate-800 flex items-center gap-2">
+                                        <FaMoneyBillWave className="text-emerald-600" /> Available Offers
+                                    </h3>
+                                    <button onClick={() => setShowCouponsList(false)} className="text-slate-400 hover:text-slate-600">
+                                        <FaTimes size={20} />
+                                    </button>
+                                </div>
+
+                                {loadingCoupons ? (
+                                    <div className="flex justify-center p-8">
+                                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600"></div>
+                                    </div>
+                                ) : availableCoupons.length === 0 ? (
+                                    <div className="text-center py-8 text-slate-500">
+                                        No active coupons available for you right now.
+                                    </div>
+                                ) : (
+                                    <div className="space-y-4">
+                                        {availableCoupons.map((coupon) => (
+                                            <div
+                                                key={coupon.code}
+                                                onClick={() => {
+                                                    setCouponCode(coupon.code);
+                                                    setShowCouponsList(false);
+                                                    if (!showCouponSection) setShowCouponSection(true);
+                                                }}
+                                                className="border rounded-xl p-4 hover:border-emerald-500 cursor-pointer transition-colors bg-slate-50 group"
+                                            >
+                                                <div className="flex justify-between items-start mb-2">
+                                                    <span className="font-bold text-emerald-800 bg-emerald-100 px-3 py-1 rounded-full text-xs tracking-wider border border-emerald-200">
+                                                        {coupon.code}
+                                                    </span>
+                                                    <span className="font-bold text-slate-900">₹{coupon.amount}</span>
+                                                </div>
+                                                <h4 className="font-semibold text-slate-800 mb-1">{coupon.title}</h4>
+                                                <p className="text-xs text-slate-500">{coupon.description}</p>
+                                                <p className="text-[10px] text-slate-400 mt-2">
+                                                    Valid until: {new Date(coupon.validTo).toLocaleDateString()}
+                                                </p>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </motion.div>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
 
                 {/* Transactions History */}
                 <motion.div
@@ -623,7 +712,7 @@ const UserWallet = () => {
             <div className="md:hidden mt-auto">
                 <UserBottomNav />
             </div>
-        </div>
+        </div >
     );
 };
 

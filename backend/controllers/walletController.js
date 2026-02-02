@@ -515,7 +515,7 @@ export const applyCoupon = asyncHandler(async (req, res) => {
         }
 
         const existingUsage = await CouponUsage.findOne(usageQuery).session(session);
-        if (existingUsage && (coupon.usageType === 'SINGLE_USE_PER_USER' || coupon.usageType === 'LIMITED')) {
+        if (existingUsage) {
             throw new Error('You have already redeemed this coupon');
         }
 
@@ -585,4 +585,58 @@ export const applyCoupon = asyncHandler(async (req, res) => {
     } finally {
         session.endSession();
     }
+});
+
+// @desc    Get active coupons available for the current user
+// @route   GET /api/wallet/coupons
+// @access  Private
+export const getAvailableCoupons = asyncHandler(async (req, res) => {
+    const userId = req.user.id;
+    const role = req.user.role; // 'user' or 'scrapper'
+    const userRoleUpper = role.toUpperCase();
+
+    const now = new Date();
+
+    // 1. Find potential coupons
+    const coupons = await Coupon.find({
+        isActive: true,
+        validFrom: { $lte: now },
+        validTo: { $gte: now },
+        applicableRole: { $in: ['ALL', userRoleUpper] }
+    });
+
+    // 2. Filter based on usage
+    const availableCoupons = [];
+
+    for (const coupon of coupons) {
+        // Check global limit
+        if (coupon.usageType === 'LIMITED' && coupon.usedCount >= coupon.limit) {
+            continue;
+        }
+
+        // Check user specific usage
+        const usageQuery = { couponId: coupon._id };
+        if (role === 'user') {
+            usageQuery.userId = userId;
+        } else {
+            usageQuery.scrapperId = userId;
+        }
+
+        const existingUsage = await CouponUsage.findOne(usageQuery);
+
+        // If single use per user and already used, skip
+        if (existingUsage && (coupon.usageType === 'SINGLE_USE_PER_USER' || coupon.usageType === 'LIMITED')) {
+            continue;
+        }
+
+        availableCoupons.push({
+            code: coupon.code,
+            title: coupon.title,
+            amount: coupon.amount,
+            validTo: coupon.validTo,
+            description: `Get ₹${coupon.amount} credit`
+        });
+    }
+
+    sendSuccess(res, 'Available coupons fetched', availableCoupons);
 });

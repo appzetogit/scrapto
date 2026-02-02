@@ -211,6 +211,9 @@ export const walletAPI = {
       method: 'POST',
       body: JSON.stringify({ code }),
     });
+  },
+  getAvailableCoupons: async () => {
+    return apiRequest('/wallet/coupons', { method: 'GET' });
   }
 };
 
@@ -554,6 +557,7 @@ export const adminAPI = {
   getCommissionTransactions: async (query = '') => {
     return apiRequest(`/admin/earnings/commissions${query ? `?${query}` : ''}`, { method: 'GET' });
   },
+  request: (endpoint, options) => apiRequest(endpoint, options),
 };
 
 // Scrapper Profile API

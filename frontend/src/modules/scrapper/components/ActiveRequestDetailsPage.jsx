@@ -152,6 +152,7 @@ const ActiveRequestDetailsPage = () => {
           const mappedRequest = {
             id: order._id || order.id,
             _id: order._id || order.id,
+            requestId: `REQ - ${(order._id || order.id).toString().slice(-6).toUpperCase()}`,
             orderType: order.orderType || 'scrap_sell',
             serviceDetails: order.serviceDetails,
             userName: order.user?.name || 'User',
@@ -254,6 +255,7 @@ const ActiveRequestDetailsPage = () => {
           const mappedRequest = {
             id: order._id || order.id,
             _id: order._id || order.id,
+            requestId: `REQ - ${(order._id || order.id).toString().slice(-6).toUpperCase()}`,
             orderType: order.orderType || 'scrap_sell',
             serviceDetails: order.serviceDetails,
             userName: order.user?.name || 'User',
@@ -660,7 +662,7 @@ const ActiveRequestDetailsPage = () => {
             </svg>
           </button>
           <div>
-            <h1 className="text-xl font-bold text-slate-800">{getTranslatedText("Active Request")}</h1>
+            <h1 className="text-xl font-bold text-slate-800">{requestData?.requestId || getTranslatedText("Active Request")}</h1>
             {allActiveRequests.length > 1 && (
               <p className="text-xs text-slate-500">
                 {currentRequestIndex + 1} {getTranslatedText("of")} {allActiveRequests.length}

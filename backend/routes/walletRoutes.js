@@ -26,7 +26,9 @@ router.post('/pay-order', protect, payOrderViaWallet);
 router.post('/withdraw', protect, requestWithdrawal);
 
 // Coupons
-import { applyCoupon } from '../controllers/walletController.js';
+// Coupons
+import { applyCoupon, getAvailableCoupons } from '../controllers/walletController.js';
 router.post('/apply-coupon', protect, applyCoupon);
+router.get('/coupons', protect, getAvailableCoupons);
 
 export default router;
