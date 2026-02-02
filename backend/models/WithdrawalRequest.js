@@ -47,6 +47,9 @@ const withdrawalRequestSchema = new mongoose.Schema({
     },
     processedAt: {
         type: Date
+    },
+    transactionId: {
+        type: String
     }
 }, {
     timestamps: true

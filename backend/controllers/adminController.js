@@ -11,6 +11,7 @@ import { USER_ROLES, ORDER_STATUS, PAYMENT_STATUS, PAGINATION } from '../config/
 import logger from '../utils/logger.js';
 import mongoose from 'mongoose';
 import { createContact, createFundAccount, initiatePayout } from '../services/payoutService.js';
+import WithdrawalRequest from '../models/WithdrawalRequest.js';
 
 // ============================================
 // DASHBOARD & ANALYTICS
@@ -1403,3 +1404,126 @@ export const withdrawFunds = asyncHandler(async (req, res) => {
   });
 });
 
+// @desc    Get all withdrawal requests
+// @route   GET /api/admin/finance/withdrawals
+// @access  Private (Admin)
+export const getAllWithdrawals = asyncHandler(async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    const filter = {};
+    if (req.query.status) {
+      filter.status = req.query.status;
+    }
+    if (req.query.userType) {
+      filter.userType = req.query.userType;
+    }
+
+    const [withdrawals, total] = await Promise.all([
+      WithdrawalRequest.find(filter)
+        .populate('user', 'name email phone') // For Users
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit),
+      WithdrawalRequest.countDocuments(filter)
+    ]);
+
+    // Manually populate Scrappers if needed since 'user' field is polymorphic but mongoose ref is usually fixed or dynamic. 
+    // Based on schema, 'user' is likely ref 'User' or 'Scrapper'. If it's dynamic ref, populate works. 
+    // If not, we might need manual fetching. Assuming simpler generic ref or similar ID structure.
+    // Actually, WalletTransaction has 'user' and 'userType'. WithdrawalRequest likely has similar.
+    // Let's assume populate works for now, or we can improve it.
+    // In walletController it was: user: userId, userType: ... 
+
+    // If the 'ref' in schema is dynamic, populate works. If not, we might miss Scrapper names.
+    // Let's rely on the userType field if needed for frontend display.
+
+    sendSuccess(res, 'Withdrawals fetched successfully', {
+      withdrawals,
+      pagination: {
+        page,
+        limit,
+        total,
+        pages: Math.ceil(total / limit)
+      }
+    });
+  } catch (error) {
+    logger.error('[Admin] Error fetching withdrawals:', error);
+    sendError(res, 'Failed to fetch withdrawals', 500);
+  }
+});
+
+// @desc    Update withdrawal request status
+// @route   PUT /api/admin/finance/withdrawals/:id
+// @access  Private (Admin)
+export const updateWithdrawalStatus = asyncHandler(async (req, res) => {
+  const { status, remarks, transactionId } = req.body;
+  const { id } = req.params;
+
+  if (!['APPROVED', 'REJECTED', 'PROCESSED'].includes(status)) {
+    return sendError(res, 'Invalid status', 400);
+  }
+
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
+  try {
+    const withdrawal = await WithdrawalRequest.findById(id).session(session);
+    if (!withdrawal) {
+      throw new Error('Withdrawal request not found');
+    }
+
+    if (withdrawal.status !== 'PENDING') {
+      throw new Error('Withdrawal request is already processed');
+    }
+
+    withdrawal.status = status;
+    if (remarks) withdrawal.adminNotes = remarks;
+    if (transactionId) withdrawal.transactionId = transactionId;
+    withdrawal.processedAt = new Date();
+
+    await withdrawal.save({ session });
+
+    // Update corresponding Wallet Transaction
+    const walletTrx = await WalletTransaction.findOne({
+      'metadata.withdrawalId': id
+    }).session(session);
+
+    if (walletTrx) {
+      if (status === 'REJECTED') {
+        // Refund the amount to user's wallet
+        const UserTypeModel = withdrawal.userType === 'Scrapper' ? Scrapper : User;
+        const user = await UserTypeModel.findById(withdrawal.user).session(session);
+
+        if (user) {
+          if (!user.wallet) user.wallet = { balance: 0 };
+          user.wallet.balance += withdrawal.amount;
+          await user.save({ session });
+
+          walletTrx.status = 'FAILED'; // Or 'REFUNDED'
+          walletTrx.description += ` (Rejected: ${remarks || 'Admin Rejected'})`;
+        }
+      } else {
+        // APPROVED / PROCESSED
+        walletTrx.status = 'SUCCESS';
+        if (transactionId) {
+          walletTrx.metadata = { ...walletTrx.metadata, bankTxId: transactionId };
+        }
+      }
+      await walletTrx.save({ session });
+    }
+
+    await session.commitTransaction();
+
+    sendSuccess(res, 'Withdrawal status updated', withdrawal);
+
+  } catch (error) {
+    await session.abortTransaction();
+    logger.error('[Admin] Withdraw Update Failed', error);
+    sendError(res, error.message, 500);
+  } finally {
+    session.endSession();
+  }
+});

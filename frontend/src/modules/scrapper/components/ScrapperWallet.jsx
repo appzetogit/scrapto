@@ -59,7 +59,7 @@ const ScrapperWallet = () => {
     const [showAddMoney, setShowAddMoney] = useState(false);
     const [showWithdraw, setShowWithdraw] = useState(false);
     const [amount, setAmount] = useState('');
-    const [withdrawDetails, setWithdrawDetails] = useState({ amount: '', method: 'UPI', upiId: '', accountHolderName: '', accountNumber: '', ifscCode: '' });
+    const [withdrawDetails, setWithdrawDetails] = useState({ amount: '', method: 'BANK_TRANSFER', upiId: '', accountHolderName: '', accountNumber: '', ifscCode: '' });
     const [processing, setProcessing] = useState(false);
     const [couponCode, setCouponCode] = useState('');
     const [applyingCoupon, setApplyingCoupon] = useState(false);
@@ -226,7 +226,7 @@ const ScrapperWallet = () => {
             if (res.success) {
                 alert(getTranslatedText("Request Submitted Successfully"));
                 setShowWithdraw(false);
-                setWithdrawDetails({ amount: '', method: 'UPI', upiId: '', accountHolderName: '', accountNumber: '', ifscCode: '' });
+                setWithdrawDetails({ amount: '', method: 'BANK_TRANSFER', upiId: '', accountHolderName: '', accountNumber: '', ifscCode: '' });
                 fetchWalletData();
             }
         } catch (error) {
@@ -628,72 +628,38 @@ const ScrapperWallet = () => {
                                     <p className="text-xs text-slate-500 mt-1">{getTranslatedText("Available")}: ₹{balance.available}</p>
                                 </div>
 
-                                <div className="mb-4">
-                                    <label className="block text-sm text-slate-500 mb-2">{getTranslatedText("Payment Method")}</label>
-                                    <div className="flex p-1 bg-slate-100 rounded-lg border border-slate-200">
-                                        <button
-                                            type="button"
-                                            onClick={() => setWithdrawDetails({ ...withdrawDetails, method: 'UPI' })}
-                                            className={`flex-1 py-2 text-sm font-medium rounded-md transition-all ${withdrawDetails.method === 'UPI' ? 'bg-white text-slate-800 shadow' : 'text-slate-500'}`}
-                                        >
-                                            UPI
-                                        </button>
-                                        <button
-                                            type="button"
-                                            onClick={() => setWithdrawDetails({ ...withdrawDetails, method: 'BANK_TRANSFER' })}
-                                            className={`flex-1 py-2 text-sm font-medium rounded-md transition-all ${withdrawDetails.method === 'BANK_TRANSFER' ? 'bg-white text-slate-800 shadow' : 'text-slate-500'}`}
-                                        >
-                                            Bank Transfer
-                                        </button>
-                                    </div>
-                                </div>
-
-                                {withdrawDetails.method === 'UPI' ? (
-                                    <div className="mb-6">
-                                        <label className="block text-sm text-slate-500 mb-2">{getTranslatedText("UPI ID")}</label>
+                                <div className="space-y-4 mb-6">
+                                    <div>
+                                        <label className="block text-sm text-slate-500 mb-2">Account Holder Name</label>
                                         <input
                                             type="text"
-                                            value={withdrawDetails.upiId}
-                                            onChange={(e) => setWithdrawDetails({ ...withdrawDetails, upiId: e.target.value })}
+                                            value={withdrawDetails.accountHolderName}
+                                            onChange={(e) => setWithdrawDetails({ ...withdrawDetails, accountHolderName: e.target.value })}
                                             className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 text-slate-800 focus:border-emerald-500 outline-none"
-                                            placeholder="username@okaxis"
                                             required
                                         />
                                     </div>
-                                ) : (
-                                    <div className="space-y-4 mb-6">
-                                        <div>
-                                            <label className="block text-sm text-slate-500 mb-2">Account Holder Name</label>
-                                            <input
-                                                type="text"
-                                                value={withdrawDetails.accountHolderName}
-                                                onChange={(e) => setWithdrawDetails({ ...withdrawDetails, accountHolderName: e.target.value })}
-                                                className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 text-slate-800 focus:border-emerald-500 outline-none"
-                                                required
-                                            />
-                                        </div>
-                                        <div>
-                                            <label className="block text-sm text-slate-500 mb-2">Account Number</label>
-                                            <input
-                                                type="text"
-                                                value={withdrawDetails.accountNumber}
-                                                onChange={(e) => setWithdrawDetails({ ...withdrawDetails, accountNumber: e.target.value })}
-                                                className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 text-slate-800 focus:border-emerald-500 outline-none"
-                                                required
-                                            />
-                                        </div>
-                                        <div>
-                                            <label className="block text-sm text-slate-500 mb-2">IFSC Code</label>
-                                            <input
-                                                type="text"
-                                                value={withdrawDetails.ifscCode}
-                                                onChange={(e) => setWithdrawDetails({ ...withdrawDetails, ifscCode: e.target.value })}
-                                                className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 text-slate-800 focus:border-emerald-500 outline-none"
-                                                required
-                                            />
-                                        </div>
+                                    <div>
+                                        <label className="block text-sm text-slate-500 mb-2">Account Number</label>
+                                        <input
+                                            type="text"
+                                            value={withdrawDetails.accountNumber}
+                                            onChange={(e) => setWithdrawDetails({ ...withdrawDetails, accountNumber: e.target.value })}
+                                            className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 text-slate-800 focus:border-emerald-500 outline-none"
+                                            required
+                                        />
                                     </div>
-                                )}
+                                    <div>
+                                        <label className="block text-sm text-slate-500 mb-2">IFSC Code</label>
+                                        <input
+                                            type="text"
+                                            value={withdrawDetails.ifscCode}
+                                            onChange={(e) => setWithdrawDetails({ ...withdrawDetails, ifscCode: e.target.value })}
+                                            className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 text-slate-800 focus:border-emerald-500 outline-none"
+                                            required
+                                        />
+                                    </div>
+                                </div>
 
                                 <button
                                     type="submit"

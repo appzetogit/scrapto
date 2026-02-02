@@ -9,6 +9,7 @@ import {
   FaUsers,
   FaTruck,
   FaRupeeSign,
+  FaMoneyCheckAlt,
   FaFileInvoice,
   FaCreditCard,
   FaChartBar,
@@ -78,6 +79,7 @@ const AdminLayout = () => {
     { icon: FaRupeeSign, label: getTranslatedText('Price Feed'), path: '/admin/prices' },
     { icon: FaFileInvoice, label: getTranslatedText('Requests'), path: '/admin/requests' },
     { icon: FaRupeeSign, label: getTranslatedText('Earnings'), path: '/admin/earnings' },
+    { icon: FaMoneyCheckAlt, label: getTranslatedText('Withdrawals'), path: '/admin/withdrawals' },
     {
       icon: FaCreditCard, label: getTranslatedText('Subscriptions'), path: '/admin/subscriptions', submenu: [
         { label: getTranslatedText('All Subscriptions'), path: '/admin/subscriptions' },

@@ -36,14 +36,18 @@ import {
   // Subscription Plan Management
   createPlan,
   updatePlan,
-
   deletePlan,
   getAllSubscriptions,
   getAllSubscriptionPlans,
+
+  // Finance
   withdrawFunds,
   updateAdminBankDetails,
-  getCommissionTransactions
+  getCommissionTransactions,
+  getAllWithdrawals,
+  updateWithdrawalStatus
 } from '../controllers/adminController.js';
+
 import { getScrapperEarningsForAdmin } from '../controllers/earningsController.js';
 import {
   getAllReviews,
@@ -61,6 +65,14 @@ import {
   updateLead,
   deleteLead
 } from '../controllers/leadController.js';
+
+// Coupon Management
+import {
+  createCoupon,
+  getAllCoupons,
+  toggleCouponStatus,
+  deleteCoupon
+} from '../controllers/couponController.js';
 
 const router = express.Router();
 
@@ -149,17 +161,12 @@ router.delete('/leads/:id', deleteLead);
 // ============================================
 router.put('/finance/bank-details', updateAdminBankDetails);
 router.post('/finance/withdraw', withdrawFunds);
+router.get('/finance/withdrawals', getAllWithdrawals);
+router.put('/finance/withdrawals/:id', updateWithdrawalStatus);
 
 // ============================================
 // COUPON MANAGEMENT
 // ============================================
-import {
-  createCoupon,
-  getAllCoupons,
-  toggleCouponStatus,
-  deleteCoupon
-} from '../controllers/couponController.js';
-
 router.post('/coupons', createCoupon);
 router.get('/coupons', getAllCoupons);
 router.patch('/coupons/:id/status', toggleCouponStatus);

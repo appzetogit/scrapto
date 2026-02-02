@@ -557,6 +557,15 @@ export const adminAPI = {
   getCommissionTransactions: async (query = '') => {
     return apiRequest(`/admin/earnings/commissions${query ? `?${query}` : ''}`, { method: 'GET' });
   },
+  getAllWithdrawals: async (query = '') => {
+    return apiRequest(`/admin/finance/withdrawals${query ? `?${query}` : ''}`, { method: 'GET' });
+  },
+  updateWithdrawalStatus: async (id, data) => {
+    return apiRequest(`/admin/finance/withdrawals/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  },
   request: (endpoint, options) => apiRequest(endpoint, options),
 };
 
