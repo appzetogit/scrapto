@@ -51,6 +51,7 @@ export const staticTranslations = {
 
         // Services
         "Home Services": "घरेलू सेवाएं",
+        "Waste Collection": "कचरा संग्रहण",
         "Home Cleaning": "घर की सफाई",
         "Professional deep cleaning service including floor scrubbing, cobweb removal, and bathroom cleaning.": "फर्श की सफाई, जाले हटाने और बाथरूम की सफाई सहित पेशेवर डीप क्लीनिंग सेवा।",
         "Fixed Price: ₹1200": "निश्चित मूल्य: ₹1200",

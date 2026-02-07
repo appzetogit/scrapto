@@ -2,7 +2,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../shared/context/AuthContext';
-import { getNotifications, markNotificationAsRead, getUnreadNotificationCount } from '../../shared/utils/referralUtils';
+import notificationService from '../../../services/notificationService';
 import { FaBell, FaArrowLeft } from 'react-icons/fa';
 import { usePageTranslation } from "../../../hooks/usePageTranslation";
 
@@ -22,31 +22,45 @@ const NotificationsPage = () => {
 
     useEffect(() => {
         if (user) {
-            const userId = user.phone || user.id;
-            loadNotifications(userId);
+            loadNotifications();
         }
     }, [user]);
 
-    const loadNotifications = (userId) => {
+    const loadNotifications = async () => {
         setLoading(true);
-        // Simulate slight delay for authentic feel or just load
-        const notifs = getNotifications(userId, 'user');
-        setNotifications(notifs);
-        setLoading(false);
-    };
-
-    const handleMarkAsRead = (notificationId) => {
-        markNotificationAsRead(notificationId, 'user');
-        loadNotifications(user?.phone || user?.id);
-    };
-
-    const handleMarkAllAsRead = () => {
-        notifications.forEach(notif => {
-            if (!notif.read) {
-                markNotificationAsRead(notif.id, 'user');
+        try {
+            const response = await notificationService.getAll();
+            if (response.success && response.data.notifications) {
+                // Map backend response structure to frontend format if needed
+                // Backend: isRead, Frontend: read (adjusting here for compatibility)
+                const mapped = response.data.notifications.map(n => ({
+                    ...n,
+                    read: n.isRead,
+                    id: n._id
+                }));
+                setNotifications(mapped);
             }
-        });
-        loadNotifications(user?.phone || user?.id);
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleMarkAsRead = async (notificationId) => {
+        // Optimistic update
+        setNotifications(prev => prev.map(n =>
+            n.id === notificationId ? { ...n, read: true } : n
+        ));
+
+        await notificationService.markAsRead(notificationId);
+    };
+
+    const handleMarkAllAsRead = async () => {
+        // Optimistic update
+        setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+
+        await notificationService.markAllAsRead();
     };
 
     return (

@@ -1,19 +1,36 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useLanguage } from '../../../contexts/LanguageContext';
 import { usePageTranslation } from '../../../hooks/usePageTranslation';
-import { IoLanguageOutline, IoChevronDownOutline } from 'react-icons/io5';
+import { useAuth } from '../../../modules/shared/context/AuthContext';
+import { IoLanguageOutline, IoChevronDownOutline, IoNotificationsOutline } from 'react-icons/io5';
 import LanguageSelector from './LanguageSelector';
 import siteLogo from '../../../assets/scraptologo-removebg-preview.png';
+import notificationService from '../../../services/notificationService';
 
 const WebViewHeader = ({ navItems, userRole = 'user' }) => {
     const location = useLocation();
     const navigate = useNavigate();
+    const { user } = useAuth();
+    const [unreadCount, setUnreadCount] = useState(0);
     const [isLangOpen, setIsLangOpen] = useState(false);
     const { language, languages, changeLanguage } = useLanguage();
 
     const { getTranslatedText } = usePageTranslation(navItems.map(item => item.label));
+
+    useEffect(() => {
+        const updateCount = async () => {
+            if (user) {
+                const count = await notificationService.getUnreadCount();
+                setUnreadCount(count);
+            }
+        };
+
+        updateCount();
+        const interval = setInterval(updateCount, 30000);
+        return () => clearInterval(interval);
+    }, [user, userRole]);
 
     return (
         <motion.header
@@ -65,7 +82,23 @@ const WebViewHeader = ({ navItems, userRole = 'user' }) => {
 
             {/* Right Side Actions (Profile/Notifications/Language) */}
             <div className="flex items-center gap-4">
-                {/* Language Selector */}
+                {/* Notification Bell */}
+                <div
+                    className="relative w-10 h-10 rounded-full bg-gray-100 border border-gray-200 flex items-center justify-center cursor-pointer hover:bg-emerald-50 hover:border-emerald-200 transition-colors"
+                    onClick={() => navigate('/notifications')}
+                >
+                    <IoNotificationsOutline className="text-xl text-gray-600" />
+                    {unreadCount > 0 && (
+                        <motion.span
+                            initial={{ scale: 0 }}
+                            animate={{ scale: 1 }}
+                            className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full border-2 border-white flex items-center justify-center text-[10px] text-white font-bold"
+                        >
+                            {unreadCount > 9 ? '9+' : unreadCount}
+                        </motion.span>
+                    )}
+                </div>
+
                 {/* Language Selector */}
                 <LanguageSelector />
 

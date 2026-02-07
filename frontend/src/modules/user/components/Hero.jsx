@@ -784,7 +784,7 @@ const Hero = () => {
               <h3
                 className="text-xl md:text-2xl font-bold"
                 style={{ color: "#2d3748" }}>
-                {getTranslatedText("Home Services")}
+                {getTranslatedText("Waste Collection")}
               </h3>
               <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700">
                 {getTranslatedText("New")}
