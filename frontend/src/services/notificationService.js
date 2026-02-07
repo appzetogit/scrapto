@@ -10,8 +10,8 @@ const notificationService = {
      */
     getAll: async (page = 1, limit = 20) => {
         try {
-            // If API_ENDPOINTS doesn't have notifications yet, use direct URL
-            const endpoint = API_ENDPOINTS.notifications || `${API_BASE_URL}/api/v1/notifications`;
+            // Use purely relative path, depend on apiRequest to prepend base URL
+            const endpoint = API_ENDPOINTS.notifications || '/v1/notifications';
             const response = await apiRequest(`${endpoint}?page=${page}&limit=${limit}`, {
                 method: 'GET'
             });
@@ -27,7 +27,7 @@ const notificationService = {
      */
     markAsRead: async (id) => {
         try {
-            const endpoint = API_ENDPOINTS.notifications || `${API_BASE_URL}/api/v1/notifications`;
+            const endpoint = API_ENDPOINTS.notifications || '/v1/notifications';
             const response = await apiRequest(`${endpoint}/${id}/read`, {
                 method: 'PUT'
             });
@@ -43,7 +43,7 @@ const notificationService = {
      */
     markAllAsRead: async () => {
         try {
-            const endpoint = API_ENDPOINTS.notifications || `${API_BASE_URL}/api/v1/notifications`;
+            const endpoint = API_ENDPOINTS.notifications || '/v1/notifications';
             const response = await apiRequest(`${endpoint}/read-all`, {
                 method: 'PUT'
             });

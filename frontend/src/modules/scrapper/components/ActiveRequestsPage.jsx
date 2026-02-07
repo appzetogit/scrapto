@@ -105,6 +105,42 @@ const ActiveRequestsPage = () => {
     fetchExistingRequests();
   }, [navigate]);
 
+  // Initialize audio context on first user interaction to fix mobile auto-play issues
+  useEffect(() => {
+    const handleFirstInteraction = () => {
+      // Create a dummy audio context to unlock audio on mobile
+      const AudioContext = window.AudioContext || window.webkitAudioContext;
+      if (AudioContext) {
+        const audioCtx = new AudioContext();
+        const oscillator = audioCtx.createOscillator();
+        const gainNode = audioCtx.createGain();
+        gainNode.gain.value = 0.01; // Nearly silent
+        oscillator.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+        oscillator.start(0);
+        oscillator.stop(0.001);
+      }
+
+      // Also try to speak something silent to unlock speech synthesis
+      if (window.speechSynthesis) {
+        const utterance = new SpeechSynthesisUtterance('');
+        window.speechSynthesis.speak(utterance);
+      }
+
+      console.log('Audio context unlocked');
+      window.removeEventListener('click', handleFirstInteraction);
+      window.removeEventListener('touchstart', handleFirstInteraction);
+    };
+
+    window.addEventListener('click', handleFirstInteraction);
+    window.addEventListener('touchstart', handleFirstInteraction);
+
+    return () => {
+      window.removeEventListener('click', handleFirstInteraction);
+      window.removeEventListener('touchstart', handleFirstInteraction);
+    };
+  }, []);
+
   // Get current location
   useEffect(() => {
     if (navigator.geolocation) {

@@ -72,4 +72,5 @@ export const API_ENDPOINTS = {
     batch: '/translate/batch',
     object: '/translate/object',
   },
+  notifications: '/v1/notifications',
 };
