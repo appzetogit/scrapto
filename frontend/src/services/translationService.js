@@ -2,6 +2,7 @@ import { API_ENDPOINTS } from '../config/apiConfig.js';
 import { apiRequest } from '../modules/shared/utils/api.js';
 import translationCache from '../utils/translationCache.js';
 import { normalizeLanguageCode } from '../utils/languageUtils.js';
+import { staticTranslations } from '../locales/staticTranslations.js';
 
 class TranslationService {
   constructor() {
@@ -19,11 +20,17 @@ class TranslationService {
    */
   async translateText(text, targetLang, sourceLang = 'en') {
     if (!text || !text.trim()) return text;
-    
+
     const normalizedTarget = normalizeLanguageCode(targetLang);
     const normalizedSource = normalizeLanguageCode(sourceLang);
-    
+
     if (normalizedTarget === normalizedSource) return text;
+
+    // 1. Check Static Dictionary FIRST
+    const staticDict = staticTranslations[normalizedTarget];
+    if (staticDict && staticDict[text]) {
+      return staticDict[text];
+    }
 
     const cacheKey = translationCache.getCacheKey(text, normalizedTarget, normalizedSource);
     const cached = await translationCache.get(cacheKey);
@@ -64,11 +71,11 @@ class TranslationService {
     }
 
     this.isProcessing = true;
-    
+
     // Group by target and source language for batching
     const batches = {};
     const itemsToProcess = this.queue.splice(0, this.MAX_BATCH_SIZE);
-    
+
     itemsToProcess.forEach(item => {
       const groupKey = `${item.sourceLang}_${item.targetLang}`;
       if (!batches[groupKey]) batches[groupKey] = [];
@@ -125,7 +132,7 @@ class TranslationService {
 
     const normalizedTarget = normalizeLanguageCode(targetLang);
     const normalizedSource = normalizeLanguageCode(sourceLang);
-    
+
     if (normalizedTarget === normalizedSource) return obj;
 
     // Use backend endpoint for complex objects or large batches
@@ -141,7 +148,7 @@ class TranslationService {
     } catch (error) {
       console.error('Object translation error:', error);
     }
-    
+
     return obj; // Fallback
   }
 }

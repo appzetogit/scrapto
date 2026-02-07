@@ -1,7 +1,5 @@
 import { useEffect, useRef, useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { gsap } from "gsap";
-import Lenis from "lenis";
 import { useNavigate } from "react-router-dom";
 import Header from "./Header";
 import PriceTicker from "./PriceTicker";
@@ -35,7 +33,6 @@ const Hero = () => {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const heroRef = useRef(null);
-  const lenisRef = useRef(null);
   const bannerIntervalRef = useRef(null);
   const locationInputRef = useRef(null);
   const suggestionsRef = useRef(null);
@@ -357,114 +354,6 @@ const Hero = () => {
       window.ReactNativeWebView !== undefined; // React Native WebView
 
     setIsWebView(isWebViewDetected);
-
-    // Initialize Lenis for smooth scrolling with optimized settings
-    const lenis = new Lenis({
-      duration: 1.2,
-      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-      smooth: true,
-      smoothTouch: false, // Disable smooth touch for better mobile performance
-      touchMultiplier: 2,
-      wheelMultiplier: 1.2,
-      infinite: false,
-      orientation: "vertical",
-      gestureOrientation: "vertical",
-      smoothWheel: true,
-    });
-
-    lenisRef.current = lenis;
-
-    // Connect Lenis to window scroll with proper RAF loop
-    let rafId;
-    function raf(time) {
-      lenis.raf(time);
-      rafId = requestAnimationFrame(raf);
-    }
-    rafId = requestAnimationFrame(raf);
-
-    // Ensure smooth scrolling works properly
-    const htmlElement = document.documentElement;
-    const bodyElement = document.body;
-
-    if (htmlElement) {
-      htmlElement.style.scrollBehavior = "auto"; // Let Lenis handle it
-      htmlElement.style.overflowX = "hidden";
-    }
-    if (bodyElement) {
-      bodyElement.style.overflowX = "hidden";
-    }
-
-    // Handle resize events to recalculate scroll
-    const handleResize = () => {
-      if (lenisRef.current) {
-        lenisRef.current.resize();
-      }
-    };
-    window.addEventListener("resize", handleResize);
-
-    // Handle content changes (for dynamic content)
-    const resizeObserver = new ResizeObserver(() => {
-      if (lenisRef.current) {
-        lenisRef.current.resize();
-      }
-    });
-    if (heroRef.current) {
-      resizeObserver.observe(heroRef.current);
-    }
-
-    // Hero entrance animation (non-blocking)
-    if (heroRef.current) {
-      // Small delay to ensure Lenis is ready
-      setTimeout(() => {
-        gsap.from(heroRef.current, {
-          y: 20,
-          duration: 0.8,
-          ease: "power2.out",
-          onComplete: () => {
-            // Ensure Lenis can scroll after animation
-            if (lenisRef.current) {
-              lenisRef.current.resize();
-            }
-          },
-        });
-      }, 100);
-    }
-
-    // Ensure Lenis recalculates after all content is loaded
-    const handleLoad = () => {
-      if (lenisRef.current) {
-        lenisRef.current.resize();
-      }
-    };
-    window.addEventListener("load", handleLoad);
-
-    // Also recalculate after a short delay to catch any late-loading content
-    const initTimeout = setTimeout(() => {
-      if (lenisRef.current) {
-        lenisRef.current.resize();
-      }
-    }, 500);
-
-    return () => {
-      if (rafId) {
-        cancelAnimationFrame(rafId);
-      }
-      window.removeEventListener("resize", handleResize);
-      window.removeEventListener("load", handleLoad);
-      clearTimeout(initTimeout);
-      resizeObserver.disconnect();
-      if (lenisRef.current) {
-        lenisRef.current.destroy();
-        lenisRef.current = null;
-      }
-      if (htmlElement) {
-        htmlElement.style.scrollBehavior = "";
-        htmlElement.style.overflowX = "";
-      }
-      if (bodyElement) {
-        bodyElement.style.overflowX = "";
-      }
-    };
   }, []);
 
   // Auto-rotate banners
