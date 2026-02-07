@@ -8,7 +8,7 @@ import PriceTicker from "./PriceTicker";
 import TrustSignals from "./TrustSignals";
 import Testimonials from "./Testimonials";
 import OTPModal from "./OTPModal";
-import CustomerSolutions from "./CustomerSolutions";
+
 import { usePageTranslation } from "../../../hooks/usePageTranslation";
 import { useDynamicTranslation } from "../../../hooks/useDynamicTranslation";
 import scrapImage from "../assets/scrap3-Photoroom.png";
@@ -180,7 +180,7 @@ const Hero = () => {
     "Getting your location...",
     "Type to search location...",
     "Home Services",
-    "Home Cleaning",
+    "Waste Collection",
     "Professional deep cleaning service including floor scrubbing, cobweb removal, and bathroom cleaning.",
     "Fixed Price: ₹1200",
     "Verified Pros",
@@ -927,7 +927,7 @@ const Hero = () => {
                       {getTranslatedText("Premium")}
                     </span>
                     <h4 className="text-lg md:text-2xl font-bold text-white">
-                      {getTranslatedText("Home Cleaning")}
+                      {getTranslatedText("Waste Collection")}
                     </h4>
                   </div>
 
@@ -979,9 +979,7 @@ const Hero = () => {
           </div>
 
           {/* Customer Solutions */}
-          <div className="px-4 md:px-6 lg:px-8 max-w-7xl mx-auto">
-            <CustomerSolutions />
-          </div>
+
 
           {/* Trust Signals */}
           <div className="px-4 md:px-6 lg:px-8 max-w-7xl mx-auto">
