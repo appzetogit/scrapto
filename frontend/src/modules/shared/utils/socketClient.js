@@ -25,7 +25,9 @@ class SocketClient {
     }
 
     // Socket.io needs base URL without /api
+    console.log('SocketClient: API_BASE_URL is:', API_BASE_URL);
     const socketUrl = API_BASE_URL.replace('/api', '') || 'http://localhost:7000';
+    console.log('SocketClient: Derived socketUrl is:', socketUrl);
 
     this.socket = io(socketUrl, {
       auth: {
