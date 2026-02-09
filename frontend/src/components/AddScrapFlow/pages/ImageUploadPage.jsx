@@ -29,7 +29,8 @@ const ImageUploadPage = () => {
     "Copper",
     "Aluminium",
     "Steel",
-    "Brass"
+    "Brass",
+    "Take Photo"
   ];
   const { getTranslatedText } = usePageTranslation(staticTexts);
   const navigate = useNavigate();
@@ -139,6 +140,30 @@ const ImageUploadPage = () => {
       }
     } finally {
       setIsUploading(false);
+    }
+  };
+
+  const handleNativeCamera = async () => {
+    // Check if running in Flutter WebView
+    if (window.flutter_inappwebview) {
+      try {
+        const result = await window.flutter_inappwebview.callHandler('openCamera');
+
+        if (result && result.success) {
+          const res = await fetch(`data:${result.mimeType};base64,${result.base64}`);
+          const blob = await res.blob();
+          const file = new File([blob], result.fileName, { type: result.mimeType });
+          handleFileSelect([file]);
+        }
+      } catch (error) {
+        console.error("Camera handler error:", error);
+      }
+    } else {
+      // Fallback for web
+      if (fileInputRef.current) {
+        fileInputRef.current.setAttribute('capture', 'environment');
+        fileInputRef.current.click();
+      }
     }
   };
 
@@ -265,6 +290,21 @@ const ImageUploadPage = () => {
                   onMouseLeave={(e) => e.target.style.backgroundColor = '#64946e'}
                 >
                   {getTranslatedText("Choose from Gallery")}
+                </button>
+                <button
+                  onClick={handleNativeCamera}
+                  className="px-4 py-2 md:px-6 md:py-3 rounded-full text-sm md:text-base font-semibold transition-all duration-300 transform hover:scale-105 border-2 border-[#64946e]"
+                  style={{ backgroundColor: '#ffffff', color: '#64946e' }}
+                  onMouseEnter={(e) => {
+                    e.target.style.backgroundColor = '#64946e';
+                    e.target.style.color = '#ffffff';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.target.style.backgroundColor = '#ffffff';
+                    e.target.style.color = '#64946e';
+                  }}
+                >
+                  {getTranslatedText("Take Photo")}
                 </button>
               </div>
             </motion.div>
