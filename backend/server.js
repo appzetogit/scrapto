@@ -47,7 +47,7 @@ const PORT = process.env.PORT || 7000;
 app.use(helmet());
 // CORS Configuration
 const allowedOrigins = process.env.FRONTEND_URL
-  ? process.env.FRONTEND_URL.split(',').map(url => url.trim())
+  ? process.env.FRONTEND_URL.split(',').map(url => url.trim().replace(/\/$/, "")) // Remove trailing slash
   : ['http://localhost:5173', 'https://www.scrapto.com', 'https://scrapto.com'];
 
 app.use(
