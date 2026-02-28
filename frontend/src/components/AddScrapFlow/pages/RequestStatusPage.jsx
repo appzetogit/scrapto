@@ -1,9 +1,14 @@
 import { motion } from 'framer-motion';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { GoogleMap, Marker, DirectionsRenderer, useJsApiLoader } from '@react-google-maps/api';
 import { orderAPI, paymentAPI } from '../../../modules/shared/utils/api';
 import { useAuth } from '../../../modules/shared/context/AuthContext';
 import { usePageTranslation } from '../../../hooks/usePageTranslation';
+import socketClient from '../../../modules/shared/utils/socketClient';
+
+const defaultCenter = { lat: 19.076, lng: 72.8777 };
+const mapContainerStyle = { width: '100%', height: '100%', borderRadius: '12px' };
 
 const RequestStatusPage = () => {
   const staticTexts = [
@@ -47,7 +52,10 @@ const RequestStatusPage = () => {
     "Payment will be available once the request is confirmed by scrapper.",
     "Failed to initiate payment. Please try again.",
     "Payment verification failed. Please contact support.",
-    "Plastic", "Metal", "Paper", "Electronics", "Glass", "Other"
+    "Plastic", "Metal", "Paper", "Electronics", "Glass", "Other",
+    "Live location",
+    "Waiting for scrapper location...",
+    "Map could not be loaded"
   ];
   const { getTranslatedText } = usePageTranslation(staticTexts);
   const navigate = useNavigate();
@@ -59,6 +67,20 @@ const RequestStatusPage = () => {
   const [eta, setEta] = useState(null);
   const [isPaying, setIsPaying] = useState(false);
   const [showAcceptanceAlert, setShowAcceptanceAlert] = useState(false);
+
+  // Map & live tracking state
+  const [userLocation, setUserLocation] = useState(null);
+  const [scrapperLocation, setScrapperLocation] = useState(null);
+  const [directions, setDirections] = useState(null);
+  const [animatedPosition, setAnimatedPosition] = useState(null);
+  const mapRef = useRef(null);
+  const animationRef = useRef(null);
+  const lastPositionRef = useRef(null);
+
+  const { isLoaded: isMapLoaded, loadError: mapLoadError } = useJsApiLoader({
+    googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
+    libraries: ['places']
+  });
 
   // Refs for tracking status changes
   const prevStatusRef = useRef(null);
@@ -151,6 +173,13 @@ const RequestStatusPage = () => {
             name: order.scrapper.name,
             phone: order.scrapper.phone
           });
+          // Scrapper live location from API (so it reflects as soon as accepted)
+          if (order.scrapper.liveLocation?.coordinates && Array.isArray(order.scrapper.liveLocation.coordinates)) {
+            const [lng, lat] = order.scrapper.liveLocation.coordinates;
+            if (lat != null && lng != null) {
+              setScrapperLocation({ lat, lng });
+            }
+          }
         }
       } catch (err) {
         console.error('Failed to fetch order status', err);
@@ -164,6 +193,107 @@ const RequestStatusPage = () => {
       clearInterval(interval);
     };
   }, [location.state, navigate]);
+
+  // Set user location from requestData pickup address
+  useEffect(() => {
+    if (!requestData?.pickupAddress?.coordinates) return;
+    const coords = requestData.pickupAddress.coordinates;
+    const lat = typeof coords.lat === 'number' ? coords.lat : (Array.isArray(coords) ? coords[1] : null);
+    const lng = typeof coords.lng === 'number' ? coords.lng : (Array.isArray(coords) ? coords[0] : null);
+    if (lat != null && lng != null) {
+      setUserLocation({ lat, lng });
+    }
+  }, [requestData?.pickupAddress?.coordinates]);
+
+  // Socket: live scrapper location as soon as accepted/on_way
+  useEffect(() => {
+    const orderId = requestData?._id;
+    if (!orderId || !['accepted', 'on_way'].includes(status)) return;
+    const token = localStorage.getItem('token');
+    if (!token) return;
+    if (!socketClient.getConnectionStatus()) {
+      socketClient.connect(token);
+    }
+    socketClient.joinTracking(orderId);
+    socketClient.onLocationUpdate((data) => {
+      if (data.orderId === orderId && data.location?.lat != null && data.location?.lng != null) {
+        setScrapperLocation(data.location);
+      }
+    });
+    return () => {
+      socketClient.leaveTracking(orderId);
+      socketClient.offLocationUpdate();
+    };
+  }, [requestData?._id, status]);
+
+  // Animated scrapper marker position
+  useEffect(() => {
+    if (!scrapperLocation) return;
+    if (!lastPositionRef.current) {
+      setAnimatedPosition(scrapperLocation);
+      lastPositionRef.current = scrapperLocation;
+      return;
+    }
+    const startPos = animatedPosition || lastPositionRef.current;
+    const targetPos = scrapperLocation;
+    const latDiff = targetPos.lat - startPos.lat;
+    const lngDiff = targetPos.lng - startPos.lng;
+    const dist = Math.sqrt(latDiff * latDiff + lngDiff * lngDiff);
+    if (dist > 0.1) {
+      setAnimatedPosition(targetPos);
+      lastPositionRef.current = targetPos;
+      return;
+    }
+    const startTime = performance.now();
+    const duration = 1000;
+    const animate = (currentTime) => {
+      const elapsed = currentTime - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const ease = 1 - Math.pow(1 - progress, 3);
+      const newPos = {
+        lat: startPos.lat + (targetPos.lat - startPos.lat) * ease,
+        lng: startPos.lng + (targetPos.lng - startPos.lng) * ease
+      };
+      setAnimatedPosition(newPos);
+      if (progress < 1) {
+        animationRef.current = requestAnimationFrame(animate);
+      } else {
+        lastPositionRef.current = targetPos;
+      }
+    };
+    if (animationRef.current) cancelAnimationFrame(animationRef.current);
+    animationRef.current = requestAnimationFrame(animate);
+    return () => {
+      if (animationRef.current) cancelAnimationFrame(animationRef.current);
+    };
+  }, [scrapperLocation]);
+
+  // Directions (route) and ETA when both locations available
+  useEffect(() => {
+    if (!isMapLoaded || !userLocation || !scrapperLocation || !window.google?.maps?.DirectionsService) return;
+    const svc = new window.google.maps.DirectionsService();
+    svc.route(
+      {
+        origin: scrapperLocation,
+        destination: userLocation,
+        travelMode: window.google.maps.TravelMode.DRIVING
+      },
+      (result, status) => {
+        if (status === window.google.maps.DirectionsStatus.OK && result?.routes?.[0]?.legs?.[0]) {
+          setDirections(result);
+          const leg = result.routes[0].legs[0];
+          setEta(leg.duration?.text ?? null);
+        }
+      }
+    );
+  }, [isMapLoaded, userLocation, scrapperLocation]);
+
+  const onMapLoad = useCallback((map) => {
+    mapRef.current = map;
+  }, []);
+  const onMapUnmount = useCallback(() => {
+    mapRef.current = null;
+  }, []);
 
   const handlePay = async () => {
     if (!requestData?._id || isPaying) return;
@@ -421,6 +551,104 @@ const RequestStatusPage = () => {
             </div>
           </div>
         </motion.div>
+
+        {/* Live tracking map – shows as soon as scrapper accepts */}
+        {['accepted', 'on_way'].includes(status) && (
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.35 }}
+            className="rounded-2xl overflow-hidden shadow-lg mb-4 md:mb-6 border"
+            style={{ backgroundColor: '#fff', borderColor: 'rgba(100, 148, 110, 0.2)' }}
+          >
+            <div className="p-3 pb-2">
+              <p className="text-sm font-semibold" style={{ color: '#2d3748' }}>
+                {getTranslatedText("Live location")}
+              </p>
+              <p className="text-xs mt-0.5" style={{ color: '#718096' }}>
+                {eta ? `${getTranslatedText("ETA:")} ${eta}` : (scrapperLocation ? getTranslatedText("In progress...") : getTranslatedText("Waiting for scrapper location..."))}
+              </p>
+            </div>
+            <div className="w-full h-56 md:h-72 relative">
+              {mapLoadError && (
+                <div className="absolute inset-0 flex items-center justify-center bg-gray-100 rounded-b-2xl text-sm text-gray-500">
+                  Map could not be loaded
+                </div>
+              )}
+              {!isMapLoaded && !mapLoadError && (
+                <div className="absolute inset-0 flex items-center justify-center bg-gray-50 rounded-b-2xl">
+                  <div className="animate-spin rounded-full h-10 w-10 border-2 border-green-600 border-t-transparent" />
+                </div>
+              )}
+              {isMapLoaded && (userLocation || scrapperLocation) && (
+                <GoogleMap
+                  mapContainerStyle={mapContainerStyle}
+                  zoom={14}
+                  center={userLocation || scrapperLocation || defaultCenter}
+                  options={{
+                    disableDefaultUI: true,
+                    zoomControl: true,
+                    mapTypeControl: false,
+                    streetViewControl: false,
+                    fullscreenControl: false
+                  }}
+                  onLoad={onMapLoad}
+                  onUnmount={onMapUnmount}
+                >
+                  {userLocation && (
+                    <Marker
+                      position={userLocation}
+                      icon={{
+                        url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
+                          <svg width="40" height="48" viewBox="0 0 40 48" xmlns="http://www.w3.org/2000/svg">
+                            <ellipse cx="20" cy="46" rx="10" ry="2" fill="rgba(0,0,0,0.2)"/>
+                            <path d="M20 4 C12 4 6 10 6 18 C6 28 20 44 20 44 C20 44 34 28 34 18 C34 10 28 4 20 4 Z" fill="#ef4444" stroke="#fff" stroke-width="2"/>
+                            <circle cx="20" cy="18" r="6" fill="#fff"/><circle cx="20" cy="16" r="2.5" fill="#ef4444"/>
+                          </svg>
+                        `),
+                        scaledSize: new window.google.maps.Size(40, 48),
+                        anchor: new window.google.maps.Point(20, 46)
+                      }}
+                    />
+                  )}
+                  {animatedPosition && (
+                    <Marker
+                      position={animatedPosition}
+                      zIndex={10}
+                      icon={{
+                        url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
+                          <svg width="48" height="48" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+                            <ellipse cx="24" cy="44" rx="12" ry="3" fill="rgba(0,0,0,0.2)"/>
+                            <path d="M8 20 L8 32 L32 32 L32 20 Z" fill="#64946e" stroke="#fff" stroke-width="2"/>
+                            <path d="M8 16 L8 20 L20 20 L20 16 Z" fill="#4a7356" stroke="#fff" stroke-width="2"/>
+                            <circle cx="14" cy="32" r="4" fill="#2d3748"/><circle cx="26" cy="32" r="4" fill="#2d3748"/>
+                            <text x="20" y="28" font-size="10" fill="white" font-weight="bold">♻</text>
+                          </svg>
+                        `),
+                        scaledSize: new window.google.maps.Size(48, 48),
+                        anchor: new window.google.maps.Point(24, 44)
+                      }}
+                    />
+                  )}
+                  {directions && (
+                    <DirectionsRenderer
+                      directions={directions}
+                      options={{
+                        suppressMarkers: true,
+                        polylineOptions: {
+                          strokeColor: '#64946e',
+                          strokeOpacity: 0.9,
+                          strokeWeight: 5,
+                          geodesic: true
+                        }
+                      }}
+                    />
+                  )}
+                </GoogleMap>
+              )}
+            </div>
+          </motion.div>
+        )}
 
         {/* Payment CTA */}
         {requestData?.status && !['completed', 'cancelled'].includes(requestData.status) && requestData?.paymentStatus !== 'completed' && (

@@ -74,6 +74,10 @@ const ScrapperMap = ({
     const [routeStats, setRouteStats] = useState(null);
     const animationRef = useRef(null);
     const lastPositionRef = useRef(scrapperLocation);
+    // Industry standard: fit bounds once when entering pickup, then keep map view stable
+    const boundsFittedRef = useRef(false);
+    const requestBoundsFittedRef = useRef(false);
+    const [stableMapCenter, setStableMapCenter] = useState(null);
 
     const onLoad = useCallback((map) => {
         setMap(map);
@@ -191,38 +195,58 @@ const ScrapperMap = ({
         }
     }, [stage, isLoaded, scrapperLocation, userLocation]);
 
-    // Adjust bounds to fit markers with padding
+    // Reset bounds-fitted flags when stage changes (so next stage can fit again)
     useEffect(() => {
-        if (map && isLoaded) {
-            const bounds = new window.google.maps.LatLngBounds();
-            let hasPoints = false;
-
-            if (userLocation) {
-                bounds.extend(userLocation);
-                hasPoints = true;
-            }
-
-            if (animatedPosition) {
-                bounds.extend(animatedPosition);
-                hasPoints = true;
-            }
-
-            if (hasPoints) {
-                map.fitBounds(bounds, {
-                    top: 100,
-                    bottom: 100,
-                    left: 100,
-                    right: 100
-                });
-
-                // Limit max zoom
-                const listener = window.google.maps.event.addListener(map, 'idle', () => {
-                    if (map.getZoom() > 16) map.setZoom(16);
-                    window.google.maps.event.removeListener(listener);
-                });
-            }
+        if (stage !== 'pickup') {
+            boundsFittedRef.current = false;
         }
-    }, [map, isLoaded, userLocation, animatedPosition]);
+        if (stage !== 'request') {
+            requestBoundsFittedRef.current = false;
+        }
+        if (stage === 'request') {
+            setStableMapCenter(null);
+        }
+    }, [stage]);
+
+    // When switching to another order, reset so map can fit bounds for the new order
+    useEffect(() => {
+        boundsFittedRef.current = false;
+        requestBoundsFittedRef.current = false;
+        setStableMapCenter(null);
+    }, [orderId]);
+
+    // Fit bounds ONCE when map is ready: request stage = user only; pickup = user + scrapper. Then map stays stable; only route/markers update.
+    useEffect(() => {
+        if (!map || !isLoaded || !window.google) return;
+
+        if (stage === 'request' && userLocation && !requestBoundsFittedRef.current) {
+            const bounds = new window.google.maps.LatLngBounds();
+            bounds.extend(userLocation);
+            map.fitBounds(bounds, { top: 100, bottom: 100, left: 100, right: 100 });
+            const listener = window.google.maps.event.addListener(map, 'idle', () => {
+                if (map.getZoom() > 16) map.setZoom(16);
+                window.google.maps.event.removeListener(listener);
+            });
+            requestBoundsFittedRef.current = true;
+            return;
+        }
+
+        if (stage === 'pickup' && userLocation && scrapperLocation && !boundsFittedRef.current) {
+            const bounds = new window.google.maps.LatLngBounds();
+            bounds.extend(userLocation);
+            bounds.extend(scrapperLocation);
+            map.fitBounds(bounds, { top: 100, bottom: 100, left: 100, right: 100 });
+            const listener = window.google.maps.event.addListener(map, 'idle', () => {
+                if (map.getZoom() > 16) map.setZoom(16);
+                window.google.maps.event.removeListener(listener);
+            });
+            boundsFittedRef.current = true;
+            setStableMapCenter({
+                lat: (userLocation.lat + scrapperLocation.lat) / 2,
+                lng: (userLocation.lng + scrapperLocation.lng) / 2
+            });
+        }
+    }, [map, isLoaded, stage, userLocation, scrapperLocation]);
 
     if (loadError) {
         return (
@@ -252,7 +276,7 @@ const ScrapperMap = ({
             <GoogleMap
                 mapContainerStyle={mapContainerStyle}
                 zoom={14}
-                center={animatedPosition || userLocation || defaultCenter}
+                center={stableMapCenter || userLocation || defaultCenter}
                 options={{
                     ...mapOptions,
                     tilt: 45, // 3D view
