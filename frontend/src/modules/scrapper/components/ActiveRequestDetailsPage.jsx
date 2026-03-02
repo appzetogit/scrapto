@@ -339,11 +339,17 @@ const ActiveRequestDetailsPage = () => {
   // Get scrapper's current location
   useEffect(() => {
     if (navigator.geolocation) {
+      const geoOptions = {
+        enableHighAccuracy: true,
+        maximumAge: 0,
+        timeout: 10000,
+      };
+
       navigator.geolocation.getCurrentPosition(
         (position) => {
           setScrapperLocation({
             lat: position.coords.latitude,
-            lng: position.coords.longitude
+            lng: position.coords.longitude,
           });
         },
         (error) => {
@@ -351,9 +357,10 @@ const ActiveRequestDetailsPage = () => {
           // Default location (Mumbai)
           setScrapperLocation({
             lat: 19.0760,
-            lng: 72.8777
+            lng: 72.8777,
           });
-        }
+        },
+        geoOptions,
       );
 
       // Watch position for live updates
@@ -361,12 +368,13 @@ const ActiveRequestDetailsPage = () => {
         (position) => {
           setScrapperLocation({
             lat: position.coords.latitude,
-            lng: position.coords.longitude
+            lng: position.coords.longitude,
           });
         },
         (error) => {
           console.error('Error watching location:', error);
-        }
+        },
+        geoOptions,
       );
 
       return () => {
@@ -376,7 +384,7 @@ const ActiveRequestDetailsPage = () => {
       // Default location if geolocation not supported
       setScrapperLocation({
         lat: 19.0760,
-        lng: 72.8777
+        lng: 72.8777,
       });
     }
   }, []);

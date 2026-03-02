@@ -51,6 +51,25 @@ const defaultCenter = {
     lng: 72.8777
 };
 
+// Scrapper truck icon rotated by heading (degrees) so it faces direction of travel
+const getScrapperTruckIcon = (heading = 0) => ({
+    url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
+        <svg width="48" height="48" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+            <ellipse cx="24" cy="44" rx="12" ry="3" fill="rgba(0,0,0,0.2)"/>
+            <g transform="rotate(${Number(heading).toFixed(1)} 24 24)">
+                <path d="M8 20 L8 32 L32 32 L32 20 Z" fill="#64946e" stroke="#ffffff" stroke-width="2"/>
+                <path d="M8 16 L8 20 L20 20 L20 16 Z" fill="#4a7356" stroke="#ffffff" stroke-width="2"/>
+                <circle cx="14" cy="32" r="4" fill="#2d3748" stroke="#ffffff" stroke-width="2"/>
+                <circle cx="26" cy="32" r="4" fill="#2d3748" stroke="#ffffff" stroke-width="2"/>
+                <rect x="10" y="17" width="8" height="2" fill="#87ceeb" opacity="0.7"/>
+                <text x="20" y="28" font-size="10" fill="white" font-weight="bold">♻</text>
+            </g>
+        </svg>
+    `),
+    scaledSize: new window.google.maps.Size(48, 48),
+    anchor: new window.google.maps.Point(24, 44)
+});
+
 // Icons (reused from scrapper module or simplified)
 const truckIcon = {
     path: 'M17 8h3a3 3 0 0 1 3 3v8h-3a2 2 0 0 1-4 0H9a2 2 0 0 1-4 0H3V9a3 3 0 0 1 3-3h11zm-1-5a2 2 0 0 1 2 2v3h-2V3zm-2 0h-4v3h4V3zm-6 2v3H6V5a2 2 0 0 1 2-2z',
@@ -303,25 +322,11 @@ const TrackOrderPage = () => {
                         animation={window.google.maps.Animation.BOUNCE}
                     />
 
-                    {/* Scrapper Truck Marker */}
-                    {animatedPosition && (
+                    {/* Scrapper Truck Marker (rotated by heading from socket) */}
+                    {animatedPosition && window.google && (
                         <Marker
                             position={animatedPosition}
-                            icon={{
-                                url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
-                                    <svg width="48" height="48" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
-                                        <ellipse cx="24" cy="44" rx="12" ry="3" fill="rgba(0,0,0,0.2)"/>
-                                        <path d="M8 20 L8 32 L32 32 L32 20 Z" fill="#64946e" stroke="#ffffff" stroke-width="2"/>
-                                        <path d="M8 16 L8 20 L20 20 L20 16 Z" fill="#4a7356" stroke="#ffffff" stroke-width="2"/>
-                                        <circle cx="14" cy="32" r="4" fill="#2d3748" stroke="#ffffff" stroke-width="2"/>
-                                        <circle cx="26" cy="32" r="4" fill="#2d3748" stroke="#ffffff" stroke-width="2"/>
-                                        <rect x="10" y="17" width="8" height="2" fill="#87ceeb" opacity="0.7"/>
-                                        <text x="20" y="28" font-size="10" fill="white" font-weight="bold">♻</text>
-                                    </svg>
-                                `),
-                                scaledSize: new window.google.maps.Size(48, 48),
-                                anchor: new window.google.maps.Point(24, 44)
-                            }}
+                            icon={getScrapperTruckIcon(heading)}
                             zIndex={2}
                         />
                     )}

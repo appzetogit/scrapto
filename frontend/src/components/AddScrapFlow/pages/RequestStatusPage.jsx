@@ -10,6 +10,24 @@ import socketClient from '../../../modules/shared/utils/socketClient';
 const defaultCenter = { lat: 19.076, lng: 72.8777 };
 const mapContainerStyle = { width: '100%', height: '100%', borderRadius: '12px' };
 
+function getScrapperTruckIcon(heading = 0) {
+  return {
+    url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
+      <svg width="48" height="48" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+        <ellipse cx="24" cy="44" rx="12" ry="3" fill="rgba(0,0,0,0.2)"/>
+        <g transform="rotate(${Number(heading).toFixed(1)} 24 24)">
+          <path d="M8 20 L8 32 L32 32 L32 20 Z" fill="#64946e" stroke="#fff" stroke-width="2"/>
+          <path d="M8 16 L8 20 L20 20 L20 16 Z" fill="#4a7356" stroke="#fff" stroke-width="2"/>
+          <circle cx="14" cy="32" r="4" fill="#2d3748"/><circle cx="26" cy="32" r="4" fill="#2d3748"/>
+          <text x="20" y="28" font-size="10" fill="white" font-weight="bold">♻</text>
+        </g>
+      </svg>
+    `),
+    scaledSize: new window.google.maps.Size(48, 48),
+    anchor: new window.google.maps.Point(24, 44),
+  };
+}
+
 const RequestStatusPage = () => {
   const staticTexts = [
     "Request Status",
@@ -73,6 +91,7 @@ const RequestStatusPage = () => {
   const [scrapperLocation, setScrapperLocation] = useState(null);
   const [directions, setDirections] = useState(null);
   const [animatedPosition, setAnimatedPosition] = useState(null);
+  const [scrapperHeading, setScrapperHeading] = useState(0);
   const mapRef = useRef(null);
   const animationRef = useRef(null);
   const lastPositionRef = useRef(null);
@@ -218,6 +237,7 @@ const RequestStatusPage = () => {
     socketClient.onLocationUpdate((data) => {
       if (data.orderId === orderId && data.location?.lat != null && data.location?.lng != null) {
         setScrapperLocation(data.location);
+        if (data.heading != null) setScrapperHeading(data.heading);
       }
     });
     return () => {
@@ -226,7 +246,7 @@ const RequestStatusPage = () => {
     };
   }, [requestData?._id, status]);
 
-  // Animated scrapper marker position
+  // Animated scrapper marker position + heading from movement
   useEffect(() => {
     if (!scrapperLocation) return;
     if (!lastPositionRef.current) {
@@ -238,6 +258,8 @@ const RequestStatusPage = () => {
     const targetPos = scrapperLocation;
     const latDiff = targetPos.lat - startPos.lat;
     const lngDiff = targetPos.lng - startPos.lng;
+    const headingDeg = Math.atan2(lngDiff, latDiff) * (180 / Math.PI);
+    setScrapperHeading(headingDeg);
     const dist = Math.sqrt(latDiff * latDiff + lngDiff * lngDiff);
     if (dist > 0.1) {
       setAnimatedPosition(targetPos);
@@ -611,23 +633,11 @@ const RequestStatusPage = () => {
                       }}
                     />
                   )}
-                  {animatedPosition && (
+                  {animatedPosition && window.google && (
                     <Marker
                       position={animatedPosition}
                       zIndex={10}
-                      icon={{
-                        url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
-                          <svg width="48" height="48" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
-                            <ellipse cx="24" cy="44" rx="12" ry="3" fill="rgba(0,0,0,0.2)"/>
-                            <path d="M8 20 L8 32 L32 32 L32 20 Z" fill="#64946e" stroke="#fff" stroke-width="2"/>
-                            <path d="M8 16 L8 20 L20 20 L20 16 Z" fill="#4a7356" stroke="#fff" stroke-width="2"/>
-                            <circle cx="14" cy="32" r="4" fill="#2d3748"/><circle cx="26" cy="32" r="4" fill="#2d3748"/>
-                            <text x="20" y="28" font-size="10" fill="white" font-weight="bold">♻</text>
-                          </svg>
-                        `),
-                        scaledSize: new window.google.maps.Size(48, 48),
-                        anchor: new window.google.maps.Point(24, 44)
-                      }}
+                      icon={getScrapperTruckIcon(scrapperHeading)}
                     />
                   )}
                   {directions && (

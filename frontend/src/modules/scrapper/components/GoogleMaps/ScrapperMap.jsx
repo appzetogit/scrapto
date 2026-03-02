@@ -5,22 +5,26 @@ import { usePageTranslation } from '../../../../hooks/usePageTranslation';
 import socketClient from '../../../../modules/shared/utils/socketClient';
 
 // Custom 3D-style marker icons (Lazy created to avoid window.google access on module load)
-const getScrapperIcon = () => ({
+// Scrapper icon accepts a heading so the truck faces the direction of travel.
+const getScrapperIcon = (heading = 0) => ({
     url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
         <svg width="48" height="48" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
             <!-- Shadow -->
             <ellipse cx="24" cy="44" rx="12" ry="3" fill="rgba(0,0,0,0.2)"/>
-            <!-- Truck body -->
-            <path d="M8 20 L8 32 L32 32 L32 20 Z" fill="#64946e" stroke="#ffffff" stroke-width="2"/>
-            <!-- Truck cabin -->
-            <path d="M8 16 L8 20 L20 20 L20 16 Z" fill="#4a7356" stroke="#ffffff" stroke-width="2"/>
-            <!-- Wheels -->
-            <circle cx="14" cy="32" r="4" fill="#2d3748" stroke="#ffffff" stroke-width="2"/>
-            <circle cx="26" cy="32" r="4" fill="#2d3748" stroke="#ffffff" stroke-width="2"/>
-            <!-- Window -->
-            <rect x="10" y="17" width="8" height="2" fill="#87ceeb" opacity="0.7"/>
-            <!-- Recycling symbol -->
-            <text x="20" y="28" font-size="10" fill="white" font-weight="bold">♻</text>
+            <!-- Rotating group for truck -->
+            <g transform="rotate(${heading.toFixed(1)} 24 24)">
+                <!-- Truck body -->
+                <path d="M8 20 L8 32 L32 32 L32 20 Z" fill="#64946e" stroke="#ffffff" stroke-width="2"/>
+                <!-- Truck cabin -->
+                <path d="M8 16 L8 20 L20 20 L20 16 Z" fill="#4a7356" stroke="#ffffff" stroke-width="2"/>
+                <!-- Wheels -->
+                <circle cx="14" cy="32" r="4" fill="#2d3748" stroke="#ffffff" stroke-width="2"/>
+                <circle cx="26" cy="32" r="4" fill="#2d3748" stroke="#ffffff" stroke-width="2"/>
+                <!-- Window -->
+                <rect x="10" y="17" width="8" height="2" fill="#87ceeb" opacity="0.7"/>
+                <!-- Recycling symbol -->
+                <text x="20" y="28" font-size="10" fill="white" font-weight="bold">♻</text>
+            </g>
         </svg>
     `),
     scaledSize: window.google ? new window.google.maps.Size(48, 48) : null,
@@ -112,7 +116,7 @@ const ScrapperMap = ({
         setHeading(newHeading);
 
         // Smooth animation
-        const steps = 60; // 60 frames for smooth animation
+        const steps = 30; // 30 frames for smooth animation (faster response)
         let currentStep = 0;
 
         const animate = () => {
@@ -130,15 +134,6 @@ const ScrapperMap = ({
                     setTrail(prev => [...prev.slice(-50), { lat: newLat, lng: newLng }]);
                 }
 
-                // Broadcast location update if pickup stage
-                if (stage === 'pickup' && orderId && currentStep % 10 === 0) {
-                    socketClient.sendLocationUpdate({
-                        orderId,
-                        location: { lat: newLat, lng: newLng },
-                        heading: newHeading
-                    });
-                }
-
                 currentStep++;
                 animationRef.current = requestAnimationFrame(animate);
             } else {
@@ -146,13 +141,6 @@ const ScrapperMap = ({
                 lastPositionRef.current = scrapperLocation;
 
                 // Final update
-                if (stage === 'pickup' && orderId) {
-                    socketClient.sendLocationUpdate({
-                        orderId,
-                        location: scrapperLocation,
-                        heading: heading
-                    });
-                }
             }
         };
 
@@ -164,6 +152,17 @@ const ScrapperMap = ({
             }
         };
     }, [scrapperLocation, enableTracking, showTrail, stage, orderId]);
+
+    // Broadcast latest scrapper location to users as soon as it updates (pickup stage only)
+    useEffect(() => {
+        if (stage === 'pickup' && orderId && scrapperLocation) {
+            socketClient.sendLocationUpdate({
+                orderId,
+                location: scrapperLocation,
+                heading,
+            });
+        }
+    }, [scrapperLocation, stage, orderId, heading]);
 
     // Calculate Route when in pickup stage
     useEffect(() => {
@@ -325,12 +324,12 @@ const ScrapperMap = ({
                 {/* Pickup Stage: Show both + Route */}
                 {stage === 'pickup' && (
                     <>
-                        {/* Animated Scrapper Marker with 3D truck icon */}
+                        {/* Animated Scrapper Marker with 3D truck icon (rotated to face heading) */}
                         {animatedPosition && (
                             <Marker
                                 position={animatedPosition}
                                 title={getTranslatedText("Scrapper (You)")}
-                                icon={getScrapperIcon()}
+                                icon={getScrapperIcon(heading)}
                                 zIndex={1000}
                             />
                         )}
