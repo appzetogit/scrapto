@@ -136,6 +136,17 @@ export const createOrder = asyncHandler(async (req, res) => {
     // Do not fail the request if notification fails
   }
 
+  // --- NOTIFY USER: Order placed confirmation ---
+  try {
+    await sendNotificationToUser(userId, {
+      title: 'Order Placed ✅',
+      body: 'Your scrap pickup request has been placed successfully!',
+      data: { type: 'order_placed', orderId: order._id.toString() }
+    }, 'user');
+  } catch (e) {
+    logger.error('Failed to notify user on order placed:', e);
+  }
+
   sendSuccess(res, 'Order created successfully', { order }, 201);
 });
 
@@ -332,6 +343,17 @@ export const acceptOrder = asyncHandler(async (req, res) => {
 
   logger.info(`Order ${id} accepted by scrapper ${scrapperId}`);
 
+  // --- NOTIFY USER: Scrapper accepted their order ---
+  try {
+    await sendNotificationToUser(order.user.toString(), {
+      title: 'Order Accepted 🎉',
+      body: 'A scrapper has accepted your pickup request and is on the way!',
+      data: { type: 'order_accepted', orderId: order._id.toString() }
+    }, 'user');
+  } catch (e) {
+    logger.error('Failed to notify user on order accepted:', e);
+  }
+
   sendSuccess(res, 'Order accepted successfully', { order });
 });
 
@@ -493,6 +515,32 @@ export const updateOrderStatus = asyncHandler(async (req, res) => {
   await order.populate('scrapper', 'name phone');
 
   logger.info(`Order ${id} status updated to ${status} (Payment: ${order.paymentStatus}) by ${userRole} ${userId}`);
+
+  // --- NOTIFY on Order Completion ---
+  if (status === ORDER_STATUS.COMPLETED) {
+    // Notify User
+    try {
+      await sendNotificationToUser(order.user.toString(), {
+        title: 'Order Completed ✅',
+        body: 'Your scrap pickup order has been completed successfully!',
+        data: { type: 'order_completed', orderId: order._id.toString() }
+      }, 'user');
+    } catch (e) {
+      logger.error('Failed to notify user on order completed:', e);
+    }
+    // Notify Scrapper
+    if (order.scrapper) {
+      try {
+        await sendNotificationToUser(order.scrapper.toString(), {
+          title: 'Order Completed ✅',
+          body: 'Great job! You have successfully completed the pickup.',
+          data: { type: 'order_completed', orderId: order._id.toString() }
+        }, 'scrapper');
+      } catch (e) {
+        logger.error('Failed to notify scrapper on order completed:', e);
+      }
+    }
+  }
 
   sendSuccess(res, 'Order status updated successfully', { order });
 });
