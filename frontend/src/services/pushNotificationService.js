@@ -79,13 +79,17 @@ export async function registerFCMToken(forceUpdate = false) {
             throw new Error('Failed to get FCM token');
         }
 
+        // Detect platform
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        const platformType = isMobile ? 'mobile' : 'web';
+
         // Save to backend
         // Assuming apiRequest handles Authorization header automatically via localStorage
         const response = await apiRequest('/fcm-tokens/save', {
             method: 'POST',
             body: JSON.stringify({
                 token: token,
-                platform: 'web'
+                platform: platformType
             })
         });
 

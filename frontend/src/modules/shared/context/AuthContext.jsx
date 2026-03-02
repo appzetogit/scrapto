@@ -65,7 +65,7 @@ export const AuthProvider = ({ children }) => {
     verifyToken();
   }, [logout]);
 
-  const login = (userData, token = null) => {
+  const login = async (userData, token = null) => {
     setIsAuthenticated(true);
     setUser(userData);
     localStorage.setItem('isAuthenticated', 'true');
@@ -78,7 +78,11 @@ export const AuthProvider = ({ children }) => {
         tokenPreview: `${token.substring(0, 20)}...`
       });
       // Register FCM Token
-      registerFCMToken(true).catch(err => console.error('FCM registration failed', err));
+      try {
+        await registerFCMToken(true);
+      } catch (err) {
+        console.error('FCM registration failed', err);
+      }
     } else {
       console.warn('⚠️ No token provided to login function');
     }

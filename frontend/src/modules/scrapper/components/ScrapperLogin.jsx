@@ -396,7 +396,7 @@ const ScrapperLogin = () => {
         const token = response.data.token;
 
         // Login user with token
-        login(userData, token);
+        await login(userData, token);
 
         // Set scrapper-specific authentication
         localStorage.setItem('scrapperAuthenticated', 'true');

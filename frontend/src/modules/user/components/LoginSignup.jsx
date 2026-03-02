@@ -298,7 +298,7 @@ const LoginSignup = () => {
         const token = response.data.token;
 
         // Login user with token
-        login(userData, token);
+        await login(userData, token);
 
         // Process referral if code is provided and valid (only for new registrations)
         if (
