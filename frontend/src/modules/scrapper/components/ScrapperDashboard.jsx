@@ -228,6 +228,18 @@ const ScrapperDashboard = () => {
   // Handle availability toggle
   const handleAvailabilityToggle = async () => {
     const newAvailability = !isAvailable;
+
+    // Check subscription if trying to go online
+    if (newAvailability) {
+      const isSubActive = subscriptionData?.isPlatformActive;
+      if (!isSubActive) {
+        // Show notification/alert and redirect
+        alert('Active subscription required to go online. Please subscribe first.');
+        navigate('/scrapper/subscription');
+        return;
+      }
+    }
+
     setIsAvailable(newAvailability);
 
     // Sync with backend
@@ -354,13 +366,10 @@ const ScrapperDashboard = () => {
           return;
         }
 
-        // If KYC is verified but platform subscription not active, redirect to subscription page
-        // Note: Market price subscription is optional, so we don't block access if missing
+        // If KYC is verified, allow dashboard to render
+        // Subscription check is now moved to operational actions (going online/accepting orders)
         if (backendKycStatus === 'verified') {
-          if (!platformSubActive) {
-            navigate('/scrapper/subscription', { replace: true });
-            return;
-          }
+          // No longer redirecting to subscription page automatically
         }
 
         // If KYC not verified, redirect to status page

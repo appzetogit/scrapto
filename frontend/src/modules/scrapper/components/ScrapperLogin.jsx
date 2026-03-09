@@ -197,24 +197,7 @@ const ScrapperLogin = () => {
           } else if (kycStatus === 'rejected') {
             navigate('/scrapper/kyc', { replace: true });
           } else if (kycStatus === 'verified') {
-            // Check subscription if verified
-            const subscription = response.data?.subscription;
-            const isActive = subscription?.status === 'active';
-
-            // Also check expiration
-            let isActuallyActive = false;
-            if (isActive && subscription.expiryDate) {
-              const expiry = new Date(subscription.expiryDate);
-              if (expiry > new Date()) {
-                isActuallyActive = true;
-              }
-            }
-
-            if (isActuallyActive) {
-              navigate('/scrapper', { replace: true });
-            } else {
-              navigate('/scrapper/subscription', { replace: true });
-            }
+            navigate('/scrapper', { replace: true });
           }
         } catch (error) {
           console.error('Failed to fetch initial status:', error);

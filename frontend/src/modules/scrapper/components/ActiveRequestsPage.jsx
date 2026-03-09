@@ -470,6 +470,29 @@ const ActiveRequestsPage = () => {
     // Stop sound & vibration immediately
     setAudioPlaying(false);
 
+    // Active Subscription Check (Change 3)
+    try {
+      const { subscriptionAPI } = await import('../../shared/utils/api');
+      const subRes = await subscriptionAPI.getMySubscription();
+      const subscription = subRes.data?.subscription;
+      const platformSubActive = subscription?.status === 'active' && new Date(subscription.expiryDate) > new Date();
+
+      if (!platformSubActive) {
+        alert('Active subscription required to accept orders. Please subscribe first.');
+        navigate('/scrapper/subscription');
+        return;
+      }
+    } catch (subErr) {
+      console.error('Failed to verify subscription before acceptance:', subErr);
+      // Fallback to localStorage check if API fails
+      const storedStatus = localStorage.getItem('scrapperSubscriptionStatus');
+      if (storedStatus !== 'active') {
+        alert('Active subscription required to accept orders. Please subscribe first.');
+        navigate('/scrapper/subscription');
+        return;
+      }
+    }
+
     try {
       // Accept order via backend API
       const orderId = incomingRequest._id || incomingRequest.id;

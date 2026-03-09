@@ -59,8 +59,23 @@ export const updateMyProfile = asyncHandler(async (req, res) => {
         if (vehicleInfo) scrapper.vehicleInfo = { ...scrapper.vehicleInfo, ...vehicleInfo };
 
         // Update Online Status
-        if (availability !== undefined) scrapper.isOnline = availability;
-        if (isOnline !== undefined) scrapper.isOnline = isOnline;
+        if (availability !== undefined || isOnline !== undefined) {
+            const requestedOnline = availability === true || isOnline === true;
+
+            if (requestedOnline) {
+                const now = new Date();
+                const isSubscribed = scrapper.subscription &&
+                    scrapper.subscription.status === 'active' &&
+                    new Date(scrapper.subscription.expiryDate) > now;
+
+                if (!isSubscribed) {
+                    return sendError(res, 'Active subscription required to go online. Please subscribe first.', 403);
+                }
+            }
+
+            if (availability !== undefined) scrapper.isOnline = availability;
+            if (isOnline !== undefined) scrapper.isOnline = isOnline;
+        }
 
         await scrapper.save();
     }

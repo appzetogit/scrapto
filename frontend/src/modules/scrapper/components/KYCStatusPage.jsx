@@ -35,6 +35,8 @@ const KYCStatusPage = () => {
     "Status:",
     "Resubmit KYC",
     "Continue to Subscription",
+    "Go to Dashboard",
+    "View Subscriptions",
     "Waiting for Verification",
     "Your KYC is under review. You'll be automatically redirected to dashboard once verified.",
     "What happens next?",
@@ -295,22 +297,24 @@ const KYCStatusPage = () => {
             )}
 
             {kycStatus === 'verified' && (
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={() => {
-                  // Check subscription status before redirecting
-                  const subscriptionStatus = localStorage.getItem('scrapperSubscriptionStatus');
-                  if (subscriptionStatus === 'active') {
-                    navigate('/scrapper', { replace: true });
-                  } else {
-                    navigate('/scrapper/subscription', { replace: true });
-                  }
-                }}
-                className="w-full py-3 md:py-4 rounded-xl font-bold text-base md:text-lg shadow-lg hover:shadow-xl transition-all duration-300 bg-emerald-600 text-white hover:bg-emerald-700"
-              >
-                {getTranslatedText("Continue to Subscription")}
-              </motion.button>
+              <div className="space-y-3">
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => navigate('/scrapper', { replace: true })}
+                  className="w-full py-3 md:py-4 rounded-xl font-bold text-base md:text-lg shadow-lg hover:shadow-xl transition-all duration-300 bg-emerald-600 text-white hover:bg-emerald-700"
+                >
+                  {getTranslatedText("Go to Dashboard")}
+                </motion.button>
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => navigate('/scrapper/subscription', { replace: true })}
+                  className="w-full py-3 md:py-4 rounded-xl font-bold text-base md:text-lg shadow-lg hover:shadow-xl transition-all duration-300 bg-zinc-800 text-white border border-zinc-700 hover:bg-zinc-700 hover:border-emerald-500"
+                >
+                  {getTranslatedText("View Subscriptions")}
+                </motion.button>
+              </div>
             )}
 
             {kycStatus === 'pending' && (

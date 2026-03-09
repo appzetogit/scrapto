@@ -322,6 +322,16 @@ export const acceptOrder = asyncHandler(async (req, res) => {
     return sendError(res, 'Insufficient wallet balance. You need minimum ₹100 to accept orders. Please recharge your wallet.', 403);
   }
 
+  // Active Subscription Check
+  const now = new Date();
+  const isSubscribed = scrapper.subscription &&
+    scrapper.subscription.status === 'active' &&
+    new Date(scrapper.subscription.expiryDate) > now;
+
+  if (!isSubscribed) {
+    return sendError(res, 'Active subscription required to accept orders. Please subscribe first.', 403);
+  }
+
   // Assign scrapper to order
   order.scrapper = scrapperId;
   order.assignmentStatus = 'accepted';
