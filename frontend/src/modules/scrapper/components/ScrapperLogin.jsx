@@ -658,7 +658,7 @@ const ScrapperLogin = () => {
                       <label className="block text-sm font-semibold mb-2 text-white">
                         {getTranslatedText("Select Services")}
                       </label>
-                      <div className="grid grid-cols-2 gap-3">
+                      <div className="grid grid-cols-1 gap-3">
                         <label
                           className={`flex items-center gap-3 p-3 rounded-xl border-2 cursor-pointer transition-all ${selectedServices.includes('scrap_pickup')
                             ? 'border-emerald-500 bg-emerald-900/20'
@@ -678,27 +678,6 @@ const ScrapperLogin = () => {
                             className="w-4 h-4 rounded text-emerald-500 focus:ring-emerald-500 bg-zinc-900 border-zinc-600"
                           />
                           <span className="text-sm text-white">Scrap Pickup</span>
-                        </label>
-
-                        <label
-                          className={`flex items-center gap-3 p-3 rounded-xl border-2 cursor-pointer transition-all ${selectedServices.includes('home_cleaning')
-                            ? 'border-emerald-500 bg-emerald-900/20'
-                            : 'border-zinc-700 bg-zinc-800/50 hover:border-zinc-600'
-                            }`}
-                        >
-                          <input
-                            type="checkbox"
-                            checked={selectedServices.includes('home_cleaning')}
-                            onChange={(e) => {
-                              if (e.target.checked) {
-                                setSelectedServices([...selectedServices, 'home_cleaning']);
-                              } else {
-                                setSelectedServices(selectedServices.filter(s => s !== 'home_cleaning'));
-                              }
-                            }}
-                            className="w-4 h-4 rounded text-emerald-500 focus:ring-emerald-500 bg-zinc-900 border-zinc-600"
-                          />
-                          <span className="text-sm text-white">Home Cleaning</span>
                         </label>
                       </div>
                     </motion.div>
