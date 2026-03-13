@@ -117,7 +117,7 @@ const PriceConfirmationPage = () => {
           // Convert prices array to object for easy lookup
           const pricesMap = {};
           response.data.prices.forEach(price => {
-            pricesMap[price.category] = price.pricePerKg;
+            pricesMap[(price.category || "").toLowerCase()] = price.pricePerKg;
           });
           setMarketPrices(pricesMap);
         } else {
@@ -137,14 +137,14 @@ const PriceConfirmationPage = () => {
         console.error('Failed to fetch market prices:', error);
         // Fallback to default prices
         setMarketPrices({
-          'Plastic': 45,
-          'Metal': 180,
-          'Paper': 12,
-          'Electronics': 85,
-          'Copper': 650,
-          'Aluminium': 180,
-          'Steel': 35,
-          'Brass': 420,
+          'plastic': 45,
+          'metal': 180,
+          'paper': 12,
+          'electronics': 85,
+          'copper': 650,
+          'aluminium': 180,
+          'steel': 35,
+          'brass': 420,
         });
       }
     };
@@ -232,17 +232,15 @@ const PriceConfirmationPage = () => {
       };
     }
 
-    const totalWeight = Number(weightData?.weight || 0);
-    const itemCount = Math.max(selectedCategories.length, 1);
-    const weightPerItem = totalWeight > 0 ? totalWeight / itemCount : 0;
-
     const scrapItems = selectedCategories.map((cat) => {
       const category = mapCategoryToBackend(cat);
-      const rate = cat.price || marketPrices[cat.name] || 0;
-      const total = weightPerItem * rate;
+      const catNameLower = (cat.name || "").toLowerCase();
+      const rate = cat.price || marketPrices[catNameLower] || 0;
+      // Use total weight for each item to match the sum-of-rates logic requested by user
+      const total = totalWeight * rate;
       return {
         category,
-        weight: weightPerItem || 1,
+        weight: totalWeight,
         rate,
         total
       };
@@ -447,7 +445,7 @@ const PriceConfirmationPage = () => {
                   {getTranslatedText(cat.name)}
                 </span>
                 <span className="text-xs md:text-sm font-medium" style={{ color: '#64946e' }}>
-                  ₹{marketPrices[cat.name] || 0}/{getTranslatedText("kg")}
+                  ₹{marketPrices[(cat.name || "").toLowerCase()] || cat.price || 0}/{getTranslatedText("kg")}
                 </span>
               </div>
             ))}

@@ -69,34 +69,34 @@ const WeightInputPage = () => {
           // Convert prices array to object for easy lookup
           const pricesMap = {};
           response.data.prices.forEach(price => {
-            pricesMap[price.category] = price.pricePerKg;
+            pricesMap[(price.category || "").toLowerCase()] = price.pricePerKg;
           });
           setMarketPrices(pricesMap);
         } else {
           // Fallback to default prices if API fails
           setMarketPrices({
-            'Plastic': 45,
-            'Metal': 180,
-            'Paper': 12,
-            'Electronics': 85,
-            'Copper': 650,
-            'Aluminium': 180,
-            'Steel': 35,
-            'Brass': 420,
+            'plastic': 45,
+            'metal': 180,
+            'paper': 12,
+            'electronics': 85,
+            'copper': 650,
+            'aluminium': 180,
+            'steel': 35,
+            'brass': 420,
           });
         }
       } catch (error) {
         console.error('Failed to fetch market prices:', error);
         // Fallback to default prices
         setMarketPrices({
-          'Plastic': 45,
-          'Metal': 180,
-          'Paper': 12,
-          'Electronics': 85,
-          'Copper': 650,
-          'Aluminium': 180,
-          'Steel': 35,
-          'Brass': 420,
+          'plastic': 45,
+          'metal': 180,
+          'paper': 12,
+          'electronics': 85,
+          'copper': 650,
+          'aluminium': 180,
+          'steel': 35,
+          'brass': 420,
         });
       }
     };
@@ -128,10 +128,10 @@ const WeightInputPage = () => {
       if (currentWeight > 0) {
         // Calculate average price from selected categories
         const totalPrice = selectedCategories.reduce((sum, cat) => {
-          return sum + (marketPrices[cat.name] || 0);
+          const catNameLower = (cat.name || "").toLowerCase();
+          return sum + (marketPrices[catNameLower] || cat.price || 0);
         }, 0);
-        const avgPrice = totalPrice / selectedCategories.length;
-        const payout = currentWeight * avgPrice;
+        const payout = currentWeight * totalPrice;
         setEstimatedPayout(payout);
       } else {
         setEstimatedPayout(0);
@@ -434,7 +434,7 @@ const WeightInputPage = () => {
             <div className="text-xs md:text-sm" style={{ color: '#718096' }}>
               {selectedCategories.map((cat, idx) => (
                 <span key={cat.id}>
-                  {getTranslatedText(cat.name)} @ ₹{marketPrices[cat.name] || 0}/{getTranslatedText("kg")}
+                  {getTranslatedText(cat.name)} @ ₹{marketPrices[(cat.name || "").toLowerCase()] || cat.price || 0}/{getTranslatedText("kg")}
                   {idx < selectedCategories.length - 1 && ' • '}
                 </span>
               ))}
