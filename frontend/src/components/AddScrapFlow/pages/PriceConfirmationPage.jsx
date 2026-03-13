@@ -232,15 +232,18 @@ const PriceConfirmationPage = () => {
       };
     }
 
+    const totalWeight = Number(weightData?.totalWeight || 0);
+    const categoryWeights = weightData?.categoryWeights || {};
+
     const scrapItems = selectedCategories.map((cat) => {
       const category = mapCategoryToBackend(cat);
       const catNameLower = (cat.name || "").toLowerCase();
       const rate = cat.price || marketPrices[catNameLower] || 0;
-      // Use total weight for each item to match the sum-of-rates logic requested by user
-      const total = totalWeight * rate;
+      const weight = parseFloat(categoryWeights[cat.id]) || 0;
+      const total = weight * rate;
       return {
         category,
-        weight: totalWeight,
+        weight: weight,
         rate,
         total
       };
@@ -441,8 +444,8 @@ const PriceConfirmationPage = () => {
             </p>
             {selectedCategories.map((cat) => (
               <div key={cat.id} className="flex justify-between items-center mb-1">
-                <span className="text-xs md:text-sm" style={{ color: '#2d3748' }}>
-                  {getTranslatedText(cat.name)}
+                <span className="text-sm md:text-base font-semibold" style={{ color: '#2d3748' }}>
+                  {getTranslatedText(cat.name)} ({parseFloat(weightData?.categoryWeights?.[cat.id] || 0).toFixed(1)}kg)
                 </span>
                 <span className="text-xs md:text-sm font-medium" style={{ color: '#64946e' }}>
                   ₹{marketPrices[(cat.name || "").toLowerCase()] || cat.price || 0}/{getTranslatedText("kg")}

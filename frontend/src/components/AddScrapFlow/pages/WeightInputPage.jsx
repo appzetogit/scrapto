@@ -38,7 +38,7 @@ const WeightInputPage = () => {
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [weightMode, setWeightMode] = useState('manual'); // 'auto' or 'manual'
   const [autoDetectedWeight, setAutoDetectedWeight] = useState(null);
-  const [manualWeight, setManualWeight] = useState('');
+  const [categoryWeights, setCategoryWeights] = useState({});
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [marketPrices, setMarketPrices] = useState({});
   const [estimatedPayout, setEstimatedPayout] = useState(0);
@@ -52,7 +52,20 @@ const WeightInputPage = () => {
       setUploadedImages(JSON.parse(storedImages));
     }
     if (storedCategories) {
-      setSelectedCategories(JSON.parse(storedCategories));
+      const parsedCategories = JSON.parse(storedCategories);
+      setSelectedCategories(parsedCategories);
+      
+      // Initialize categoryWeights if not already set (e.g., when coming back from next step)
+      const storedWeightData = sessionStorage.getItem('weightData');
+      if (storedWeightData) {
+        setCategoryWeights(JSON.parse(storedWeightData).categoryWeights || {});
+      } else {
+        const initialWeights = {};
+        parsedCategories.forEach(cat => {
+          initialWeights[cat.id] = '';
+        });
+        setCategoryWeights(initialWeights);
+      }
     } else {
       navigate('/add-scrap/category');
     }
@@ -121,45 +134,43 @@ const WeightInputPage = () => {
   // Calculate estimated payout
   useEffect(() => {
     if (selectedCategories.length > 0) {
-      const currentWeight = weightMode === 'auto' && autoDetectedWeight
-        ? autoDetectedWeight
-        : parseFloat(manualWeight) || 0;
-
-      if (currentWeight > 0) {
-        // Calculate average price from selected categories
-        const totalPrice = selectedCategories.reduce((sum, cat) => {
-          const catNameLower = (cat.name || "").toLowerCase();
-          return sum + (marketPrices[catNameLower] || cat.price || 0);
-        }, 0);
-        const payout = currentWeight * totalPrice;
-        setEstimatedPayout(payout);
-      } else {
-        setEstimatedPayout(0);
-      }
+      let totalPayout = 0;
+      selectedCategories.forEach(cat => {
+        const weight = parseFloat(categoryWeights[cat.id]) || 0;
+        const rate = marketPrices[(cat.name || "").toLowerCase()] || cat.price || 0;
+        totalPayout += weight * rate;
+      });
+      setEstimatedPayout(totalPayout);
     }
-  }, [selectedCategories, weightMode, autoDetectedWeight, manualWeight, marketPrices]);
+  }, [selectedCategories, categoryWeights, marketPrices]);
 
-  const handleWeightChange = (value) => {
+  const handleWeightChange = (categoryId, value) => {
     // Only allow numbers and one decimal point
     const regex = /^\d*\.?\d*$/;
     if (regex.test(value) || value === '') {
-      setManualWeight(value);
+      setCategoryWeights(prev => ({
+        ...prev,
+        [categoryId]: value
+      }));
     }
   };
 
-  const handleQuickWeight = (weight) => {
-    setManualWeight(weight.toString());
+  const handleQuickWeight = (categoryId, weight) => {
+    setCategoryWeights(prev => ({
+      ...prev,
+      [categoryId]: weight.toString()
+    }));
     setWeightMode('manual');
   };
 
   const handleContinue = () => {
-    const finalWeight = weightMode === 'auto' && autoDetectedWeight
-      ? autoDetectedWeight
-      : parseFloat(manualWeight);
+    const weights = Object.values(categoryWeights).map(w => parseFloat(w) || 0);
+    const totalWeight = weights.reduce((sum, w) => sum + w, 0);
 
-    if (finalWeight > 0) {
+    if (totalWeight > 0) {
       const weightData = {
-        weight: finalWeight,
+        totalWeight: totalWeight,
+        categoryWeights: categoryWeights,
         mode: weightMode,
         autoDetected: autoDetectedWeight,
         estimatedPayout: estimatedPayout
@@ -169,9 +180,7 @@ const WeightInputPage = () => {
     }
   };
 
-  const currentWeight = weightMode === 'auto' && autoDetectedWeight
-    ? autoDetectedWeight
-    : parseFloat(manualWeight) || 0;
+  const totalWeightDisplay = Object.values(categoryWeights).reduce((sum, w) => sum + (parseFloat(w) || 0), 0);
 
   const quickWeights = [5, 10, 15, 20, 25, 30];
 
@@ -348,25 +357,36 @@ const WeightInputPage = () => {
         )} */}
 
         {/* Manual Input Section */}
-        {(
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="mb-4 md:mb-6"
-          >
-            <div className="rounded-xl p-4 md:p-6" style={{ backgroundColor: '#ffffff' }}>
+        {/* Manual Input Section - One for each category */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="space-y-6"
+        >
+          {selectedCategories.map((category) => (
+            <div key={category.id} className="rounded-xl p-4 md:p-6 shadow-sm border border-gray-100" style={{ backgroundColor: '#ffffff' }}>
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 rounded-full flex items-center justify-center bg-green-50">
+                  <img src={category.image} alt="" className="w-6 h-6 object-cover rounded-full" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-gray-800">{getTranslatedText(category.name)}</h3>
+                  <p className="text-xs text-green-600 font-medium">₹{marketPrices[(category.name || "").toLowerCase()] || category.price || 0}/{getTranslatedText("kg")}</p>
+                </div>
+              </div>
+              
               <label className="block text-xs md:text-sm font-semibold mb-2" style={{ color: '#2d3748' }}>
                 {getTranslatedText("Enter Weight (kg)")}
               </label>
-              <div className="relative">
+              <div className="relative mb-4">
                 <input
                   type="text"
-                  value={manualWeight}
-                  onChange={(e) => handleWeightChange(e.target.value)}
+                  value={categoryWeights[category.id] || ''}
+                  onChange={(e) => handleWeightChange(category.id, e.target.value)}
                   placeholder="0.0"
-                  className="w-full py-3 md:py-4 px-4 text-2xl md:text-3xl font-bold rounded-lg border-2 focus:outline-none focus:ring-2 transition-all"
+                  className="w-full py-3 md:py-4 px-4 text-xl md:text-2xl font-bold rounded-lg border-2 focus:outline-none focus:ring-2 transition-all"
                   style={{
-                    borderColor: manualWeight ? '#64946e' : 'rgba(100, 148, 110, 0.3)',
+                    borderColor: categoryWeights[category.id] ? '#64946e' : 'rgba(100, 148, 110, 0.3)',
                     color: '#2d3748',
                     backgroundColor: '#f9f9f9'
                   }}
@@ -375,33 +395,18 @@ const WeightInputPage = () => {
                   {getTranslatedText("kg")}
                 </span>
               </div>
-            </div>
 
-            {/* Quick Weight Buttons */}
-            <div className="mt-4">
-              <p className="text-xs md:text-sm mb-2" style={{ color: '#718096' }}>
-                {getTranslatedText("Quick Select:")}
-              </p>
+              {/* Quick Weight Buttons for this category */}
               <div className="flex flex-wrap gap-2">
                 {quickWeights.map((weight) => (
                   <button
                     key={weight}
-                    onClick={() => handleQuickWeight(weight)}
-                    className="px-3 py-2 md:px-4 md:py-2 rounded-lg text-xs md:text-sm font-semibold transition-all duration-300 border-2"
+                    onClick={() => handleQuickWeight(category.id, weight)}
+                    className="px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all duration-300 border-2"
                     style={{
-                      borderColor: manualWeight === weight.toString() ? '#64946e' : 'rgba(100, 148, 110, 0.3)',
-                      backgroundColor: manualWeight === weight.toString() ? '#64946e' : 'transparent',
-                      color: manualWeight === weight.toString() ? '#ffffff' : '#64946e'
-                    }}
-                    onMouseEnter={(e) => {
-                      if (manualWeight !== weight.toString()) {
-                        e.target.style.backgroundColor = 'rgba(100, 148, 110, 0.1)';
-                      }
-                    }}
-                    onMouseLeave={(e) => {
-                      if (manualWeight !== weight.toString()) {
-                        e.target.style.backgroundColor = 'transparent';
-                      }
+                      borderColor: categoryWeights[category.id] === weight.toString() ? '#64946e' : 'rgba(100, 148, 110, 0.3)',
+                      backgroundColor: categoryWeights[category.id] === weight.toString() ? '#64946e' : 'transparent',
+                      color: categoryWeights[category.id] === weight.toString() ? '#ffffff' : '#64946e'
                     }}
                   >
                     {weight} {getTranslatedText("kg")}
@@ -409,11 +414,12 @@ const WeightInputPage = () => {
                 ))}
               </div>
             </div>
-          </motion.div>
-        )}
+          ))}
+        </motion.div>
+
 
         {/* Price Calculation Preview */}
-        {currentWeight > 0 && selectedCategories.length > 0 && (
+        {totalWeightDisplay > 0 && selectedCategories.length > 0 && (
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -428,16 +434,20 @@ const WeightInputPage = () => {
                 ₹{estimatedPayout.toFixed(0)}
               </span>
               <span className="text-sm md:text-base" style={{ color: '#718096' }}>
-                {getTranslatedText("for")} {currentWeight} {getTranslatedText("kg")}
+                {getTranslatedText("for")} {totalWeightDisplay.toFixed(1)} {getTranslatedText("kg")}
               </span>
             </div>
             <div className="text-xs md:text-sm" style={{ color: '#718096' }}>
-              {selectedCategories.map((cat, idx) => (
-                <span key={cat.id}>
-                  {getTranslatedText(cat.name)} @ ₹{marketPrices[(cat.name || "").toLowerCase()] || cat.price || 0}/{getTranslatedText("kg")}
-                  {idx < selectedCategories.length - 1 && ' • '}
-                </span>
-              ))}
+              {selectedCategories.map((cat, idx) => {
+                const weight = parseFloat(categoryWeights[cat.id]) || 0;
+                if (weight === 0) return null;
+                return (
+                  <span key={cat.id}>
+                    {getTranslatedText(cat.name)} ({weight}kg) @ ₹{marketPrices[(cat.name || "").toLowerCase()] || cat.price || 0}/{getTranslatedText("kg")}
+                    {idx < selectedCategories.length - 1 && ' • '}
+                  </span>
+                );
+              })}
             </div>
           </motion.div>
         )}
@@ -451,7 +461,7 @@ const WeightInputPage = () => {
           backgroundColor: '#f4ebe2'
         }}
       >
-        {currentWeight > 0 ? (
+        {totalWeightDisplay > 0 ? (
           <motion.button
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -462,7 +472,7 @@ const WeightInputPage = () => {
             onMouseEnter={(e) => e.target.style.backgroundColor = '#5a8263'}
             onMouseLeave={(e) => e.target.style.backgroundColor = '#64946e'}
           >
-            {getTranslatedText("Continue with")} {currentWeight} {getTranslatedText("kg")}
+            {getTranslatedText("Continue with")} {totalWeightDisplay.toFixed(1)} {getTranslatedText("kg")}
           </motion.button>
         ) : (
           <p
