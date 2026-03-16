@@ -40,7 +40,7 @@ const RefundPolicy = () => {
             <p>For scrappers subscribing to our platform plans, refund requests must be made within 24 hours of purchase if the service has not been utilized. After 24 hours or once the service is used, no refunds will be provided.</p>
 
             <h2 className="text-lg font-semibold text-gray-800 mt-6">4. Contact Support</h2>
-            <p>For any refund-related queries, please email us at support@scrapto.in with your transaction details.</p>
+            <p>For any refund-related queries, please email us at Scraptowork@gmail.com with your transaction details.</p>
           </div>
         </div>
       </div>

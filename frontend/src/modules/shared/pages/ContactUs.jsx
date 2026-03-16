@@ -41,7 +41,7 @@ const ContactUs = () => {
                 </div>
                 <div>
                   <p className="text-xs text-gray-400">Email us at</p>
-                  <p className="font-medium">support@scrapto.in</p>
+                  <p className="font-medium text-[15px] sm:text-base selection:bg-emerald-100">Scraptowork@gmail.com</p>
                 </div>
               </div>
 
@@ -51,7 +51,7 @@ const ContactUs = () => {
                 </div>
                 <div>
                   <p className="text-xs text-gray-400">Call us at</p>
-                  <p className="font-medium">+91 90000 00000</p>
+                  <p className="font-medium text-[15px] sm:text-base selection:bg-blue-100">+91 9971363160</p>
                 </div>
               </div>
 
@@ -61,7 +61,7 @@ const ContactUs = () => {
                 </div>
                 <div>
                   <p className="text-xs text-gray-400">Visit us at</p>
-                  <p className="font-medium">123 Green Street, Eco Park, City - 400001</p>
+                  <p className="font-medium text-[15px] sm:text-base selection:bg-orange-100">312 ram Nagar ghaziabad</p>
                 </div>
               </div>
             </div>
@@ -72,7 +72,7 @@ const ContactUs = () => {
             <h2 className="text-2xl font-bold mb-4">Support Available 24/7</h2>
             <p className="opacity-90 mb-6">Our dedicated support team is always ready to assist you with your scrap collection needs.</p>
             <button 
-                onClick={() => window.location.href = 'mailto:support@scrapto.in'}
+                onClick={() => window.location.href = 'mailto:Scraptowork@gmail.com'}
                 className="bg-white text-emerald-600 px-8 py-3 rounded-xl font-bold hover:bg-emerald-50 transition-colors shadow-md"
             >
               Send Message
