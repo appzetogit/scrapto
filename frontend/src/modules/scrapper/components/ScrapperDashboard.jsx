@@ -574,10 +574,12 @@ const ScrapperDashboard = () => {
           </motion.button>
         </motion.div>
 
-        {/* Live Market Prices - Hidden as per request */}
-        {/* <div className="mt-4 relative">
-          <PriceTicker />
-        </div> */}
+        {/* Live Market Prices */}
+        {subscriptionData?.isMarketActive && (
+          <div className="mt-4 relative">
+            <PriceTicker />
+          </div>
+        )}
 
         {/* Ad Banners */}
         <div className="mt-4">
@@ -585,53 +587,48 @@ const ScrapperDashboard = () => {
         </div>
 
         {/* Market Price Management Card */}
-        {/* Market Price Management Card - Hidden as per request */}
-        {/* <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.15 }}
-          onClick={() => navigate('/scrapper/subscription')}
-          className="mt-3 rounded-2xl shadow-md p-4 md:p-5 border border-gray-800 cursor-pointer relative overflow-hidden group"
-          style={{ backgroundColor: '#020617' }}
-        >
-          <div className="absolute top-0 -left-full w-full h-full bg-gradient-to-r from-transparent via-white/10 to-transparent group-hover:left-full transition-all duration-1000 ease-in-out"></div>
+        {!subscriptionData?.isMarketActive && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.15 }}
+            onClick={() => navigate('/scrapper/subscription?type=market_price')}
+            className="mt-3 rounded-2xl shadow-md p-4 md:p-5 border border-gray-800 cursor-pointer relative overflow-hidden group"
+            style={{ backgroundColor: '#020617' }}
+          >
+            <div className="absolute top-0 -left-full w-full h-full bg-gradient-to-r from-transparent via-white/10 to-transparent group-hover:left-full transition-all duration-1000 ease-in-out"></div>
 
-          <div className="flex items-start justify-between gap-3 relative z-10">
-            <div className="flex gap-3">
-              <div className="mt-1 w-10 h-10 rounded-full flex items-center justify-center"
-                style={{ backgroundColor: subscriptionData?.isMarketActive ? 'rgba(16, 185, 129, 0.2)' : 'rgba(148, 163, 184, 0.15)' }}>
-                {subscriptionData?.isMarketActive ? (
-                  <FaCheck className="text-emerald-400" />
-                ) : (
+            <div className="flex items-start justify-between gap-3 relative z-10">
+              <div className="flex gap-3">
+                <div className="mt-1 w-10 h-10 rounded-full flex items-center justify-center"
+                  style={{ backgroundColor: 'rgba(148, 163, 184, 0.15)' }}>
                   <FaChartLine className="text-emerald-400" />
-                )}
+                </div>
+                <div>
+                  <p className="text-xs font-semibold mb-1" style={{ color: '#a5b4fc' }}>
+                    {getTranslatedText("Market Price Add‑On")}
+                  </p>
+                  <h3 className="text-sm md:text-base font-bold mb-1" style={{ color: '#e5e7eb' }}>
+                    {getTranslatedText("Unlock real‑time scrap rates")}
+                  </h3>
+                </div>
               </div>
-              <div>
-                <p className="text-xs font-semibold mb-1" style={{ color: subscriptionData?.isMarketActive ? '#34d399' : '#a5b4fc' }}>
-                  {subscriptionData?.isMarketActive ? getTranslatedText("Active Subscription") : getTranslatedText("Market Price Add‑On")}
-                </p>
-                <h3 className="text-sm md:text-base font-bold mb-1" style={{ color: '#e5e7eb' }}>
-                  {subscriptionData?.isMarketActive
-                    ? getTranslatedText("You have access to live rates")
-                    : getTranslatedText("Unlock real‑time scrap rates")}
-                </h3>
+              <div className="flex flex-col items-end gap-2">
+                <button
+                  type="button"
+                  className="mt-1 px-3 py-1.5 rounded-full text-[11px] md:text-xs font-semibold border transition-colors"
+                  style={{
+                    borderColor: '#4b5563',
+                    color: '#e5e7eb',
+                    backgroundColor: 'transparent'
+                  }}
+                >
+                  {getTranslatedText("View plans")}
+                </button>
               </div>
             </div>
-            <div className="flex flex-col items-end gap-2">
-              <button
-                type="button"
-                className="mt-1 px-3 py-1.5 rounded-full text-[11px] md:text-xs font-semibold border transition-colors"
-                style={{
-                  borderColor: subscriptionData?.isMarketActive ? '#34d399' : '#4b5563',
-                  color: subscriptionData?.isMarketActive ? '#34d399' : '#e5e7eb',
-                  backgroundColor: subscriptionData?.isMarketActive ? 'rgba(16, 185, 129, 0.1)' : 'transparent'
-                }}
-              >
-                {subscriptionData?.isMarketActive ? getTranslatedText("Manage Plan") : getTranslatedText("View plans")}
-              </button>
-            </div>
-          </div>
-        </motion.div> */}
+          </motion.div>
+        )}
       </div>
 
       {/* Content */}
@@ -759,7 +756,7 @@ const ScrapperDashboard = () => {
 
                   return (
                     <motion.div
-                      key={request.id}
+                      key={request.id || index}
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: 0.1 * index }}
@@ -916,7 +913,7 @@ const ScrapperDashboard = () => {
 
                   return (
                     <motion.div
-                      key={order.id || order.orderId}
+                      key={order.id || order.orderId || index}
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: 0.1 * index }}

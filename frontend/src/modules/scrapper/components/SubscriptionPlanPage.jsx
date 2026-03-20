@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../shared/context/AuthContext';
 import { checkAndProcessMilestone } from '../../shared/utils/referralUtils';
 import { subscriptionAPI } from '../../shared/utils/api';
@@ -42,13 +42,17 @@ const SubscriptionPlanPage = () => {
   const { getTranslatedText } = usePageTranslation(staticTexts);
   const navigate = useNavigate();
   const { user } = useAuth();
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
+  const initialType = queryParams.get('type') === 'market_price' ? 'market_price' : 'general';
+  
   const [selectedPlan, setSelectedPlan] = useState(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [plans, setPlans] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [currentSubscription, setCurrentSubscription] = useState(null);
-  const [planType, setPlanType] = useState('general'); // Default to platform access
+  const [planType, setPlanType] = useState(initialType);
 
   // Check if user is authenticated as scrapper
   useEffect(() => {
@@ -308,16 +312,16 @@ const SubscriptionPlanPage = () => {
           <h1 className="text-2xl md:text-3xl font-bold mb-2 text-white">
             {isTabActive ? getTranslatedText('Manage Your Subscription') : getTranslatedText('Choose Your Plan')}
           </h1>
-          <div className="flex justify-center gap-4 mt-4 mb-6" style={{ display: 'none' }}>
+          <div className="flex justify-center gap-4 mt-4 mb-6">
             <button
               onClick={() => { setPlanType('general'); setSelectedPlan(null); }}
-              className={`px-4 py-2 rounded-full font-semibold transition-colors ${planType === 'general' ? 'bg-emerald-600 text-white' : 'bg-zinc-900 text-gray-400'}`}
+              className={`px-4 py-2 rounded-full font-semibold transition-colors ${planType === 'general' ? 'bg-emerald-600 text-white' : 'bg-zinc-800 text-gray-400'}`}
             >
               {getTranslatedText("Platform Access")}
             </button>
             <button
               onClick={() => { setPlanType('market_price'); setSelectedPlan(null); }}
-              className={`px-4 py-2 rounded-full font-semibold transition-colors ${planType === 'market_price' ? 'bg-emerald-600 text-white' : 'bg-zinc-900 text-gray-400'}`}
+              className={`px-4 py-2 rounded-full font-semibold transition-colors ${planType === 'market_price' ? 'bg-emerald-600 text-white' : 'bg-zinc-800 text-gray-400'}`}
             >
               {getTranslatedText("Market Prices")}
             </button>

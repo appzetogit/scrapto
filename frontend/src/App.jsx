@@ -12,7 +12,6 @@ import RefundPolicy from './modules/shared/pages/RefundPolicy';
 import AboutUs from './modules/shared/pages/AboutUs';
 import ContactUs from './modules/shared/pages/ContactUs';
 import SharedTerms from './modules/shared/pages/SharedTerms';
-import Footer from './modules/shared/components/Footer';
 
 function App() {
   useEffect(() => {
@@ -44,7 +43,6 @@ function App() {
             <Route path="/*" element={<UserModule />} />
           </Routes>
         </main>
-        <Footer />
       </div>
     </BrowserRouter>
   );
