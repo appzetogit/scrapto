@@ -85,8 +85,12 @@ export const createRechargeOrder = asyncHandler(async (req, res) => {
             keyId: process.env.RAZORPAY_KEY_ID
         });
     } catch (error) {
-        logger.error('[Wallet] Create Order Failed', error);
-        sendError(res, 'Failed to create recharge order', 500);
+        logger.error('[Wallet] Create Order Failed', {
+            error: error.message,
+            stack: error.stack,
+            options
+        });
+        sendError(res, `Failed to create recharge order: ${error.message || 'Unknown error'}`, 500);
     }
 });
 
