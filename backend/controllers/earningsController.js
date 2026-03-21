@@ -194,7 +194,10 @@ export const getScrapperEarningsForAdmin = asyncHandler(async (req, res) => {
   let totalEarnings = 0;
 
   const formattedOrders = orders.map((order) => {
-    const amount = order.totalAmount || 0;
+    let amount = order.totalAmount || 0;
+    if (order.orderType !== 'cleaning_service') {
+      amount = -Math.abs(amount);
+    }
     const orderDate = order.completedDate || order.createdAt;
 
     // Filter by date for stats (unless specific date range query is active, in which case we might just be showing filtered total, but for the profile view we generally want the standard breakdown)

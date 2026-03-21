@@ -4,7 +4,7 @@
 
 export const PRICE_TYPES = {
   MATERIAL: 'material',
-  SERVICE: 'service'
+  // SERVICE: 'service'
 };
 
 export const DEFAULT_PRICE_FEED = [
@@ -15,15 +15,11 @@ export const DEFAULT_PRICE_FEED = [
   { id: 'price_005', category: 'Copper', pricePerKg: 650, region: 'All', type: PRICE_TYPES.MATERIAL },
   { id: 'price_006', category: 'Aluminium', pricePerKg: 180, region: 'All', type: PRICE_TYPES.MATERIAL },
   { id: 'price_007', category: 'Steel', pricePerKg: 35, region: 'All', type: PRICE_TYPES.MATERIAL },
-  { id: 'price_008', category: 'Brass', pricePerKg: 420, region: 'All', type: PRICE_TYPES.MATERIAL }
+  { id: 'price_008', category: 'Brass', pricePerKg: 420, region: 'All', type: PRICE_TYPES.MATERIAL },
+  { id: 'price_009', category: 'Bajri', pricePerKg: 40, region: 'All', type: PRICE_TYPES.MATERIAL }
 ];
 
-export const DEFAULT_SERVICE_FEED = [
-  { id: 'srv_001', category: 'Home Cleaning', price: 1500, region: 'All', type: PRICE_TYPES.SERVICE, description: 'Basic home cleaning service' },
-  { id: 'srv_002', category: 'Office Cleaning', price: 2500, region: 'All', type: PRICE_TYPES.SERVICE, description: 'Office space cleaning' },
-  { id: 'srv_003', category: 'Garage Cleaning', price: 1000, region: 'All', type: PRICE_TYPES.SERVICE, description: 'Garage and storage cleaning' },
-  { id: 'srv_004', category: 'Debris Removal', price: 2000, region: 'All', type: PRICE_TYPES.SERVICE, description: 'Construction or renovation debris removal' }
-];
+export const DEFAULT_SERVICE_FEED = [];
 
 const STORAGE_KEY = 'adminPriceFeed';
 

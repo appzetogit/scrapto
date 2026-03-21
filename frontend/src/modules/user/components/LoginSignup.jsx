@@ -299,6 +299,7 @@ const LoginSignup = () => {
 
         // Login user with token
         await login(userData, token);
+        localStorage.setItem('userToken', token || '');
 
         // Process referral if code is provided and valid (only for new registrations)
         if (

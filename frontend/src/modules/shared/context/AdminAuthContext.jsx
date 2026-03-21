@@ -21,11 +21,15 @@ export const AdminAuthProvider = ({ children }) => {
     return storedAdmin ? JSON.parse(storedAdmin) : null;
   });
 
-  const login = (adminData) => {
+  const login = (adminData, token = null) => {
     setIsAuthenticated(true);
     setAdmin(adminData);
     localStorage.setItem('adminAuthenticated', 'true');
     localStorage.setItem('adminUser', JSON.stringify(adminData));
+    if (token) {
+      localStorage.setItem('adminToken', token);
+      localStorage.setItem('token', token); // Mirror to compatible key
+    }
     // Register FCM Token
     registerFCMToken(true).catch(err => console.error('FCM registration failed', err));
   };
@@ -35,6 +39,8 @@ export const AdminAuthProvider = ({ children }) => {
     setAdmin(null);
     localStorage.removeItem('adminAuthenticated');
     localStorage.removeItem('adminUser');
+    localStorage.removeItem('adminToken');
+    localStorage.removeItem('token');
   };
 
   return (

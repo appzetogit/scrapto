@@ -49,19 +49,6 @@ export const staticTranslations = {
         "Batteries": "बैटरी",
         "Cables": "केबल्स",
 
-        // Services
-        "Home Services": "घरेलू सेवाएं",
-        "Waste Collection": "कचरा संग्रहण",
-        "Home Cleaning": "घर की सफाई",
-        "Professional deep cleaning service including floor scrubbing, cobweb removal, and bathroom cleaning.": "फर्श की सफाई, जाले हटाने और बाथरूम की सफाई सहित पेशेवर डीप क्लीनिंग सेवा।",
-        "Fixed Price: ₹1200": "निश्चित मूल्य: ₹1200",
-        "Verified Pros": "सत्यापित पेशेवर",
-        "New": "नया",
-        "Premium": "प्रीमियम",
-        "Experience a spotless home with our professional deep cleaning. Verified experts & eco-friendly products.": "हमारी पेशेवर डीप क्लीनिंग के साथ बेदाग घर का अनुभव करें। सत्यापित विशेषज्ञ और पर्यावरण के अनुकूल उत्पाद।",
-        "Verified": "सत्यापित",
-        "Book Now": "अभी बुक करें",
-
         // Features / Value Props
         "Free Pickup": "मुफ्त पिकअप",
         "No pickup charges. We reach your doorstep without any extra cost.": "कोई पिकअप शुल्क नहीं। हम बिना किसी अतिरिक्त लागत के आपके दरवाजे तक पहुंचते हैं।",

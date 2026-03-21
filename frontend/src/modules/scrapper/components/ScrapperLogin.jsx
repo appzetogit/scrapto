@@ -381,8 +381,8 @@ const ScrapperLogin = () => {
         // Login user with token
         await login(userData, token);
 
-        // Set scrapper-specific authentication
         localStorage.setItem('scrapperAuthenticated', 'true');
+        localStorage.setItem('scrapperToken', token || '');
         localStorage.setItem('scrapperUser', JSON.stringify(userData));
 
         // If this is a new registration, clear any old KYC/subscription data and link lead

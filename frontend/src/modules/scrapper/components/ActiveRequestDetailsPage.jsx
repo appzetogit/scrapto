@@ -435,11 +435,7 @@ const ActiveRequestDetailsPage = () => {
 
   const handleScrapPickedUp = () => {
     setConfirmAction('pickup');
-    const isService = requestData.orderType === 'cleaning_service';
-    setConfirmMessage(isService
-      ? getTranslatedText('Have you arrived and started the cleaning service?')
-      : getTranslatedText('Have you picked up the scrap from the customer?')
-    );
+    setConfirmMessage(getTranslatedText('Have you picked up the scrap from the customer?'));
     setShowConfirmModal(true);
   };
 
@@ -450,20 +446,9 @@ const ActiveRequestDetailsPage = () => {
     }
 
     // Determine Logic based on Type
-    const isCleaning = requestData.orderType === 'cleaning_service';
-
     // For Scrap Sell (Scrapper Pays)
-    if (!isCleaning) {
-      // Logic handled in handleRazorpayPayment or handleWalletPayment
-      setConfirmAction('payment_scrap');
-      setConfirmMessage(getTranslatedText("Pay ₹{amount} to User?", { amount: paidAmount }));
-      setShowConfirmModal(true);
-      return;
-    }
-
-    // For Cleaning Service (User Pays)
-    setConfirmAction('payment_cleaning');
-    setConfirmMessage(getTranslatedText("Have you collected ₹{amount} from the customer?", { amount: paidAmount }));
+    setConfirmAction('payment_scrap');
+    setConfirmMessage(getTranslatedText("Pay ₹{amount} to User?", { amount: paidAmount }));
     setShowConfirmModal(true);
   };
 
@@ -580,8 +565,7 @@ const ActiveRequestDetailsPage = () => {
 
         if (response.success) {
           setIsPickedUp(true);
-          const isService = requestData.orderType === 'cleaning_service';
-          const amount = isService ? (requestData.estimatedEarnings || '₹0') : (requestData.estimatedEarnings || '₹450');
+          const amount = requestData.estimatedEarnings || '₹450';
           // Strip currency symbol for state
           setFinalAmount(amount);
 
@@ -760,7 +744,7 @@ const ActiveRequestDetailsPage = () => {
                 </svg>
               </button>
               <h1 className="text-xl font-bold" style={{ color: '#1e293b' }}>
-                {requestData.orderType === 'cleaning_service' ? getTranslatedText('Collect Payment') : getTranslatedText('Make Payment')}
+                {getTranslatedText('Make Payment')}
               </h1>
             </div>
 
@@ -789,11 +773,11 @@ const ActiveRequestDetailsPage = () => {
                 {/* Payment Input */}
                 <div className="mb-6 p-6 rounded-2xl shadow-md border border-slate-100" style={{ backgroundColor: '#ffffff' }}>
                   <h2 className="text-lg font-bold mb-4" style={{ color: '#1e293b' }}>
-                    {requestData.orderType === 'cleaning_service' ? getTranslatedText('Enter Amount Received') : getTranslatedText('Enter Amount Paid')}
+                    {getTranslatedText('Enter Amount Paid')}
                   </h2>
 
-                  {/* Payment Mode Selection for Scrap Pickup - Hidden for Cleaning Service */}
-                  {requestData.orderType !== 'cleaning_service' && (
+                  {/* Payment Mode Selection for Scrap Pickup */}
+                  {true && (
                     <div className="mb-6 p-3 rounded-xl bg-slate-50 border border-slate-200">
                       <div className="flex justify-between items-center mb-2">
                         <span className="text-slate-500 text-sm">Wallet Balance</span>

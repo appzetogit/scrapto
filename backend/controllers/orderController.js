@@ -30,17 +30,17 @@ export const createOrder = asyncHandler(async (req, res) => {
   } = req.body;
   const userId = req.user.id;
 
-  // New Wallet Check for Cleaning Service
+  // New Wallet Check for Cleaning Service (DISABLED)
   if (orderType === 'cleaning_service') {
-    const user = await User.findById(userId);
-    if (!user) {
-      return sendError(res, 'User not found', 404);
-    }
+    return sendError(res, 'Cleaning Services are currently unavailable', 400);
 
-    // Check if user has minimum balance (₹100)
+    /* Original Logic:
+    const user = await User.findById(userId);
+    if (!user) return sendError(res, 'User not found', 404);
     if (!user.wallet || user.wallet.balance < 100) {
-      return sendError(res, 'Insufficient wallet balance. Minimum ₹100 required to book a cleaning service. Please recharge your wallet.', 403);
+      return sendError(res, 'Insufficient wallet balance. Minimum ₹100 required...', 403);
     }
+    */
   }
 
   // Calculate totals

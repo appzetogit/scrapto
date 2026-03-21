@@ -105,42 +105,46 @@ const ScrapperModule = () => {
 
             // Update scrapper-specific localStorage
             localStorage.setItem('scrapperAuthenticated', 'true');
+            localStorage.setItem('scrapperToken', token || '');
             localStorage.setItem('scrapperUser', JSON.stringify(userData));
 
             // Check if scrapper is blocked
             const scrapperStatus = localStorage.getItem('scrapperStatus') || 'active';
             if (scrapperStatus === 'blocked') {
               setScrapperIsAuthenticated(false);
-              logout();
+              // Only call logout if we are purely in scrapper mode
               localStorage.removeItem('scrapperAuthenticated');
               localStorage.removeItem('scrapperUser');
+              localStorage.removeItem('scrapperToken');
             } else {
               setScrapperIsAuthenticated(true);
             }
           } else {
-            // User doesn't have scrapper role
+            // User doesn't have scrapper role - Just show them login without clearing their user session
             console.warn('User does not have scrapper role:', userData.role);
             setScrapperIsAuthenticated(false);
-            logout();
             localStorage.removeItem('scrapperAuthenticated');
             localStorage.removeItem('scrapperUser');
+            localStorage.removeItem('scrapperToken');
           }
         } else {
           // Token invalid
           setScrapperIsAuthenticated(false);
-          logout();
           localStorage.removeItem('scrapperAuthenticated');
           localStorage.removeItem('scrapperUser');
+          localStorage.removeItem('scrapperToken');
         }
       } catch (error) {
         if (!isMounted) return;
 
         console.error('Auth verification failed:', error);
-        // On 401, clear everything
+        // On 401, clear scrapper session but don't force global logout if we're not sure
         if (error.status === 401) {
           setScrapperIsAuthenticated(false);
-          logout();
+          // If the token itself is invalid, AuthContext will handle the global logout.
+          // Here we just clear the scrapper flags.
           localStorage.removeItem('scrapperAuthenticated');
+          localStorage.removeItem('scrapperToken');
           localStorage.removeItem('scrapperUser');
         } else {
           // For other errors, check localStorage as fallback

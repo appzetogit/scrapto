@@ -398,6 +398,7 @@ const PriceFeedEditor = () => {
           >
             {getTranslatedText("Scrap Materials")}
           </button>
+          {/* 
           <button
             onClick={() => setActiveTab(PRICE_TYPES.SERVICE)}
             className={`px-4 py-2 font-semibold text-sm transition-all border-b-2 ${activeTab === PRICE_TYPES.SERVICE
@@ -407,6 +408,7 @@ const PriceFeedEditor = () => {
           >
             {getTranslatedText("Cleaning Services")}
           </button>
+          */}
         </div>
       </motion.div >
 

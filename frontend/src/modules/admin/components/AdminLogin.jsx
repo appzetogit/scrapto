@@ -64,11 +64,7 @@ const AdminLogin = () => {
           return;
         }
 
-        // Store token in localStorage
-        localStorage.setItem('token', token);
-        localStorage.setItem('adminToken', token);
-
-        // Prepare admin data
+        // Store admin data
         const adminData = {
           id: userData._id || userData.id,
           name: userData.name,
@@ -77,7 +73,7 @@ const AdminLogin = () => {
           permissions: ['all']
         };
 
-        login(adminData);
+        login(adminData, token);
         navigate('/admin', { replace: true });
       } else {
         setError(getTranslatedText('Invalid email or password'));

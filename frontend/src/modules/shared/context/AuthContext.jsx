@@ -31,14 +31,18 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('isAuthenticated');
     localStorage.removeItem('user');
     localStorage.removeItem('token');
+    localStorage.removeItem('userToken');
+    localStorage.removeItem('scrapperToken');
   }, []);
 
   // Verify token on mount
   useEffect(() => {
     const verifyToken = async () => {
-      const token = localStorage.getItem('token');
+      // Check for any valid token (user or scrapper)
+      const token = localStorage.getItem('userToken') || localStorage.getItem('scrapperToken') || localStorage.getItem('token');
       if (token) {
         try {
+          // Use the getMe API; the apiRequest will automatically try to find a token
           const response = await authAPI.getMe();
           if (response.success) {
             setUser(response.data.user);
@@ -49,11 +53,11 @@ export const AuthProvider = ({ children }) => {
           }
         } catch (error) {
           console.error('Token verification failed:', error);
-          // Only logout on explicit unauthorized; keep session on network/server errors
+          // Only logout on explicit unauthorized (401)
           if (error.status === 401) {
             logout();
           } else {
-            // Preserve existing session data
+            // Preserve existing session data on network errors
             setIsAuthenticated(!!token);
             setUser((prev) => prev || null);
           }
@@ -70,8 +74,15 @@ export const AuthProvider = ({ children }) => {
     setUser(userData);
     localStorage.setItem('isAuthenticated', 'true');
     localStorage.setItem('user', JSON.stringify(userData));
+
     if (token) {
+      // Store in its own specific slot as well as the generic slot for compatibility
       localStorage.setItem('token', token);
+      if (userData.role === 'scrapper') {
+        localStorage.setItem('scrapperToken', token);
+      } else {
+        localStorage.setItem('userToken', token);
+      }
       console.log('✅ Token stored in localStorage:', {
         hasToken: !!token,
         tokenLength: token.length,

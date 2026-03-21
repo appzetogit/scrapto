@@ -1,13 +1,22 @@
 import { API_BASE_URL, API_ENDPOINTS } from '../../../config/apiConfig.js';
 
 // Helper function to get auth token
-const getAuthToken = () => {
-  return localStorage.getItem('token');
+// Helper function to get auth token
+const getAuthToken = (role = null) => {
+  if (role === 'admin') return localStorage.getItem('adminToken') || localStorage.getItem('token');
+  if (role === 'scrapper') return localStorage.getItem('scrapperToken') || localStorage.getItem('token');
+  if (role === 'user') return localStorage.getItem('userToken') || localStorage.getItem('token');
+  
+  // Fallback to any available token if no role specified
+  return localStorage.getItem('token') || 
+         localStorage.getItem('adminToken') || 
+         localStorage.getItem('scrapperToken') || 
+         localStorage.getItem('userToken');
 };
 
 // Helper function to make API requests
 export const apiRequest = async (endpoint, options = {}) => {
-  const token = getAuthToken();
+  const token = getAuthToken(options.role);
 
   const isFormData = options.body instanceof FormData;
 

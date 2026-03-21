@@ -939,7 +939,7 @@ export const createPrice = asyncHandler(async (req, res) => {
 // @access  Private (Admin)
 export const updatePrice = asyncHandler(async (req, res) => {
   try {
-    const { pricePerKg, effectiveDate, isActive, image } = req.body;
+    const { pricePerKg, price: fixedPrice, effectiveDate, isActive, image } = req.body;
     const priceId = req.params.id;
 
     const price = await Price.findById(priceId);
@@ -947,7 +947,8 @@ export const updatePrice = asyncHandler(async (req, res) => {
       return sendError(res, 'Price not found', 404);
     }
 
-    if (pricePerKg) price.pricePerKg = pricePerKg;
+    if (pricePerKg !== undefined) price.pricePerKg = pricePerKg;
+    if (fixedPrice !== undefined) price.price = fixedPrice;
     if (effectiveDate) price.effectiveDate = new Date(effectiveDate);
     if (isActive !== undefined) price.isActive = isActive;
     if (isActive !== undefined) price.isActive = isActive;

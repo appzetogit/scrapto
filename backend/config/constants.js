@@ -44,20 +44,22 @@ export const PAGINATION = {
 
 export const ORDER_TYPES = {
   SCRAP_SELL: 'scrap_sell',
-  CLEANING_SERVICE: 'cleaning_service'
+  // CLEANING_SERVICE: 'cleaning_service'
 };
 
 export const PRICE_TYPES = {
   MATERIAL: 'material',
-  SERVICE: 'service'
+  // SERVICE: 'service'
 };
 
+/* 
 export const SERVICE_CATEGORIES = {
   HOME_CLEANING: 'home_cleaning',
   OFFICE_CLEANING: 'office_cleaning',
   DEBRIS_REMOVAL: 'debris_removal',
   GARAGE_CLEANING: 'garage_cleaning'
 };
+*/
 
 export const NOTIFICATION_TYPES = {
   ORDER_UPDATE: 'order_update',

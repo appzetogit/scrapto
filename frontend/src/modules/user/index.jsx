@@ -68,17 +68,6 @@ const UserModule = () => {
         <Route path="/add-scrap/address" element={<AddressInputPage />} />
         <Route path="/add-scrap/confirm" element={<PriceConfirmationPage />} />
 
-        {/* Service Booking Flow */}
-        <Route path="/book-service/details" element={<ServiceDetailsPage />} />
-        <Route path="/book-service/address" element={<ServiceAddressPage />} />
-        <Route
-          path="/book-service/schedule"
-          element={<ServiceSchedulePage />}
-        />
-        <Route
-          path="/book-service/confirm"
-          element={<ServiceConfirmationPage />}
-        />
         <Route path="/request-status" element={<RequestStatusPage />} />
         <Route path="/chats" element={<ChatListPage />} />
         <Route path="/chat/:chatId" element={<ChatPage />} />

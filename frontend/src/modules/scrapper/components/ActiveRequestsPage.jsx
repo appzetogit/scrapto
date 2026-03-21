@@ -250,7 +250,7 @@ const ActiveRequestsPage = () => {
               userName: order.user?.name || 'User',
               userPhone: order.user?.phone || '',
               userEmail: order.user?.email || '',
-              scrapType: order.orderType === 'cleaning_service' ? 'Cleaning Service' : (order.scrapItems?.map(item => item.category).join(', ') || 'Scrap'),
+              scrapType: order.scrapItems?.map(item => item.category).join(', ') || 'Scrap',
               weight: order.totalWeight,
               pickupSlot: order.pickupSlot || null,
               preferredTime: order.preferredTime || null,
