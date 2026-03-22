@@ -14,8 +14,8 @@ export const useAuth = () => {
 
 export const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
-    // Check localStorage on mount
-    const token = localStorage.getItem('token');
+    // Check for any valid token (prioritize role-specific ones for initialization)
+    const token = localStorage.getItem('userToken') || localStorage.getItem('scrapperToken') || localStorage.getItem('token');
     return !!token;
   });
   const [user, setUser] = useState(() => {
@@ -38,7 +38,7 @@ export const AuthProvider = ({ children }) => {
   // Verify token on mount
   useEffect(() => {
     const verifyToken = async () => {
-      // Check for any valid token (user or scrapper)
+      // Prioritize role-specific tokens over the legacy 'token' key
       const token = localStorage.getItem('userToken') || localStorage.getItem('scrapperToken') || localStorage.getItem('token');
       if (token) {
         try {
@@ -76,8 +76,8 @@ export const AuthProvider = ({ children }) => {
     localStorage.setItem('user', JSON.stringify(userData));
 
     if (token) {
-      // Store in its own specific slot as well as the generic slot for compatibility
-      localStorage.setItem('token', token);
+      // Store in its own specific slot. We no longer use the generic 'token' key to avoid ghost session issues.
+      localStorage.removeItem('token'); 
       if (userData.role === 'scrapper') {
         localStorage.setItem('scrapperToken', token);
       } else {

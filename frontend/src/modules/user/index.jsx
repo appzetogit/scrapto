@@ -33,7 +33,14 @@ import TermsAndConditions from "./components/TermsAndConditions";
 import NotificationsPage from "./components/NotificationsPage";
 
 const UserModule = () => {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
+  
+  // Use local storage as fallback/buffer to prevent flicker-induced logouts
+  const hasUserToken = !!localStorage.getItem('userToken') || !!localStorage.getItem('token');
+  const hasUserSession = localStorage.getItem('isAuthenticated') === 'true' && (!!localStorage.getItem('user') || !!localStorage.getItem('userToken'));
+  
+  // A "soft" authenticated check that allows for context initialization delay
+  const isTransitioning = !isAuthenticated && hasUserSession;
 
   const staticTexts = ["Home", "My Requests", "Chats", "Profile"];
   const { getTranslatedText } = usePageTranslation(staticTexts);
@@ -49,7 +56,8 @@ const UserModule = () => {
     { label: getTranslatedText("Profile"), path: "/my-profile", icon: FaUser },
   ];
 
-  if (!isAuthenticated) {
+  // Only show login if we are definitely NOT authenticated AND have no saved session
+  if (!isAuthenticated && !isTransitioning) {
     return <LoginSignup />;
   }
 
