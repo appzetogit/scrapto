@@ -1,7 +1,7 @@
 {
-  "name": "scrapto-backend",
+  "name": "scraptox-backend",
   "version": "1.0.0",
-  "description": "Backend API for Scrapto - Scrap Management Platform",
+  "description": "Backend API for Scraptox - Scrap Management Platform",
   "main": "server.js",
   "type": "module",
   "scripts": {

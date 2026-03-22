@@ -9,7 +9,7 @@ const Header = () => {
   const [isLangOpen, setIsLangOpen] = useState(false);
   const { language, languages, changeLanguage } = useLanguage();
   
-  const staticTexts = ["Hi, User!", "Welcome back to Scrapto"];
+  const staticTexts = ["Hi, User!", "Welcome back to Scraptox"];
   const { getTranslatedText } = usePageTranslation(staticTexts);
 
   return (
@@ -31,7 +31,7 @@ const Header = () => {
             className="text-sm md:text-base"
             style={{ color: '#718096' }}
           >
-            {getTranslatedText("Welcome back to Scrapto")}
+            {getTranslatedText("Welcome back to Scraptox")}
           </p>
         </div>
         

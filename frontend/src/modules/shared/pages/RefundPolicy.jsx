@@ -34,13 +34,13 @@ const RefundPolicy = () => {
             <p>Users can cancel their scrap pickup request anytime before the scrapper arrives at the location. Once the scrap is weighed and the transaction is initiated, no cancellation or refund of the scrap material is possible.</p>
 
             <h2 className="text-lg font-semibold text-gray-800 mt-6">2. Payment Disputes</h2>
-            <p>Scrapto is a platform connecting users and scrappers. Payments for scrap are handled directly between the user and the scrapper. Scrapto does not collect payments from users for scrap collection and therefore does not issue refunds for scrap value.</p>
+            <p>Scraptox is a platform connecting users and scrappers. Payments for scrap are handled directly between the user and the scrapper. Scraptox does not collect payments from users for scrap collection and therefore does not issue refunds for scrap value.</p>
 
             <h2 className="text-lg font-semibold text-gray-800 mt-6">3. Subscription Refunds</h2>
             <p>For scrappers subscribing to our platform plans, refund requests must be made within 24 hours of purchase if the service has not been utilized. After 24 hours or once the service is used, no refunds will be provided.</p>
 
             <h2 className="text-lg font-semibold text-gray-800 mt-6">4. Contact Support</h2>
-            <p>For any refund-related queries, please email us at Scraptowork@gmail.com with your transaction details.</p>
+            <p>For any refund-related queries, please email us at Scraptoxwork@gmail.com with your transaction details.</p>
           </div>
         </div>
       </div>

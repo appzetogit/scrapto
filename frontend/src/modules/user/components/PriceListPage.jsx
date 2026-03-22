@@ -101,7 +101,7 @@ const PriceListPage = () => {
                 const mapped = defaultFeed.map((item, index) => ({
                     id: index,
                     name: item.category,
-                    price: item.price,
+                    price: item.pricePerKg || item.price || 0,
                     unit: 'kg',
                     image: getCategoryImage(item.category),
                 }));

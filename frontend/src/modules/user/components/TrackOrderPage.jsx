@@ -360,7 +360,7 @@ const TrackOrderPage = () => {
                         </div>
                         <div>
                             <h3 className="font-bold text-gray-800 text-lg">{order.scrapper?.name || 'Assigned Scrapper'}</h3>
-                            <p className="text-sm text-gray-500">{order.scrapper?.vehicleNumber || 'Scrapto Partner'}</p>
+                            <p className="text-sm text-gray-500">{order.scrapper?.vehicleNumber || 'Scraptox Partner'}</p>
                         </div>
                     </div>
                     <div className="flex gap-2">

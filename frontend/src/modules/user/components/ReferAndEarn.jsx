@@ -102,7 +102,7 @@ const ReferAndEarn = () => {
   };
 
   const handleShare = (method) => {
-    const message = `Join ScrapConnect and get ₹100 welcome bonus! Use my referral code: ${referralCode}\n${shareLink}`;
+    const message = `Join Scraptox and get ₹100 welcome bonus! Use my referral code: ${referralCode}\n${shareLink}`;
 
     switch (method) {
       case "whatsapp":
@@ -116,7 +116,7 @@ const ReferAndEarn = () => {
         break;
       case "email":
         window.open(
-          `mailto:?subject=Join ScrapConnect&body=${encodeURIComponent(
+          `mailto:?subject=Join Scraptox&body=${encodeURIComponent(
             message
           )}`,
           "_blank"

@@ -129,7 +129,7 @@ const ScrapperWallet = () => {
                 key: keyId,
                 amount: orderAmount,
                 currency: currency,
-                name: "Scrapto Wallet",
+                name: "Scraptox Wallet",
                 description: "Add Money to Wallet",
                 order_id: orderId,
                 prefill: {

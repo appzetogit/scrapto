@@ -20,7 +20,7 @@ import {
   FaGift,
   FaBullhorn
 } from 'react-icons/fa';
-import siteLogo from '../../../assets/scraptologo-removebg-preview.png';
+import siteLogo from '../../../assets/scraptox-removebg-preview.png';
 
 const AdminLayout = () => {
   const navigate = useNavigate();
@@ -49,7 +49,7 @@ const AdminLayout = () => {
     "Reports",
     "Ad Banners",
     "Admin Panel",
-    "Scrapto",
+    "Scraptox",
     "Logout",
     "Administrator"
   ];
@@ -123,7 +123,7 @@ const AdminLayout = () => {
         {/* Logo */}
         <div className="p-6 border-b flex-shrink-0" style={{ borderColor: '#e2e8f0' }}>
           <div className="flex items-center justify-center">
-            <img src={siteLogo} alt="Scrapto" className="h-16 w-auto object-contain" />
+            <img src={siteLogo} alt="Scraptox" className="h-16 w-auto object-contain" />
           </div>
         </div>
 
@@ -202,7 +202,7 @@ const AdminLayout = () => {
         <div className="p-4 border-t flex-shrink-0" style={{ borderColor: '#e2e8f0' }}>
           <div className="mb-3 p-3 rounded-xl" style={{ backgroundColor: '#f7fafc' }}>
             <p className="text-sm font-semibold" style={{ color: '#2d3748' }}>{admin?.name || 'Admin'}</p>
-            <p className="text-xs" style={{ color: '#718096' }}>{admin?.email || 'admin@scrapto.com'}</p>
+            <p className="text-xs" style={{ color: '#718096' }}>{admin?.email || 'admin@scraptox.com'}</p>
           </div>
           <button
             onClick={handleLogout}
@@ -236,7 +236,7 @@ const AdminLayout = () => {
               {/* Mobile Header */}
               <div className="p-4 border-b flex items-center justify-between" style={{ borderColor: '#e2e8f0' }}>
                 <div className="flex items-center justify-center">
-                  <img src={siteLogo} alt="Scrapto" className="h-12 w-auto object-contain" />
+                  <img src={siteLogo} alt="Scraptox" className="h-12 w-auto object-contain" />
                 </div>
                 <button
                   onClick={() => setSidebarOpen(false)}
@@ -320,7 +320,7 @@ const AdminLayout = () => {
               <div className="p-4 border-t" style={{ borderColor: '#e2e8f0' }}>
                 <div className="mb-3 p-3 rounded-xl" style={{ backgroundColor: '#f7fafc' }}>
                   <p className="text-sm font-semibold" style={{ color: '#2d3748' }}>{admin?.name || 'Admin'}</p>
-                  <p className="text-xs" style={{ color: '#718096' }}>{admin?.email || 'admin@scrapto.com'}</p>
+                  <p className="text-xs" style={{ color: '#718096' }}>{admin?.email || 'admin@scraptox.com'}</p>
                 </div>
                 <button
                   onClick={handleLogout}

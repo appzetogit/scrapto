@@ -32,7 +32,7 @@ export const mapOptions = {
     streetViewControl: false,
     fullscreenControl: true,
     clickableIcons: false,
-    // Custom Scrapto green theme
+    // Custom Scraptox green theme
     styles: [
         {
             "featureType": "landscape.natural",

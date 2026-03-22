@@ -798,7 +798,7 @@ const Hero = () => {
             <TrustSignals />
           </div>
 
-          {/* Why Scrapto Section */}
+          {/* Why Scraptox Section */}
           <div className="px-4 md:px-6 lg:px-8 max-w-7xl mx-auto">
             <motion.div
               initial={{ y: 16, opacity: 0 }}
@@ -809,7 +809,7 @@ const Hero = () => {
               <h3
                 className="text-lg md:text-2xl font-bold mb-4 md:mb-8 text-center"
                 style={{ color: "#2d3748" }}>
-                Why Scrapto?
+                Why Scraptox?
               </h3>
               <div className="flex flex-col gap-3 md:grid md:grid-cols-3 md:gap-6">
                 {[

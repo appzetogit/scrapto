@@ -31,19 +31,19 @@ const TermsAndConditions = () => {
             <p>Last Updated: October 2023</p>
             
             <h2 className="text-lg font-semibold text-gray-800 mt-6">1. Acceptance of Terms</h2>
-            <p>By accessing or using the Scrapto platform, you agree to be bound by these Terms and Conditions and our Privacy Policy.</p>
+            <p>By accessing or using the Scraptox platform, you agree to be bound by these Terms and Conditions and our Privacy Policy.</p>
 
             <h2 className="text-lg font-semibold text-gray-800 mt-6">2. Platform Role</h2>
-            <p>Scrapto acts as a facilitator connecting users who want to dispose of scrap with independent collectors. We are not responsible for the actual transaction, weighing, or payment process between the parties.</p>
+            <p>Scraptox acts as a facilitator connecting users who want to dispose of scrap with independent collectors. We are not responsible for the actual transaction, weighing, or payment process between the parties.</p>
 
             <h2 className="text-lg font-semibold text-gray-800 mt-6">3. User Obligations</h2>
-            <p>Users must provide accurate information regarding the type and quantity of scrap. Scrapto reserves the right to suspend accounts providing false information.</p>
+            <p>Users must provide accurate information regarding the type and quantity of scrap. Scraptox reserves the right to suspend accounts providing false information.</p>
 
             <h2 className="text-lg font-semibold text-gray-800 mt-6">4. Pricing</h2>
             <p>Prices listed on the platform are indicative market rates. Final pricing is determined at the time of pickup based on actual weight and quality.</p>
 
             <h2 className="text-lg font-semibold text-gray-800 mt-6">5. Limitation of Liability</h2>
-            <p>Scrapto shall not be liable for any direct, indirect, incidental, or consequential damages resulting from the use or inability to use our services.</p>
+            <p>Scraptox shall not be liable for any direct, indirect, incidental, or consequential damages resulting from the use or inability to use our services.</p>
           </div>
         </div>
       </div>

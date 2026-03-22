@@ -29,12 +29,12 @@ const AboutUs = () => {
         <div className="bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-gray-100">
           <div className="prose max-w-none text-gray-600 space-y-4">
             <h2 className="text-lg font-semibold text-gray-800">Who We Are</h2>
-            <p>Scrapto is India's leading digital platform for scrap management. We aim to organize the unorganized scrap collection industry by connecting households and businesses with verified scrap collectors (Scrappers).</p>
+            <p>Scraptox is India's leading digital platform for scrap management. We aim to organize the unorganized scrap collection industry by connecting households and businesses with verified scrap collectors (Scrappers).</p>
 
             <h2 className="text-lg font-semibold text-gray-800 mt-6">Our Mission</h2>
             <p>Our mission is to make recycling accessible, transparent, and rewarding for everyone. By providing a digital bridge, we ensure that scrap materials are collected efficiently and channeled back into the recycling ecosystem, contributing to a Greener Earth.</p>
 
-            <h2 className="text-lg font-semibold text-gray-800 mt-6">Why Choose Scrapto?</h2>
+            <h2 className="text-lg font-semibold text-gray-800 mt-6">Why Choose Scraptox?</h2>
             <ul className="list-disc pl-5 space-y-2">
               <li><strong>Convenience:</strong> Book a pickup from your home with just a few clicks.</li>
               <li><strong>Fair Pricing:</strong> Get transparent market rates for your scrap.</li>

@@ -60,7 +60,7 @@ const CustomerSolutions = () => {
   ];
 
   const staticTexts = [
-    "Why Choose Scrapto?",
+    "Why Choose Scraptox?",
     ...solutions.map((s) => s.title),
     ...solutions.map((s) => s.description),
   ];
@@ -79,7 +79,7 @@ const CustomerSolutions = () => {
         transition={{ duration: 0.5, delay: 0.2 }}
         className="text-2xl md:text-3xl lg:text-4xl font-bold mb-6 md:mb-10 text-center"
         style={{ color: "#2d3748" }}>
-        {getTranslatedText("Why Choose Scrapto?")}
+        {getTranslatedText("Why Choose Scraptox?")}
       </motion.h3>
 
       {/* Solutions Container - Single container, no cards */}

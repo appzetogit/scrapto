@@ -29,7 +29,7 @@ const ScrapperProfile = () => {
     "Phone",
     "Vehicle",
     "Not provided",
-    "Heard about Scrapto",
+    "Heard about Scraptox",
     "Profile editing will be available soon.",
     "KYC status",
     "View",
@@ -44,7 +44,7 @@ const ScrapperProfile = () => {
     "Refer & Earn",
     "Share your code and earn extra on pickups",
     "Terms & Conditions",
-    "Read how Scrapto works for scrappers",
+    "Read how Scraptox works for scrappers",
     "Terms & Conditions screen will be added later.",
     "Help & Support",
     "Get help for any issue"
@@ -332,7 +332,7 @@ const ScrapperProfile = () => {
               </span>
               {scrapperUser?.heardFrom && (
                 <>
-                  <span>{getTranslatedText("Heard about Scrapto")}</span>
+                  <span>{getTranslatedText("Heard about Scraptox")}</span>
                   <span className="font-semibold text-right text-slate-900">
                     {scrapperUser.heardFrom.startsWith('other:')
                       ? scrapperUser.heardFrom.replace('other:', '')
@@ -509,7 +509,7 @@ const ScrapperProfile = () => {
                   {getTranslatedText("Terms & Conditions")}
                 </p>
                 <p className="text-[11px] md:text-xs text-slate-500">
-                  {getTranslatedText("Read how Scrapto works for scrappers")}
+                  {getTranslatedText("Read how Scraptox works for scrappers")}
                 </p>
               </div>
               <span className="text-sm text-slate-400">

@@ -23,7 +23,7 @@ const PriceTicker = () => {
           const mapped = await Promise.all(
             response.data.prices.map(async (item) => ({
               type: await translate(item.category),
-              price: item.pricePerKg,
+              price: item.pricePerKg || item.price || 0,
               unit: "kg",
               change: null,
             }))
@@ -42,7 +42,7 @@ const PriceTicker = () => {
         const mapped = await Promise.all(
           feed.map(async (item) => ({
             type: await translate(item.category),
-            price: item.pricePerKg,
+            price: item.pricePerKg || item.price || 0,
             unit: "kg",
             change: null,
           }))

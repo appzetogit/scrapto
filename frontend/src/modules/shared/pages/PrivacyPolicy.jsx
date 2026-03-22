@@ -43,7 +43,7 @@ const PrivacyPolicy = () => {
             <p>We take reasonable measures to help protect information about you from loss, theft, misuse and unauthorized access, disclosure, alteration and destruction.</p>
 
             <h2 className="text-lg font-semibold text-gray-800 mt-6">5. Contact Us</h2>
-            <p>If you have any questions about this Privacy Policy, please contact us at Scraptowork@gmail.com.</p>
+            <p>If you have any questions about this Privacy Policy, please contact us at Scraptoxwork@gmail.com.</p>
           </div>
         </div>
       </div>

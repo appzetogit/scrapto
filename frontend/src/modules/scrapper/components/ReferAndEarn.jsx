@@ -72,7 +72,7 @@ const ReferAndEarn = () => {
     "Subscribed",
     "First Pickup",
     "Message copied! Paste it in your Instagram story or post.",
-    "Join ScrapConnect as a Scrapper and earn money! Use my referral code: {code}\n{link}",
+    "Join Scraptox as a Scrapper and earn money! Use my referral code: {code}\n{link}",
     "Monthly tier bonus of ₹{amount} credited!",
     "Unable to process monthly bonus"
   ];
@@ -117,7 +117,7 @@ const ReferAndEarn = () => {
   };
 
   const handleShare = (method) => {
-    const message = getTranslatedText('Join ScrapConnect as a Scrapper and earn money! Use my referral code: {code}\n{link}', { code: referralCode, link: shareLink });
+    const message = getTranslatedText('Join Scraptox as a Scrapper and earn money! Use my referral code: {code}\n{link}', { code: referralCode, link: shareLink });
 
     switch (method) {
       case 'whatsapp':
@@ -127,7 +127,7 @@ const ReferAndEarn = () => {
         window.open(`sms:?body=${encodeURIComponent(message)}`, '_blank');
         break;
       case 'email':
-        window.open(`mailto:?subject=Join ScrapConnect as Scrapper&body=${encodeURIComponent(message)}`, '_blank');
+        window.open(`mailto:?subject=Join Scraptox as Scrapper&body=${encodeURIComponent(message)}`, '_blank');
         break;
       case 'facebook':
         window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareLink)}`, '_blank');

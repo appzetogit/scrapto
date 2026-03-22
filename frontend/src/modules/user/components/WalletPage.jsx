@@ -66,7 +66,7 @@ const WalletPage = () => {
                 key: orderData.data.keyId,
                 amount: orderData.data.amount,
                 currency: orderData.data.currency,
-                name: "Scrapto Wallet",
+                name: "Scraptox Wallet",
                 description: "Add Money to Wallet",
                 order_id: orderData.data.orderId,
                 handler: async function (response) {

@@ -11,7 +11,7 @@ import { usePageTranslation } from '../../../hooks/usePageTranslation';
 
 const ScrapperSolutions = () => {
   const staticTexts = [
-    "Why Choose Scrapto?",
+    "Why Choose Scraptox?",
     "Guaranteed Daily Orders",
     "Get consistent daily pickup requests. No more waiting for orders, steady income guaranteed.",
     "Transparent Rates",
@@ -75,7 +75,7 @@ const ScrapperSolutions = () => {
         className="text-2xl md:text-3xl lg:text-4xl font-bold mb-6 md:mb-10 text-center"
         style={{ color: '#2d3748' }}
       >
-        {getTranslatedText("Why Choose Scrapto?")}
+        {getTranslatedText("Why Choose Scraptox?")}
       </motion.h3>
 
       <div className="flex flex-col gap-3 md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-5">

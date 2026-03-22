@@ -6,7 +6,7 @@ import { usePageTranslation } from "../../../hooks/usePageTranslation";
 import { useAuth } from "../../shared/context/AuthContext";
 import { IoLanguageOutline, IoChevronDownOutline, IoNotificationsOutline } from "react-icons/io5";
 import LanguageSelector from "../../shared/components/LanguageSelector";
-import siteLogo from "../../../assets/scraptologo-removebg-preview.png";
+import siteLogo from "../../../assets/scraptox-removebg-preview.png";
 import notificationService from "../../../services/notificationService";
 
 const Header = () => {
@@ -17,7 +17,7 @@ const Header = () => {
 
   const staticTexts = [
     "Hi, User!",
-    "Welcome back to Scrapto",
+    "Welcome back to Scraptox",
   ];
   const { getTranslatedText } = usePageTranslation(staticTexts);
 
@@ -47,7 +47,7 @@ const Header = () => {
         <div className="flex items-center">
           <img
             src={siteLogo}
-            alt="Scrapto Logo"
+            alt="Scraptox Logo"
             className="h-14 w-56 object-contain object-left -ml-3"
           />
         </div>

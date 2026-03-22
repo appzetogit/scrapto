@@ -179,7 +179,7 @@ const SubscriptionPlanPage = () => {
         key: keyId,
         amount,
         currency: currency || 'INR',
-        name: 'Scrapto',
+        name: 'Scraptox',
         description: `${selectedPlanData.name} - ${selectedPlanData.durationType || 'monthly'} subscription`,
         order_id: razorpayOrderId,
         prefill: {

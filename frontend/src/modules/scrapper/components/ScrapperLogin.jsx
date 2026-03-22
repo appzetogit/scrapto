@@ -9,7 +9,7 @@ import { usePageTranslation } from '../../../hooks/usePageTranslation';
 
 const ScrapperLogin = () => {
   const staticTexts = [
-    "Join Scrapto Scrapper Network",
+    "Join Scraptox Scrapper Network",
     "Earn more from",
     "every scrap pickup.",
     "Get verified leads, transparent pricing, and on‑time payments. Designed for serious scrap collectors.",
@@ -17,7 +17,7 @@ const ScrapperLogin = () => {
     "Priority access to high‑value pickups near your area.",
     "Simple OTP login – no passwords, no complications.",
     "Login to continue pickups",
-    "New to Scrapto? Register now",
+    "New to Scraptox? Register now",
     "Scrapper Login",
     "Create Scrapper Account",
     "Enter your phone number to receive a one‑time OTP.",
@@ -28,7 +28,7 @@ const ScrapperLogin = () => {
     "Enter your full name",
     "Email Address",
     "Enter your email address",
-    "How did you hear about Scrapto?",
+    "How did you hear about Scraptox?",
     "Select an option",
     "YouTube",
     "Instagram",
@@ -449,7 +449,7 @@ const ScrapperLogin = () => {
           <div className="relative z-10">
             <p className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-white/15 backdrop-blur">
               <span className="w-2 h-2 rounded-full bg-emerald-300 animate-pulse" />
-              {getTranslatedText("Join Scrapto Scrapper Network")}
+              {getTranslatedText("Join Scraptox Scrapper Network")}
             </p>
             <h2 className="mt-4 text-3xl lg:text-4xl font-extrabold leading-tight">
               {getTranslatedText("Earn more from")}
@@ -498,7 +498,7 @@ const ScrapperLogin = () => {
           >
             <div className="inline-flex items-center gap-3 px-3 py-2 rounded-full bg-emerald-900/30 text-emerald-400 text-xs font-semibold mb-3">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              {isLogin ? getTranslatedText('Login to continue pickups') : getTranslatedText('New to Scrapto? Register now')}
+              {isLogin ? getTranslatedText('Login to continue pickups') : getTranslatedText('New to Scraptox? Register now')}
             </div>
             <h1 className="text-2xl md:text-3xl font-bold mb-1 text-white">
               {isLogin ? getTranslatedText('Scrapper Login') : getTranslatedText('Create Scrapper Account')}
@@ -612,7 +612,7 @@ const ScrapperLogin = () => {
                     </motion.div>
                   )}
 
-                  {/* How did you hear about Scrapto? (Signup only) */}
+                  {/* How did you hear about Scraptox? (Signup only) */}
                   {!isLogin && (
                     <motion.div
                       initial={{ opacity: 0, height: 0 }}
@@ -620,7 +620,7 @@ const ScrapperLogin = () => {
                       transition={{ duration: 0.3, delay: 0.2 }}
                     >
                       <label className="block text-sm font-semibold mb-2 text-white">
-                        {getTranslatedText("How did you hear about Scrapto?")}
+                        {getTranslatedText("How did you hear about Scraptox?")}
                       </label>
                       <select
                         value={heardFrom}

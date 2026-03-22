@@ -41,7 +41,7 @@ const ContactUs = () => {
                 </div>
                 <div>
                   <p className="text-xs text-gray-400">Email us at</p>
-                  <p className="font-medium text-[15px] sm:text-base selection:bg-emerald-100">Scraptowork@gmail.com</p>
+                  <p className="font-medium text-[15px] sm:text-base selection:bg-emerald-100">Scraptoxwork@gmail.com</p>
                 </div>
               </div>
 
@@ -72,7 +72,7 @@ const ContactUs = () => {
             <h2 className="text-2xl font-bold mb-4">Support Available 24/7</h2>
             <p className="opacity-90 mb-6">Our dedicated support team is always ready to assist you with your scrap collection needs.</p>
             <button 
-                onClick={() => window.location.href = 'mailto:Scraptowork@gmail.com'}
+                onClick={() => window.location.href = 'mailto:Scraptoxwork@gmail.com'}
                 className="bg-white text-emerald-600 px-8 py-3 rounded-xl font-bold hover:bg-emerald-50 transition-colors shadow-md"
             >
               Send Message

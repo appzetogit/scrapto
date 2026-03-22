@@ -484,7 +484,7 @@ const ActiveRequestDetailsPage = () => {
           key: orderData.data.keyId,
           amount: orderData.data.amount,
           currency: orderData.data.currency,
-          name: "Scrapto",
+          name: "Scraptox",
           description: "Order Payment to User",
           order_id: orderData.data.orderId,
           handler: async function (response) {

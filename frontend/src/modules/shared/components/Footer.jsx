@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import siteLogo from '../../../assets/scraptologo-removebg-preview.png';
+import siteLogo from '../../../assets/scraptox-removebg-preview.png';
 
 const Footer = () => {
     const navigate = useNavigate();
@@ -30,7 +30,7 @@ const Footer = () => {
                     {/* Brand Section */}
                     <div className="col-span-1 md:col-span-2 space-y-4">
                         <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate('/')}>
-                            <img src={siteLogo} alt="Scrapto" className="h-12 w-auto object-contain -ml-2" />
+                            <img src={siteLogo} alt="Scraptox" className="h-12 w-auto object-contain -ml-2" />
                         </div>
                         <p className="text-gray-500 max-w-sm text-sm leading-relaxed">
                             Organizing the unorganized scrap industry in India. 
@@ -63,7 +63,7 @@ const Footer = () => {
                 {/* Bottom Bar */}
                 <div className="border-t border-gray-50 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
                     <p className="text-gray-400 text-xs text-center md:text-left">
-                        © {currentYear} Scrapto. All rights reserved. Made with ❤️ for a Greener India.
+                        © {currentYear} Scraptox. All rights reserved. Made with ❤️ for a Greener India.
                     </p>
                     <div className="flex gap-6">
                         {/* Placeholder for social links if needed */}

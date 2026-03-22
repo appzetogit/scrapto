@@ -337,7 +337,7 @@ const RequestStatusPage = () => {
         key: keyId,
         amount,
         currency: currency || 'INR',
-        name: 'Scrapto',
+        name: 'Scraptox',
         description: 'Pickup payment',
         order_id: razorpayOrderId,
         prefill: {

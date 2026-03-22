@@ -84,11 +84,11 @@ const AdminProfile = () => {
     if (admin) {
       setFormData({
         name: admin.name || 'Admin User',
-        email: admin.email || 'admin@scrapconnect.com',
+        email: admin.email || 'admin@scraptox.com',
         phone: admin.phone || '+91 98765 43210',
         role: admin.role || 'Administrator',
         department: admin.department || 'Operations',
-        bio: admin.bio || 'Administrator managing the ScrapConnect platform.'
+        bio: admin.bio || 'Administrator managing the Scraptox platform.'
       });
     }
   }, [admin]);
@@ -398,11 +398,11 @@ const AdminProfile = () => {
                         if (admin) {
                           setFormData({
                             name: admin.name || 'Admin User',
-                            email: admin.email || 'admin@scrapconnect.com',
+                            email: admin.email || 'admin@scraptox.com',
                             phone: admin.phone || '+91 98765 43210',
                             role: admin.role || 'Administrator',
                             department: admin.department || 'Operations',
-                            bio: admin.bio || 'Administrator managing the ScrapConnect platform.'
+                            bio: admin.bio || 'Administrator managing the Scraptox platform.'
                           });
                         }
                       }}

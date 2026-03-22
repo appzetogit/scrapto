@@ -26,7 +26,7 @@ const LoginSignup = () => {
   const { language, languages, changeLanguage } = useLanguage();
 
   const staticTexts = [
-    "Welcome to Scrapto",
+    "Welcome to Scraptox",
     "Login to your account",
     "Create a new account",
     "Phone Number",
@@ -59,7 +59,7 @@ const LoginSignup = () => {
     "Invalid OTP. Please try again.",
     "Full Name",
     "Email Address",
-    "How did you hear about Scrapto?",
+    "How did you hear about Scraptox?",
     "Select an option",
     "YouTube",
     "Instagram",
@@ -480,7 +480,7 @@ const LoginSignup = () => {
             className="mb-6 md:mb-8 text-center md:text-left">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-semibold mb-3">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              {getTranslatedText("Welcome to Scrapto")}
+              {getTranslatedText("Welcome to Scraptox")}
             </div>
             <h1
               className="text-2xl md:text-3xl font-bold mb-1"
@@ -628,7 +628,7 @@ const LoginSignup = () => {
               </motion.div>
             )}
 
-            {/* How did you hear about Scrapto? (Signup only) */}
+            {/* How did you hear about Scraptox? (Signup only) */}
             {!isLogin && (
               <motion.div
                 initial={{ opacity: 0, height: 0 }}
@@ -637,7 +637,7 @@ const LoginSignup = () => {
                 <label
                   className="block text-xs md:text-sm font-semibold mb-2"
                   style={{ color: "#2d3748" }}>
-                  {getTranslatedText("How did you hear about Scrapto?")}
+                  {getTranslatedText("How did you hear about Scraptox?")}
                 </label>
                 <div
                   className="flex items-center px-4 py-3 md:py-3.5 rounded-xl border transition-all mb-2"

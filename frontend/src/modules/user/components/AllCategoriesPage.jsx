@@ -231,7 +231,8 @@ const AllCategoriesPage = () => {
           </div>
         </div>
 
-        {/* Cleaning Services Section */}
+        {/* Cleaning Services Section - Hidden as requested */}
+        {/* 
         {services.length > 0 && (
           <div>
             <h2
@@ -258,7 +259,6 @@ const AllCategoriesPage = () => {
                     }}>
                     <div className="aspect-square relative overflow-hidden bg-gray-100">
                       <div className="absolute inset-0 flex items-center justify-center bg-green-100">
-                        {/* Use icon or fallback if no image */}
                         <span className="text-4xl">🧹</span>
                       </div>
                     </div>
@@ -289,6 +289,7 @@ const AllCategoriesPage = () => {
             </div>
           </div>
         )}
+        */}
       </div>
     </div>
   );
