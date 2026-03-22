@@ -46,7 +46,7 @@ const WebViewHeader = ({ navItems, userRole = 'user' }) => {
                 <img
                     src={siteLogo}
                     alt="Scraptox"
-                    className="h-14 w-48 object-contain object-left -ml-2"
+                    className="h-20 w-80 object-contain object-left -ml-2"
                 />
             </div>
 

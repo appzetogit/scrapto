@@ -525,7 +525,7 @@ const ScrapperDashboard = () => {
       <div className="p-4 md:p-6 border-b border-white/10">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <img src={siteLogo} alt="Scraptox" className="h-14 md:h-16 w-52 md:w-64 object-contain object-left -ml-3" />
+            <img src={siteLogo} alt="Scraptox" className="h-20 md:h-24 w-72 md:w-80 object-contain object-left -ml-4" />
           </div>
           <div className="flex items-center gap-3 md:hidden">
             <LanguageSelector />

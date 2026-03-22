@@ -48,7 +48,7 @@ const Header = () => {
           <img
             src={siteLogo}
             alt="Scraptox Logo"
-            className="h-14 w-56 object-contain object-left -ml-3"
+            className="h-20 w-80 object-contain object-left -ml-4"
           />
         </div>
 

@@ -30,7 +30,7 @@ const Footer = () => {
                     {/* Brand Section */}
                     <div className="col-span-1 md:col-span-2 space-y-4">
                         <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate('/')}>
-                            <img src={siteLogo} alt="Scraptox" className="h-12 w-auto object-contain -ml-2" />
+                            <img src={siteLogo} alt="Scraptox" className="h-16 w-auto object-contain -ml-2" />
                         </div>
                         <p className="text-gray-500 max-w-sm text-sm leading-relaxed">
                             Organizing the unorganized scrap industry in India. 
