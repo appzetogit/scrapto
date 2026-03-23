@@ -2,7 +2,7 @@ import { motion } from 'framer-motion';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate, useLocation, useParams } from 'react-router-dom';
 import { useAuth } from '../../shared/context/AuthContext';
-import { chatAPI } from '../../shared/utils/api';
+import { chatAPI, getAuthToken } from '../../shared/utils/api';
 import socketClient from '../../shared/utils/socketClient';
 import { usePageTranslation } from '../../../hooks/usePageTranslation';
 import { FaSpinner } from 'react-icons/fa';
@@ -110,7 +110,7 @@ const ChatPage = () => {
       }
 
       // Connect to Socket.io
-      const token = localStorage.getItem('token');
+      const token = getAuthToken('scrapper');
       if (token && currentChatId) {
         socketClient.connect(token);
 

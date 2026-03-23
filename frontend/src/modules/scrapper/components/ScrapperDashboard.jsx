@@ -6,7 +6,7 @@ import { FaGift, FaChartLine, FaCheck } from 'react-icons/fa';
 import PriceTicker from '../../user/components/PriceTicker';
 import ScrapperSolutions from './ScrapperSolutions';
 import { getActiveRequestsCount, getScrapperAssignedRequests, migrateOldActiveRequest } from '../../shared/utils/scrapperRequestUtils';
-import { earningsAPI, scrapperOrdersAPI, subscriptionAPI, kycAPI, scrapperProfileAPI } from '../../shared/utils/api';
+import { earningsAPI, scrapperOrdersAPI, subscriptionAPI, kycAPI, scrapperProfileAPI, getAuthToken } from '../../shared/utils/api';
 import BannerSlider from '../../shared/components/BannerSlider';
 import { usePageTranslation } from '../../../hooks/usePageTranslation';
 import LanguageSelector from '../../shared/components/LanguageSelector';
@@ -261,7 +261,7 @@ const ScrapperDashboard = () => {
   useEffect(() => {
     const verifyAndFetchStatus = async () => {
       // Check if user is authenticated as scrapper
-      const token = localStorage.getItem('token');
+      const token = getAuthToken('scrapper');
       const scrapperAuth = localStorage.getItem('scrapperAuthenticated');
       const scrapperUser = localStorage.getItem('scrapperUser');
 

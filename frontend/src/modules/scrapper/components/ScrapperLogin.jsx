@@ -378,12 +378,13 @@ const ScrapperLogin = () => {
         const userData = response.data.user;
         const token = response.data.token;
 
-        // Login user with token
-        await login(userData, token);
-
+        // Set local storage flags BEFORE context login to avoid race conditions
         localStorage.setItem('scrapperAuthenticated', 'true');
         localStorage.setItem('scrapperToken', token || '');
         localStorage.setItem('scrapperUser', JSON.stringify(userData));
+
+        // Login user with token
+        await login(userData, token);
 
         // If this is a new registration, clear any old KYC/subscription data and link lead
         if (!isLogin) {

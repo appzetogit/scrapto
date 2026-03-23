@@ -8,7 +8,7 @@ import {
   getScrapperAssignedRequests,
   migrateOldActiveRequest
 } from '../../shared/utils/scrapperRequestUtils';
-import { scrapperOrdersAPI, orderAPI, scrapperProfileAPI } from '../../shared/utils/api';
+import { scrapperOrdersAPI, orderAPI, scrapperProfileAPI, getAuthToken } from '../../shared/utils/api';
 import socketClient from '../../shared/utils/socketClient';
 import { usePageTranslation } from '../../../hooks/usePageTranslation';
 import ScrapperBottomNav from './ScrapperBottomNav';
@@ -314,7 +314,7 @@ const ActiveRequestsPage = () => {
 
     // SOCKET INTEGRATION
     const setupSocket = async () => {
-      const token = localStorage.getItem('token');
+      const token = getAuthToken('scrapper');
       if (token) {
         socketClient.connect(token);
 

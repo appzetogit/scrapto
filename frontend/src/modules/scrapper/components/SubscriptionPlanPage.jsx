@@ -344,8 +344,16 @@ const SubscriptionPlanPage = () => {
                   {getTranslatedText("Expires: {date}", { date: activeSubForTab.expiryDate ? new Date(activeSubForTab.expiryDate).toLocaleDateString() : 'N/A' })}
                 </p>
               </div>
-              <div className="px-4 py-2 rounded-lg font-semibold bg-emerald-900/30 text-emerald-400">
-                {getTranslatedText("Active")}
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => navigate('/scrapper/dashboard')}
+                  className="px-6 py-2 rounded-xl font-bold bg-white/10 text-white hover:bg-white/20 transition-all border border-white/20"
+                >
+                  Go to Dashboard
+                </button>
+                <div className="px-4 py-2 rounded-lg font-semibold bg-emerald-900/30 text-emerald-400">
+                  {getTranslatedText("Active")}
+                </div>
               </div>
             </div>
           </motion.div>

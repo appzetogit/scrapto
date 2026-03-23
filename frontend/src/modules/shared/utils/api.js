@@ -1,8 +1,7 @@
 import { API_BASE_URL, API_ENDPOINTS } from '../../../config/apiConfig.js';
 
 // Helper function to get auth token
-// Helper function to get auth token
-const getAuthToken = (role = null) => {
+export const getAuthToken = (role = null) => {
   // 1. If role is explicitly provided, prioritize its specific token
   if (role === 'admin') return localStorage.getItem('adminToken') || localStorage.getItem('token');
   if (role === 'scrapper') return localStorage.getItem('scrapperToken') || localStorage.getItem('token');

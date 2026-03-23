@@ -77,7 +77,7 @@ export const AuthProvider = ({ children }) => {
 
     if (token) {
       // Store in its own specific slot. We no longer use the generic 'token' key to avoid ghost session issues.
-      localStorage.removeItem('token'); 
+      localStorage.removeItem('token');
       if (userData.role === 'scrapper') {
         localStorage.setItem('scrapperToken', token);
       } else {

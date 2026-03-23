@@ -17,7 +17,7 @@ import ChatPage from './components/ChatPage';
 import ChatListPage from './components/ChatListPage';
 import ScrapperWallet from './components/ScrapperWallet';
 import ScrapperEarningsPage from './components/ScrapperEarningsPage';
-import { authAPI } from '../shared/utils/api';
+import { authAPI, getAuthToken } from '../shared/utils/api';
 import { FaHome, FaList, FaRegComments, FaUser, FaWallet } from 'react-icons/fa';
 import WebViewHeader from '../shared/components/WebViewHeader';
 
@@ -27,6 +27,18 @@ const getKYCStatus = () => {
   const kycData = localStorage.getItem('scrapperKYC');
 
   if (!kycData) return 'not_submitted';
+  
+  try {
+    const kyc = JSON.parse(kycData);
+    // Explicitly verify if Aadhaar photo was uploaded. 
+    // This prevents empty 'pending' objects from backend from bypassing the upload page.
+    if (kycStatus === 'pending' && !kyc?.aadhaarPhotoUrl) {
+      return 'not_submitted';
+    }
+  } catch (e) {
+    return 'not_submitted';
+  }
+
   if (kycStatus === 'verified') return 'verified';
   if (kycStatus === 'pending') return 'pending';
   if (kycStatus === 'rejected') return 'rejected';
@@ -63,7 +75,7 @@ const ScrapperModule = () => {
     let timeoutId = null;
 
     const verifyScrapperAuth = async () => {
-      const token = localStorage.getItem('token');
+      const token = getAuthToken('scrapper');
       const scrapperAuth = localStorage.getItem('scrapperAuthenticated');
       const scrapperUser = localStorage.getItem('scrapperUser');
 
@@ -175,12 +187,16 @@ const ScrapperModule = () => {
     };
   }, [isAuthenticated, user, login, logout]); // Re-check when auth state changes
 
-  const kycStatus = scrapperIsAuthenticated ? getKYCStatus() : 'not_submitted';
-  const subscriptionStatus = scrapperIsAuthenticated && kycStatus === 'verified' ? getSubscriptionStatus() : 'not_subscribed';
-
   // Show loading while verifying (but allow navigation if we have token and user)
-  const hasToken = !!localStorage.getItem('token');
+  const hasToken = !!getAuthToken('scrapper');
   const hasScrapperAuth = localStorage.getItem('scrapperAuthenticated') === 'true';
+  const hasScrapperSession = hasScrapperAuth && (hasToken || !!localStorage.getItem('scrapperUser'));
+
+  // A "soft" authenticated check that allows for context initialization delay
+  const isTransitioning = !scrapperIsAuthenticated && hasScrapperSession;
+
+  const kycStatus = (scrapperIsAuthenticated || isTransitioning) ? getKYCStatus() : 'not_submitted';
+  const subscriptionStatus = (scrapperIsAuthenticated || isTransitioning) && kycStatus === 'verified' ? getSubscriptionStatus() : 'not_subscribed';
 
   if (isVerifying && !hasToken && !hasScrapperAuth) {
     return (
@@ -195,7 +211,7 @@ const ScrapperModule = () => {
 
   // If not authenticated as scrapper, show login / public routes
   // But check if we're in the process of logging in (has token but not yet verified)
-  if (!scrapperIsAuthenticated && (!hasToken || !hasScrapperAuth)) {
+  if (!scrapperIsAuthenticated && !isTransitioning) {
     return (
       <Routes>
         {/* Public routes (no scrapper auth required) */}
@@ -269,7 +285,7 @@ const ScrapperModule = () => {
         {/* Earnings Route */}
         <Route path="/earnings" element={<ScrapperEarningsPage />} />
 
-        {/* Redirect logic based on KYC and Subscription status */}
+        {/* Redirect logic based on KYC status only - Subscription check is handled within Dashboard */}
         <Route path="*" element={
           kycStatus === 'not_submitted' ? (
             <Navigate to="/scrapper/kyc" replace />
@@ -277,9 +293,7 @@ const ScrapperModule = () => {
             <Navigate to="/scrapper/kyc" replace />
           ) : kycStatus === 'pending' ? (
             <Navigate to="/scrapper/kyc-status" replace />
-          ) : kycStatus === 'verified' && subscriptionStatus !== 'active' ? (
-            <Navigate to="/scrapper/subscription" replace />
-          ) : kycStatus === 'verified' && subscriptionStatus === 'active' ? (
+          ) : kycStatus === 'verified' ? (
             <Navigate to="/scrapper" replace />
           ) : (
             <Navigate to="/scrapper/kyc" replace />
