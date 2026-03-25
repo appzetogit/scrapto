@@ -249,10 +249,10 @@ export const subscriptionAPI = {
       body: JSON.stringify(paymentData),
     });
   },
-  cancel: async (reason = null) => {
+  cancel: async (type = 'general', reason = null) => {
     return apiRequest('/subscriptions/cancel', {
       method: 'POST',
-      body: JSON.stringify({ reason }),
+      body: JSON.stringify({ type, reason }),
     });
   },
   renew: async (planId) => {

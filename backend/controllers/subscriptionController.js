@@ -229,10 +229,10 @@ export const verifyPayment = asyncHandler(async (req, res) => {
 // @route   POST /api/subscriptions/cancel
 // @access  Private (Scrapper)
 export const cancel = asyncHandler(async (req, res) => {
-  const { reason } = req.body;
+  const { reason, type = 'general' } = req.body;
   const scrapperId = req.user.id;
 
-  const result = await cancelSubscription(scrapperId, reason);
+  const result = await cancelSubscription(scrapperId, type, reason);
   sendSuccess(res, 'Subscription cancelled successfully', { subscription: result.subscription });
 });
 

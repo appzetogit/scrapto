@@ -1231,34 +1231,68 @@ export const getAllSubscriptions = asyncHandler(async (req, res) => {
 
     const filter = {};
     if (req.query.status) {
-      filter['subscription.status'] = req.query.status;
+      filter.$or = [
+        { 'subscription.status': req.query.status },
+        { 'marketSubscription.status': req.query.status }
+      ];
     }
 
+    // Get scrappers who have either subscription
     const [scrappers, total] = await Promise.all([
       Scrapper.find(filter)
-        .select('name phone email subscription')
-        .populate('subscription.planId', 'name price duration durationType')
-        .sort({ 'subscription.startDate': -1 })
-        .skip(skip)
-        .limit(limit),
+        .select('name phone email subscription marketSubscription')
+        .populate('subscription.planId', 'name price duration durationType type')
+        .populate('marketSubscription.planId', 'name price duration durationType type')
+        .sort({ createdAt: -1 }),
       Scrapper.countDocuments(filter)
     ]);
 
+    // Flatten subscriptions into a single list
+    const allSubs = [];
+    scrappers.forEach(s => {
+      // Add general subscription if it exists and matches status filter
+      if (s.subscription && s.subscription.planId) {
+        if (!req.query.status || s.subscription.status === req.query.status) {
+          allSubs.push({
+            scrapper: {
+              id: s._id,
+              name: s.name,
+              phone: s.phone,
+              email: s.email
+            },
+            subscription: s.subscription,
+            type: 'general'
+          });
+        }
+      }
+
+      // Add market subscription if it exists and matches status filter
+      if (s.marketSubscription && s.marketSubscription.planId) {
+        if (!req.query.status || s.marketSubscription.status === req.query.status) {
+          allSubs.push({
+            scrapper: {
+              id: s._id,
+              name: s.name,
+              phone: s.phone,
+              email: s.email
+            },
+            subscription: s.marketSubscription,
+            type: 'market_price'
+          });
+        }
+      }
+    });
+
+    // Handle pagination on the flattened list
+    const paginatedSubs = allSubs.slice(skip, skip + limit);
+
     sendSuccess(res, 'Subscriptions retrieved successfully', {
-      subscriptions: scrappers.map(s => ({
-        scrapper: {
-          id: s._id,
-          name: s.name,
-          phone: s.phone,
-          email: s.email
-        },
-        subscription: s.subscription
-      })),
+      subscriptions: paginatedSubs,
       pagination: {
         page,
         limit,
-        total,
-        pages: Math.ceil(total / limit)
+        total: allSubs.length,
+        pages: Math.ceil(allSubs.length / limit)
       }
     });
   } catch (error) {

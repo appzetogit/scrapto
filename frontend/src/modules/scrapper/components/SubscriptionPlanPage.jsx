@@ -37,7 +37,8 @@ const SubscriptionPlanPage = () => {
     "years",
     "days",
     "Platform Access",
-    "Market Prices"
+    "Market Prices",
+    "All plans include full access to live market rates"
   ];
   const { getTranslatedText } = usePageTranslation(staticTexts);
   const navigate = useNavigate();
@@ -310,22 +311,30 @@ const SubscriptionPlanPage = () => {
           className="text-center mb-8"
         >
           <h1 className="text-2xl md:text-3xl font-bold mb-2 text-white">
-            {isTabActive ? getTranslatedText('Manage Your Subscription') : getTranslatedText('Choose Your Plan')}
+            {isTabActive 
+              ? getTranslatedText('Manage Your Subscription') 
+              : (queryParams.has('type') 
+                  ? (planType === 'market_price' ? getTranslatedText("Market Prices") : getTranslatedText("Platform Access"))
+                  : getTranslatedText('Choose Your Plan')
+                )
+            }
           </h1>
-          <div className="flex justify-center gap-4 mt-4 mb-6">
-            <button
-              onClick={() => { setPlanType('general'); setSelectedPlan(null); }}
-              className={`px-4 py-2 rounded-full font-semibold transition-colors ${planType === 'general' ? 'bg-emerald-600 text-white' : 'bg-zinc-800 text-gray-400'}`}
-            >
-              {getTranslatedText("Platform Access")}
-            </button>
-            <button
-              onClick={() => { setPlanType('market_price'); setSelectedPlan(null); }}
-              className={`px-4 py-2 rounded-full font-semibold transition-colors ${planType === 'market_price' ? 'bg-emerald-600 text-white' : 'bg-zinc-800 text-gray-400'}`}
-            >
-              {getTranslatedText("Market Prices")}
-            </button>
-          </div>
+          {!queryParams.has('type') && (
+            <div className="flex justify-center gap-4 mt-4 mb-6">
+              <button
+                onClick={() => { setPlanType('general'); setSelectedPlan(null); }}
+                className={`px-4 py-2 rounded-full font-semibold transition-colors ${planType === 'general' ? 'bg-emerald-600 text-white' : 'bg-zinc-800 text-gray-400'}`}
+              >
+                {getTranslatedText("Platform Access")}
+              </button>
+              <button
+                onClick={() => { setPlanType('market_price'); setSelectedPlan(null); }}
+                className={`px-4 py-2 rounded-full font-semibold transition-colors ${planType === 'market_price' ? 'bg-emerald-600 text-white' : 'bg-zinc-800 text-gray-400'}`}
+              >
+                {getTranslatedText("Market Prices")}
+              </button>
+            </div>
+          )}
         </motion.div>
 
         {/* Current Subscription Info */}
@@ -474,7 +483,7 @@ const SubscriptionPlanPage = () => {
                 <li>• {getTranslatedText("Subscription will auto-renew every month")}</li>
                 <li>• {getTranslatedText("You can cancel anytime from your profile")}</li>
                 <li>• {getTranslatedText("Payment will be processed securely via Razorpay")}</li>
-                <li>• {getTranslatedText("All plans include full access to pickup requests")}</li>
+                <li>• {planType === 'market_price' ? getTranslatedText("All plans include full access to live market rates") : getTranslatedText("All plans include full access to pickup requests")}</li>
               </ul>
             </div>
           </div>

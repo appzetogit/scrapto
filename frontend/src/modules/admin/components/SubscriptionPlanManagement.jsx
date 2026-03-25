@@ -56,7 +56,10 @@ const SubscriptionPlanManagement = () => {
     "Add",
     "Popular",
     "Save Plan",
-    "Cancel"
+    "Cancel",
+    "Plan Type *",
+    "Platform Access",
+    "Market Prices"
   ];
   const { getTranslatedText } = usePageTranslation(staticTexts);
 
@@ -308,7 +311,7 @@ const SubscriptionPlanManagement = () => {
                 <h3 className="text-lg md:text-xl font-bold mb-2" style={{ color: '#2d3748' }}>
                   {plan.name}
                   <span className={`ml-2 text-xs px-2 py-0.5 rounded-full ${plan.type === 'market_price' ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800'}`}>
-                    {plan.type === 'market_price' ? 'Market Price' : 'General'}
+                    {plan.type === 'market_price' ? getTranslatedText('Market Prices') : getTranslatedText('Platform Access')}
                   </span>
                 </h3>
                 {plan.description && (
@@ -471,6 +474,21 @@ const SubscriptionPlanManagement = () => {
                     <option value="monthly">{getTranslatedText("Monthly")}</option>
                     <option value="quarterly">{getTranslatedText("Quarterly")}</option>
                     <option value="yearly">{getTranslatedText("Yearly")}</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold mb-2" style={{ color: '#2d3748' }}>
+                    {getTranslatedText("Plan Type *")}
+                  </label>
+                  <select
+                    value={formData.type}
+                    onChange={(e) => setFormData({ ...formData, type: e.target.value })}
+                    className="w-full px-4 py-2 rounded-lg border-2 focus:outline-none focus:ring-2"
+                    style={{ borderColor: '#e2e8f0', focusBorderColor: '#64946e' }}
+                  >
+                    <option value="general">{getTranslatedText("Platform Access")}</option>
+                    <option value="market_price">{getTranslatedText("Market Prices")}</option>
                   </select>
                 </div>
               </div>

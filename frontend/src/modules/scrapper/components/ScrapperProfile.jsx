@@ -20,6 +20,7 @@ const ScrapperProfile = () => {
     "Pending",
     "Rejected",
     "Not Submitted",
+    "Active",
     "No subscription",
     "{planName} active",
     "Vehicle not set",
@@ -53,7 +54,8 @@ const ScrapperProfile = () => {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
   const [kycStatus, setKycStatus] = useState('not_submitted');
-  const [subscription, setSubscription] = useState(null);
+  const [platformSubscription, setPlatformSubscription] = useState(null);
+  const [marketSubscription, setMarketSubscription] = useState(null);
   const [loading, setLoading] = useState(true);
   const [scrapperUser, setScrapperUser] = useState(user);
   const [rating, setRating] = useState({ average: 0, count: 0, breakdown: null });
@@ -108,21 +110,39 @@ const ScrapperProfile = () => {
         // Fetch subscription status from API
         try {
           const subResponse = await subscriptionAPI.getMySubscription();
-          if (subResponse.success && subResponse.data?.subscription) {
-            const sub = subResponse.data.subscription;
-            setSubscription({
-              status: sub.status,
-              planId: sub.planId?._id || sub.planId,
-              planName: sub.planId?.name || 'Unknown Plan',
-              price: sub.planId?.price || 0,
-              startDate: sub.startDate,
-              expiryDate: sub.expiryDate,
-              autoRenew: sub.autoRenew
-            });
+          if (subResponse.success) {
+            // Handle Platform Subscription
+            if (subResponse.data?.subscription) {
+              const sub = subResponse.data.subscription;
+              setPlatformSubscription({
+                status: sub.status,
+                planId: sub.planId?._id || sub.planId,
+                planName: sub.planId?.name || 'Unknown Plan',
+                price: sub.planId?.price || 0,
+                startDate: sub.startDate,
+                expiryDate: sub.expiryDate,
+                autoRenew: sub.autoRenew
+              });
+            }
+
+            // Handle Market Price Subscription
+            if (subResponse.data?.marketSubscription) {
+              const mSub = subResponse.data.marketSubscription;
+              setMarketSubscription({
+                status: mSub.status,
+                planId: mSub.planId?._id || mSub.planId,
+                planName: mSub.planId?.name || 'Unknown Plan',
+                price: mSub.planId?.price || 0,
+                startDate: mSub.startDate,
+                expiryDate: mSub.expiryDate,
+                autoRenew: mSub.autoRenew
+              });
+            }
           }
         } catch (subError) {
           console.error('Error fetching subscription:', subError);
-          setSubscription(null);
+          setPlatformSubscription(null);
+          setMarketSubscription(null);
         }
 
         // Fetch detailed Scrapper Profile (including ratings)
@@ -279,12 +299,20 @@ const ScrapperProfile = () => {
                   >
                     {getTranslatedText("KYC:")} {kycConfig.label}
                   </span>
-                  {/* Subscription badge */}
+                  {/* Platform Subscription badge */}
                   <span
-                    className={`text-xs px-2 py-0.5 rounded-full ${subscription ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-500'}`}
+                    className={`text-xs px-2 py-0.5 rounded-full ${platformSubscription ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-500'}`}
                   >
-                    {subscription ? getTranslatedText("{planName} active", { planName: subscription.planName }) : getTranslatedText('No subscription')}
+                    {platformSubscription ? getTranslatedText("{planName} active", { planName: platformSubscription.planName }) : getTranslatedText('No subscription')}
                   </span>
+                  {/* Market Subscription badge */}
+                  {marketSubscription && marketSubscription.status === 'active' && (
+                    <span
+                      className="text-xs px-2 py-0.5 rounded-full bg-purple-100 text-purple-700"
+                    >
+                      {getTranslatedText("Market Prices")}: {getTranslatedText("Active")}
+                    </span>
+                  )}
                   {/* Vehicle info small badge */}
                   <span
                     className="text-xs px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 capitalize"
@@ -431,9 +459,13 @@ const ScrapperProfile = () => {
                   {getTranslatedText("Subscription")}
                 </p>
                 <p className="text-[11px] md:text-xs text-slate-500">
-                  {subscription
-                    ? getTranslatedText("{planName} • ₹{price}/month", { planName: subscription.planName, price: subscription.price })
-                    : getTranslatedText('No active subscription')}
+                  {platformSubscription 
+                    ? getTranslatedText("{planName} • ₹{price}/month", { planName: platformSubscription.planName, price: platformSubscription.price })
+                    : (marketSubscription 
+                        ? getTranslatedText("{planName} • ₹{price}/month", { planName: marketSubscription.planName, price: marketSubscription.price })
+                        : getTranslatedText('No active subscription'))
+                  }
+                  {platformSubscription && marketSubscription && marketSubscription.status === 'active' && ` & ${getTranslatedText("Market Prices")}`}
                 </p>
               </div>
               <span

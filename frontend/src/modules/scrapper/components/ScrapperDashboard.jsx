@@ -67,7 +67,8 @@ const ScrapperDashboard = () => {
     "orders",
     "No Completed Orders Yet",
     "Your completed orders will appear here",
-    "Completed on:"
+    "Completed on:",
+    "Active subscription required to go online. Please subscribe first."
   ];
   const { getTranslatedText } = usePageTranslation(staticTexts);
   const navigate = useNavigate();
@@ -234,8 +235,8 @@ const ScrapperDashboard = () => {
       const isSubActive = subscriptionData?.isPlatformActive;
       if (!isSubActive) {
         // Show notification/alert and redirect
-        alert('Active subscription required to go online. Please subscribe first.');
-        navigate('/scrapper/subscription');
+        alert(getTranslatedText('Active subscription required to go online. Please subscribe first.'));
+        navigate('/scrapper/subscription?type=general');
         return;
       }
     }

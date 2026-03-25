@@ -189,33 +189,35 @@ export const getScrapperSubscription = async (scrapperId) => {
 /**
  * Cancel subscription
  */
-export const cancelSubscription = async (scrapperId, reason = null) => {
+export const cancelSubscription = async (scrapperId, type = 'general', reason = null) => {
   try {
     const scrapper = await Scrapper.findById(scrapperId);
     if (!scrapper) {
       throw new Error('Scrapper not found');
     }
 
-    if (scrapper.subscription.status !== 'active') {
-      throw new Error('No active subscription to cancel');
+    const targetField = type === 'market_price' ? 'marketSubscription' : 'subscription';
+
+    if (scrapper[targetField].status !== 'active') {
+      throw new Error(`No active ${type === 'market_price' ? 'Market' : 'Platform'} subscription to cancel`);
     }
 
     // Mark as cancelled (but keep active until expiry)
-    scrapper.subscription.status = 'cancelled';
-    scrapper.subscription.autoRenew = false;
-    scrapper.subscription.cancelledAt = new Date();
-    scrapper.subscription.cancellationReason = reason || 'User cancelled';
+    scrapper[targetField].status = 'cancelled';
+    scrapper[targetField].autoRenew = false;
+    scrapper[targetField].cancelledAt = new Date();
+    scrapper[targetField].cancellationReason = reason || 'User cancelled';
 
     await scrapper.save();
 
-    logger.info(`[Subscription] Subscription cancelled for scrapper ${scrapperId}`);
+    logger.info(`[Subscription] ${type} Subscription cancelled for scrapper ${scrapperId}`);
 
     return {
       success: true,
-      subscription: scrapper.subscription
+      subscription: scrapper[targetField]
     };
   } catch (error) {
-    logger.error('[Subscription] Error cancelling subscription:', error);
+    logger.error(`[Subscription] Error cancelling ${type} subscription:`, error);
     throw error;
   }
 };
@@ -278,21 +280,9 @@ export const renewSubscription = async (scrapperId, planId) => {
 export const checkExpiredSubscriptions = async () => {
   try {
     const now = new Date();
-    const expiredScrappers = await Scrapper.find({
-      'subscription.status': 'active',
-      'subscription.expiryDate': { $lt: now }
-    });
-
-    if (expiredScrappers.length === 0) {
-      return {
-        success: true,
-        expiredCount: 0,
-        message: 'No expired subscriptions found'
-      };
-    }
-
-    // Update all expired subscriptions
-    const updateResult = await Scrapper.updateMany(
+    
+    // 1. Update Platform subscriptions
+    const platformRes = await Scrapper.updateMany(
       {
         'subscription.status': 'active',
         'subscription.expiryDate': { $lt: now }
@@ -304,12 +294,31 @@ export const checkExpiredSubscriptions = async () => {
       }
     );
 
-    logger.info(`[Subscription] Marked ${updateResult.modifiedCount} subscriptions as expired`);
+    // 2. Update Market Price subscriptions
+    const marketRes = await Scrapper.updateMany(
+      {
+        'marketSubscription.status': 'active',
+        'marketSubscription.expiryDate': { $lt: now }
+      },
+      {
+        $set: {
+          'marketSubscription.status': 'expired'
+        }
+      }
+    );
+
+    const totalExpired = (platformRes.modifiedCount || 0) + (marketRes.modifiedCount || 0);
+
+    if (totalExpired > 0) {
+      logger.info(`[Subscription] Expired: ${platformRes.modifiedCount} Platform, ${marketRes.modifiedCount} Market`);
+    }
 
     return {
       success: true,
-      expiredCount: updateResult.modifiedCount,
-      message: `Marked ${updateResult.modifiedCount} subscriptions as expired`
+      platformExpired: platformRes.modifiedCount,
+      marketExpired: marketRes.modifiedCount,
+      totalExpired,
+      message: `Marked ${totalExpired} subscriptions as expired`
     };
   } catch (error) {
     logger.error('[Subscription] Error checking expired subscriptions:', error);
@@ -322,10 +331,9 @@ export const checkExpiredSubscriptions = async () => {
  */
 export const getSubscriptionHistory = async (scrapperId) => {
   try {
-    // For now, we only have current subscription
-    // In future, we can add a SubscriptionHistory model
     const scrapper = await Scrapper.findById(scrapperId)
-      .populate('subscription.planId', 'name price duration durationType');
+      .populate('subscription.planId', 'name price duration durationType')
+      .populate('marketSubscription.planId', 'name price duration durationType');
 
     if (!scrapper) {
       throw new Error('Scrapper not found');
@@ -334,6 +342,7 @@ export const getSubscriptionHistory = async (scrapperId) => {
     return {
       success: true,
       subscription: scrapper.subscription,
+      marketSubscription: scrapper.marketSubscription,
       history: [] // Placeholder for future subscription history
     };
   } catch (error) {
