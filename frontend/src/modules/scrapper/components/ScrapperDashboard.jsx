@@ -352,6 +352,9 @@ const ScrapperDashboard = () => {
           localStorage.setItem('scrapperMarketPriceSubscriptionStatus', 'inactive');
         }
 
+        // Redirect based on REAL backend data
+        const backendKycStatus = kyc?.status || 'not_submitted';
+
         // If KYC not submitted or rejected, redirect to KYC page
         if (!kyc || backendKycStatus === 'rejected' || backendKycStatus === 'not_submitted') {
           navigate('/scrapper/kyc', { replace: true });

@@ -21,7 +21,7 @@ const KYCUploadPage = () => {
     "Aadhaar Card Photo",
     "Click to upload",
     "Aadhaar photo",
-    "PNG, JPG or JPEG (MAX. 5MB)",
+    "PNG, JPG or JPEG (MAX. 25MB)",
     "Remove Photo",
     "Selfie Photo",
     "selfie photo",
@@ -39,7 +39,7 @@ const KYCUploadPage = () => {
     "Your KYC documents have been submitted for verification.",
     "Verification Time:",
     "Usually takes 24-48 hours. You'll be notified once verification is complete.",
-    "File is too large (Max 5MB)"
+    "File is too large (Max 25MB)"
   ];
   const { getTranslatedText } = usePageTranslation(staticTexts);
   const navigate = useNavigate();
@@ -94,8 +94,8 @@ const KYCUploadPage = () => {
   const handleAadhaarPhotoChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      if (file.size > 5 * 1024 * 1024) {
-        alert(getTranslatedText('File is too large (Max 5MB)'));
+      if (file.size > 25 * 1024 * 1024) {
+        alert(getTranslatedText('File is too large (Max 25MB)'));
         return;
       }
       setAadhaarPhoto(file);
@@ -110,8 +110,8 @@ const KYCUploadPage = () => {
   const handleSelfiePhotoChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      if (file.size > 5 * 1024 * 1024) {
-        alert(getTranslatedText('File is too large (Max 5MB)'));
+      if (file.size > 25 * 1024 * 1024) {
+        alert(getTranslatedText('File is too large (Max 25MB)'));
         return;
       }
       setSelfiePhoto(file);
@@ -126,8 +126,8 @@ const KYCUploadPage = () => {
   const handleLicensePhotoChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      if (file.size > 5 * 1024 * 1024) {
-        alert(getTranslatedText('File is too large (Max 5MB)'));
+      if (file.size > 25 * 1024 * 1024) {
+        alert(getTranslatedText('File is too large (Max 25MB)'));
         return;
       }
       setLicenseFile(file);
@@ -188,7 +188,7 @@ const KYCUploadPage = () => {
       setShowSuccess(true);
 
       setTimeout(() => {
-        window.location.href = '/scrapper/kyc-status';
+        navigate('/scrapper/kyc-status', { replace: true });
       }, 1200);
     } catch (error) {
       console.error('KYC submit failed:', error);
