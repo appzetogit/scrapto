@@ -7,6 +7,10 @@ Scrapper accounts ke liye dedicated test phone numbers aur OTP set kiye gaye hai
 
 ### Default Scrapper Test Numbers:
 - **8888888888** - OTP: `123456`
+- **8888855555** - OTP: `123456` (New)
+- **9876598765** - OTP: `123456` (Always Bypass: Dev & Prod)
+- **9999999990** - OTP: `123456` (Always Bypass: Dev & Prod)
+- **8888888880** - OTP: `123456` (Always Bypass: Dev & Prod)
 - **7777777777** - OTP: `123456`
 - **6666666666** - OTP: `123456`
 

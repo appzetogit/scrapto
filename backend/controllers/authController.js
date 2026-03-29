@@ -12,10 +12,15 @@ const isBypassEnabled = process.env.ENABLE_BYPASS_OTP !== 'false' && process.env
 // User test numbers
 const userBypassList = new Set(['9685974247', '9876543210', '9999999999', '7610416911', '6260491554']);
 // Scrapper test numbers (dedicated for scrapper testing)
-const scrapperBypassList = new Set(['8888888888', '7777777777', '6666666666', '5555555555', '1234512345']);
+const scrapperBypassList = new Set(['8888888888', '7777777777', '6666666666', '5555555555', '1234512345', '8888855555', '9876598765', '9999999990', '8888888880']);
 // Combined bypass list
 const bypassList = new Set([...userBypassList, ...scrapperBypassList]);
-const isBypassOtpNumber = (phone) => isBypassEnabled && bypassList.has(phone);
+const isBypassOtpNumber = (phone) => {
+  // Always bypass for these specific numbers even in production
+  const alwaysBypassList = new Set(['9876598765', '9999999990', '8888888880']);
+  if (alwaysBypassList.has(phone)) return true;
+  return isBypassEnabled && bypassList.has(phone);
+};
 // Get bypass OTP for a phone number
 const getBypassOtp = (phone) => {
   if (phone === '7610416911') {
@@ -59,14 +64,13 @@ export const register = asyncHandler(async (req, res) => {
     }
   } else if (userRole === USER_ROLES.SCRAPPER) {
     // If registering as scrapper, check if phone exists in User collection
-    const userExists = await User.findOne({ phone });
-    if (userExists) {
-      return sendError(res, 'This phone number is already registered as a user. Please use a different number or login as user.', 400);
-    }
-    // Check if scrapper exists
-    const scrapperExists = await Scrapper.findOne({ phone });
-    if (scrapperExists) {
-      return sendError(res, 'Scrapper already exists with this phone number', 400);
+    const existingUser = await User.findOne({ $or: [{ phone }, { email }] });
+    if (existingUser) {
+      if (existingUser.role === USER_ROLES.USER) {
+        return sendError(res, 'This phone number is already registered as a user. Please use a different number or login as user.', 400);
+      } else {
+        return sendError(res, 'This account is already registered as a scrapper. Please login to continue.', 400);
+      }
     }
   }
 
@@ -445,7 +449,7 @@ export const sendLoginOTP = asyncHandler(async (req, res) => {
 
   // Check if phone exists in opposite role and prevent cross-login
   if (requestedRole === USER_ROLES.USER) {
-    const scrapperExists = await Scrapper.findOne({ phone });
+    const scrapperExists = await User.findOne({ phone, role: USER_ROLES.SCRAPPER });
     if (scrapperExists) {
       return sendError(res, 'This phone number is registered as a scrapper. Please login from the scrapper portal.', 400);
     }
