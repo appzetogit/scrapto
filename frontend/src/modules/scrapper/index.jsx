@@ -42,6 +42,7 @@ const getKYCStatus = () => {
   if (kycStatus === 'verified') return 'verified';
   if (kycStatus === 'pending') return 'pending';
   if (kycStatus === 'rejected') return 'rejected';
+  if (kycStatus === 'not_submitted') return 'not_submitted';
   return 'not_submitted';
 };
 
@@ -294,7 +295,7 @@ const ScrapperModule = () => {
           ) : kycStatus === 'pending' ? (
             <Navigate to="/scrapper/kyc-status" replace />
           ) : kycStatus === 'verified' ? (
-            <Navigate to="/scrapper" replace />
+            <Navigate to="/scrapper/dashboard" replace />
           ) : (
             <Navigate to="/scrapper/kyc" replace />
           )

@@ -352,9 +352,6 @@ const ScrapperDashboard = () => {
           localStorage.setItem('scrapperMarketPriceSubscriptionStatus', 'inactive');
         }
 
-        // Redirect based on REAL backend data
-        const backendKycStatus = kyc?.status || 'not_submitted';
-
         // If KYC not submitted or rejected, redirect to KYC page
         if (!kyc || backendKycStatus === 'rejected' || backendKycStatus === 'not_submitted') {
           navigate('/scrapper/kyc', { replace: true });
@@ -367,21 +364,11 @@ const ScrapperDashboard = () => {
           return;
         }
 
-        // If KYC is verified, allow dashboard to render
-        // Subscription check is now moved to operational actions (going online/accepting orders)
+        // If verified, proceed with dashboard loading
         if (backendKycStatus === 'verified') {
-          // No longer redirecting to subscription page automatically
+           migrateOldActiveRequest();
+           loadDashboardData();
         }
-
-        // If KYC not verified, redirect to status page
-        if (backendKycStatus !== 'verified') {
-          navigate('/scrapper/kyc-status', { replace: true });
-          return;
-        }
-
-        // If all checks pass (KYC verified + Platform Subscription active), allow dashboard to render
-        migrateOldActiveRequest();
-        loadDashboardData();
       } catch (error) {
         console.error('Error fetching KYC/Subscription status:', error);
         // On error, check localStorage as fallback

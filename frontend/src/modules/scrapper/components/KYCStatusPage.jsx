@@ -327,6 +327,17 @@ const KYCStatusPage = () => {
                 </p>
               </div>
             )}
+
+            {kycStatus === 'not_submitted' && (
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => navigate('/scrapper/kyc')}
+                className="w-full py-3 md:py-4 rounded-xl font-bold text-base md:text-lg shadow-lg hover:shadow-xl transition-all duration-300 bg-emerald-600 text-white hover:bg-emerald-700"
+              >
+                {getTranslatedText("Complete KYC")}
+              </motion.button>
+            )}
           </div>
         </motion.div>
 
