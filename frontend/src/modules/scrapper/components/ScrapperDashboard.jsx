@@ -565,12 +565,75 @@ const ScrapperDashboard = () => {
           </motion.button>
         </motion.div>
 
-        {/* Live Market Prices */}
-        {subscriptionData?.isMarketActive && (
-          <div className="mt-4 relative">
-            <PriceTicker />
+        {/* Platform Subscription Status Card */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.12 }}
+          onClick={() => navigate('/scrapper/subscription?type=general')}
+          className={`mt-4 rounded-2xl shadow-md p-4 md:p-5 border cursor-pointer relative overflow-hidden group transition-all duration-300 ${
+            subscriptionData?.isPlatformActive 
+            ? 'bg-white border-emerald-100 hover:border-emerald-200 shadow-sm' 
+            : 'bg-red-50 border-red-100 hover:border-red-200'
+          }`}
+        >
+          <div className="flex items-center justify-between gap-3 relative z-10">
+            <div className="flex items-center gap-3">
+              <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                subscriptionData?.isPlatformActive ? 'bg-emerald-100' : 'bg-red-100'
+              }`}>
+                <FaGift className={subscriptionData?.isPlatformActive ? 'text-emerald-600' : 'text-red-600'} />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-[10px] md:text-xs font-bold uppercase tracking-wider mb-0.5" 
+                   style={{ color: subscriptionData?.isPlatformActive ? '#059669' : '#dc2626' }}>
+                  {subscriptionData?.isPlatformActive ? getTranslatedText('Subscription Active') : getTranslatedText('Subscription Expired')}
+                </p>
+                <h3 className="text-sm md:text-base font-bold text-slate-800">
+                  {subscriptionData?.isPlatformActive 
+                    ? getTranslatedText('Access to all pickup requests')
+                    : getTranslatedText('Renew to receive requests')}
+                </h3>
+                {subscriptionData?.isPlatformActive && subscriptionData?.platform?.expiryDate && (
+                  <p className="text-[11px] text-slate-500 mt-0.5">
+                    {getTranslatedText('Valid until {date}', { date: new Date(subscriptionData.platform.expiryDate).toLocaleDateString() })}
+                  </p>
+                )}
+              </div>
+            </div>
+            <div className="flex flex-col items-end gap-2 flex-shrink-0">
+              {!subscriptionData?.isPlatformActive && (
+                <button
+                  type="button"
+                  className="px-4 py-1.5 rounded-full text-xs font-bold bg-red-600 text-white shadow-sm hover:bg-red-700 transition-colors"
+                >
+                  {getTranslatedText("Renew Now")}
+                </button>
+              )}
+              {subscriptionData?.isPlatformActive && (
+                <div className="flex items-center gap-1 text-emerald-600">
+                  <FaCheck className="text-xs" />
+                  <span className="text-xs font-bold">{getTranslatedText('Active')}</span>
+                </div>
+              )}
+            </div>
           </div>
-        )}
+          
+          {/* Decorative background element */}
+          <div className={`absolute top-0 right-0 w-24 h-full opacity-10 pointer-events-none ${
+            subscriptionData?.isPlatformActive ? 'bg-emerald-500' : 'bg-red-500'
+          }`} 
+          style={{ clipPath: 'polygon(100% 0, 0 0, 100% 100%)' }}></div>
+        </motion.div>
+
+        {/* Live Market Prices */}
+        <div className="mt-4">
+          {subscriptionData?.isMarketActive && (
+            <div className="relative">
+              <PriceTicker />
+            </div>
+          )}
+        </div>
 
         {/* Ad Banners */}
         <div className="mt-4">
