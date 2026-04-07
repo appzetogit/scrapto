@@ -261,54 +261,41 @@ const ScrapperDashboard = () => {
   // Verify authentication and fetch KYC/Subscription status from backend
   useEffect(() => {
     const verifyAndFetchStatus = async () => {
-      // Check if user is authenticated as scrapper
+      // Check if user is authenticated as scrapper locally
       const token = getAuthToken('scrapper');
       const scrapperAuth = localStorage.getItem('scrapperAuthenticated');
       const scrapperUser = localStorage.getItem('scrapperUser');
 
       if (!token || scrapperAuth !== 'true' || !scrapperUser) {
-        navigate('/scrapper/login', { replace: true });
+        // ScrapperModule handles the redirect to login
+        setIsLoadingStatus(false);
         return;
       }
 
-      // Verify token with backend
+      // Verify token/role with backend
       try {
         const { authAPI } = await import('../../shared/utils/api');
         const response = await authAPI.getMe();
 
-        if (!response.success || !response.data?.user) {
-          // Token invalid
-          navigate('/scrapper/login', { replace: true });
-          return;
-        }
+        if (response.success && response.data?.user) {
+          const userData = response.data.user;
 
-        const userData = response.data.user;
+          // Check if user has scrapper role
+          if (userData.role !== 'scrapper') {
+            console.warn('ScrapperDashboard: User does not have scrapper role:', userData.role);
+            // Don't navigate here, ScrapperModule will handle the mismatch
+            setIsLoadingStatus(false);
+            return;
+          }
 
-        // Check if user has scrapper role
-        if (userData.role !== 'scrapper') {
-          console.warn('User does not have scrapper role:', userData.role);
-          navigate('/scrapper/login', { replace: true });
-          return;
-        }
-
-        // Update scrapper-specific localStorage
-        localStorage.setItem('scrapperAuthenticated', 'true');
-        localStorage.setItem('scrapperUser', JSON.stringify(userData));
-
-        // Check if scrapper is blocked
-        const scrapperStatus = localStorage.getItem('scrapperStatus') || 'active';
-        if (scrapperStatus === 'blocked') {
-          navigate('/scrapper/login', { replace: true });
-          return;
+          // Update scrapper-specific localStorage
+          localStorage.setItem('scrapperAuthenticated', 'true');
+          localStorage.setItem('scrapperUser', JSON.stringify(userData));
         }
       } catch (error) {
-        console.error('Auth verification failed:', error);
-        // On 401, redirect to login
-        if (error.status === 401) {
-          navigate('/scrapper/login', { replace: true });
-          return;
-        }
-        // For other errors, continue with localStorage check
+        console.error('ScrapperDashboard: Auth verification failed:', error);
+        // On error, we'll continue with KYC/Sub checks if we have local data, 
+        // or let it fail naturally.
       }
 
       // Fetch KYC and Subscription status from backend

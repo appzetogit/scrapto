@@ -70,7 +70,7 @@ const ScrapperModule = () => {
   const [isVerifying, setIsVerifying] = useState(true);
   const [scrapperIsAuthenticated, setScrapperIsAuthenticated] = useState(false);
 
-  // Verify authentication - re-check when isAuthenticated or user changes
+  // Verify authentication - re-check when global isAuthenticated or user changes
   useEffect(() => {
     let isMounted = true;
     let timeoutId = null;
@@ -80,7 +80,7 @@ const ScrapperModule = () => {
       const scrapperAuth = localStorage.getItem('scrapperAuthenticated');
       const scrapperUser = localStorage.getItem('scrapperUser');
 
-      // If no token or scrapper flags, not authenticated
+      // 1. If no token OR no scrapper-specific login flags, they are not logged in as a scrapper
       if (!token || scrapperAuth !== 'true' || !scrapperUser) {
         if (isMounted) {
           setScrapperIsAuthenticated(false);
@@ -89,7 +89,7 @@ const ScrapperModule = () => {
         return;
       }
 
-      // If we already have authenticated user from context and it's a scrapper, use it
+      // 2. If we already have a scrapper user in global context, we're good
       if (isAuthenticated && user && user.role === 'scrapper') {
         if (isMounted) {
           setScrapperIsAuthenticated(true);
@@ -98,42 +98,23 @@ const ScrapperModule = () => {
         return;
       }
 
-      setIsVerifying(true);
-
+      // 3. Otherwise, we have scrapper flags but global context might be missing or wrong.
+      // We need to verify the token with the backend.
       try {
-        // Verify token with backend
         const response = await authAPI.getMe();
-
         if (!isMounted) return;
 
         if (response.success && response.data?.user) {
           const userData = response.data.user;
 
-          // Check if user has scrapper role
           if (userData.role === 'scrapper') {
-            // Update auth context if needed
-            if (!isAuthenticated || !user) {
+            // Update global context if it's missing or role is different
+            if (!isAuthenticated || !user || user.role !== 'scrapper') {
               login(userData, token);
             }
-
-            // Update scrapper-specific localStorage
-            localStorage.setItem('scrapperAuthenticated', 'true');
-            localStorage.setItem('scrapperToken', token || '');
-            localStorage.setItem('scrapperUser', JSON.stringify(userData));
-
-            // Check if scrapper is blocked
-            const scrapperStatus = localStorage.getItem('scrapperStatus') || 'active';
-            if (scrapperStatus === 'blocked') {
-              setScrapperIsAuthenticated(false);
-              // Only call logout if we are purely in scrapper mode
-              localStorage.removeItem('scrapperAuthenticated');
-              localStorage.removeItem('scrapperUser');
-              localStorage.removeItem('scrapperToken');
-            } else {
-              setScrapperIsAuthenticated(true);
-            }
+            setScrapperIsAuthenticated(true);
           } else {
-            // User doesn't have scrapper role - Just show them login without clearing their user session
+            // User exists but is NOT a scrapper - Clear scrapper session
             console.warn('User does not have scrapper role:', userData.role);
             setScrapperIsAuthenticated(false);
             localStorage.removeItem('scrapperAuthenticated');
@@ -149,27 +130,13 @@ const ScrapperModule = () => {
         }
       } catch (error) {
         if (!isMounted) return;
-
         console.error('Auth verification failed:', error);
-        // On 401, clear scrapper session but don't force global logout if we're not sure
-        if (error.status === 401) {
-          setScrapperIsAuthenticated(false);
-          // If the token itself is invalid, AuthContext will handle the global logout.
-          // Here we just clear the scrapper flags.
-          localStorage.removeItem('scrapperAuthenticated');
-          localStorage.removeItem('scrapperToken');
-          localStorage.removeItem('scrapperUser');
-        } else {
-          // For other errors, check localStorage as fallback
-          const scrapperAuth = localStorage.getItem('scrapperAuthenticated');
-          const scrapperUser = localStorage.getItem('scrapperUser');
-          const scrapperStatus = localStorage.getItem('scrapperStatus') || 'active';
-          setScrapperIsAuthenticated(
-            scrapperAuth === 'true' &&
-            scrapperUser !== null &&
-            scrapperStatus !== 'blocked'
-          );
-        }
+        
+        // On explicit auth error or role mismatch, clear session
+        setScrapperIsAuthenticated(false);
+        localStorage.removeItem('scrapperAuthenticated');
+        localStorage.removeItem('scrapperToken');
+        localStorage.removeItem('scrapperUser');
       } finally {
         if (isMounted) {
           setIsVerifying(false);
@@ -177,16 +144,14 @@ const ScrapperModule = () => {
       }
     };
 
-    // Add a small delay to allow login to complete
-    timeoutId = setTimeout(() => {
-      verifyScrapperAuth();
-    }, 100);
+    // Run verification
+    verifyScrapperAuth();
 
     return () => {
       isMounted = false;
       if (timeoutId) clearTimeout(timeoutId);
     };
-  }, [isAuthenticated, user, login, logout]); // Re-check when auth state changes
+  }, [isAuthenticated, user]); 
 
   // Show loading while verifying (but allow navigation if we have token and user)
   const hasToken = !!getAuthToken('scrapper');
@@ -196,23 +161,22 @@ const ScrapperModule = () => {
   // A "soft" authenticated check that allows for context initialization delay
   const isTransitioning = !scrapperIsAuthenticated && hasScrapperSession;
 
-  const kycStatus = (scrapperIsAuthenticated || isTransitioning) ? getKYCStatus() : 'not_submitted';
-  const subscriptionStatus = (scrapperIsAuthenticated || isTransitioning) && kycStatus === 'verified' ? getSubscriptionStatus() : 'not_subscribed';
+  const kycStatus = scrapperIsAuthenticated ? getKYCStatus() : 'not_submitted';
+  const subscriptionStatus = scrapperIsAuthenticated && kycStatus === 'verified' ? getSubscriptionStatus() : 'not_subscribed';
 
-  if (isVerifying && !hasToken && !hasScrapperAuth) {
+  if (isVerifying) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-[#dcfce7]">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Verifying authentication...</p>
+          <p className="mt-4 text-emerald-800 font-medium">Verifying scrapper session...</p>
         </div>
       </div>
     );
   }
 
   // If not authenticated as scrapper, show login / public routes
-  // But check if we're in the process of logging in (has token but not yet verified)
-  if (!scrapperIsAuthenticated && !isTransitioning) {
+  if (!scrapperIsAuthenticated) {
     return (
       <Routes>
         {/* Public routes (no scrapper auth required) */}
@@ -286,20 +250,12 @@ const ScrapperModule = () => {
         {/* Earnings Route */}
         <Route path="/earnings" element={<ScrapperEarningsPage />} />
 
-        {/* Redirect logic based on KYC status only - Subscription check is handled within Dashboard */}
-        <Route path="*" element={
-          kycStatus === 'not_submitted' ? (
-            <Navigate to="/scrapper/kyc" replace />
-          ) : kycStatus === 'rejected' ? (
-            <Navigate to="/scrapper/kyc" replace />
-          ) : kycStatus === 'pending' ? (
-            <Navigate to="/scrapper/kyc-status" replace />
-          ) : kycStatus === 'verified' ? (
-            <Navigate to="/scrapper/dashboard" replace />
-          ) : (
-            <Navigate to="/scrapper/kyc" replace />
-          )
-        } />
+        {/* 
+            Strict catch-all: 
+            If we are here, we are verified as scrapper. 
+            Redirect anything else to dashboard.
+        */}
+        <Route path="*" element={<Navigate to="/scrapper/dashboard" replace />} />
       </Routes>
     </div>
   );

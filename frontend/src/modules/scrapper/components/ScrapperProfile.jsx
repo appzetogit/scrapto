@@ -491,11 +491,11 @@ const ScrapperProfile = () => {
                   {getTranslatedText("Subscription")}
                 </p>
                 <p className="text-[11px] md:text-xs text-slate-500">
-                  {platformSubscription 
+                  {platformSubscription
                     ? getTranslatedText("{planName} • ₹{price}/month", { planName: platformSubscription.planName, price: platformSubscription.price })
-                    : (marketSubscription 
-                        ? getTranslatedText("{planName} • ₹{price}/month", { planName: marketSubscription.planName, price: marketSubscription.price })
-                        : getTranslatedText('No active subscription'))
+                    : (marketSubscription
+                      ? getTranslatedText("{planName} • ₹{price}/month", { planName: marketSubscription.planName, price: marketSubscription.price })
+                      : getTranslatedText('No active subscription'))
                   }
                   {platformSubscription && marketSubscription && marketSubscription.status === 'active' && ` & ${getTranslatedText("Market Prices")}`}
                 </p>
@@ -599,27 +599,25 @@ const ScrapperProfile = () => {
               </span>
             </button>
 
-            {/* Test Notification Section */}
-            <div className="mt-4 pt-4 border-t border-slate-200">
-              <button
-                type="button"
-                onClick={handleTestNotification}
-                disabled={testLoading}
-                className="w-full flex items-center gap-4 px-4 py-3 text-left hover:bg-orange-50 transition-colors rounded-xl border-2 border-dashed border-orange-200 bg-orange-50/30"
-              >
-                <div className="w-10 h-10 rounded-full flex items-center justify-center bg-orange-100 text-orange-600 flex-shrink-0">
-                  <FaBell className={testLoading ? "animate-bounce" : ""} />
-                </div>
-                <div>
-                  <p className="text-sm font-bold text-orange-800">
-                    {testLoading ? "Sending Test..." : "Test Push Notification"}
-                  </p>
-                  <p className="text-[11px] text-orange-600/70">
-                    Verify if push notifications are working on this device
-                  </p>
-                </div>
-              </button>
-            </div>
+            <button
+              type="button"
+              onClick={handleTestNotification}
+              disabled={testLoading}
+              className="w-full flex items-center justify-between px-3 md:px-4 py-3 md:py-3.5 text-left hover:bg-orange-50 transition-colors rounded-b-2xl"
+              style={{ backgroundColor: 'rgba(245, 158, 11, 0.05)' }}
+            >
+              <div>
+                <p className="text-xs md:text-sm font-semibold text-orange-700">
+                  {testLoading ? "Sending Test..." : "Test Push Notification"}
+                </p>
+                <p className="text-[11px] md:text-xs text-orange-600/70">
+                  Verify if your push notifications are working
+                </p>
+              </div>
+              <span className="text-sm text-orange-400">
+                🔔
+              </span>
+            </button>
           </div>
         </div>
       </div>

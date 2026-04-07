@@ -378,13 +378,13 @@ const MyProfilePage = () => {
       color: "#10b981"
     },
     {
-        icon: <FaBell />,
-        title: testLoading ? "Sending..." : "Test Push",
-        desc: "Send a test notification",
-        action: handleTestNotification,
-        color: "#f59e0b",
-        isTest: true
-      }
+      icon: <FaBell />,
+      title: testLoading ? "Sending..." : "Test Push",
+      desc: "Send a test notification",
+      action: handleTestNotification,
+      color: "#f59e0b",
+      isTest: true
+    }
   ];
 
   return (
@@ -715,7 +715,7 @@ const MyProfilePage = () => {
                   {getTranslatedText("Quick Actions")}
                 </h3>
                 <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
-                  {quickActions.filter(a => !a.isTest).map((action, index) => (
+                  {quickActions.map((action, index) => (
                     <motion.button
                       key={index}
                       initial={{ opacity: 0, scale: 0.9 }}
@@ -730,9 +730,9 @@ const MyProfilePage = () => {
                     >
                       <div
                         className="w-10 h-10 rounded-full flex items-center justify-center text-xl"
-                        style={{ 
-                            backgroundColor: "#ecfdf5", 
-                            color: "#10b981" 
+                        style={{
+                          backgroundColor: action.isTest ? "rgba(245, 158, 11, 0.1)" : "#ecfdf5",
+                          color: action.isTest ? "#f59e0b" : "#10b981"
                         }}
                       >
                         {action.icon}
@@ -744,31 +744,6 @@ const MyProfilePage = () => {
                     </motion.button>
                   ))}
                 </div>
-
-                {/* Separate Section for Test Push Notification */}
-                {quickActions.filter(a => a.isTest).map((action, index) => (
-                    <motion.button
-                      key="test-push"
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      onClick={action.action}
-                      disabled={testLoading}
-                      className="w-full mt-4 p-4 rounded-xl border-2 border-dashed flex items-center gap-4 transition-all hover:bg-orange-50"
-                      style={{ 
-                          backgroundColor: "rgba(245, 158, 11, 0.05)", 
-                          borderColor: "rgba(245, 158, 11, 0.2)",
-                          color: "#f59e0b"
-                      }}
-                    >
-                      <div className="w-12 h-12 rounded-full bg-orange-100 flex items-center justify-center text-2xl flex-shrink-0">
-                        <FaBell className={testLoading ? "animate-bounce" : ""} />
-                      </div>
-                      <div className="text-left">
-                        <p className="text-sm font-bold text-orange-700">{action.title}</p>
-                        <p className="text-xs text-orange-600/70">{action.desc}</p>
-                      </div>
-                    </motion.button>
-                ))}
               </div>
             </motion.div>
           )}

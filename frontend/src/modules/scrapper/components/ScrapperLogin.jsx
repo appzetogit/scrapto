@@ -137,6 +137,14 @@ const ScrapperLogin = () => {
 
   // Check for referral code in URL
   useEffect(() => {
+    // If already logged in as a normal user, don't auto-redirect to dashboard 
+    // because that causes a loop in ScrapperModule. 
+    // Only redirect if specifically authenticated as a scrapper.
+    if (isAuthenticated && user?.role === 'scrapper') {
+      navigate('/scrapper/dashboard', { replace: true });
+      return;
+    }
+
     const refCode = searchParams.get('ref');
     if (refCode) {
       setReferralCode(refCode.toUpperCase());
@@ -144,7 +152,7 @@ const ScrapperLogin = () => {
       validateReferralCodeInput(refCode.toUpperCase());
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchParams]);
+  }, [searchParams, isAuthenticated, user, navigate]);
 
   // Helper function to check KYC status
   const getKYCStatus = () => {

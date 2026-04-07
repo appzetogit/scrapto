@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import { authAPI } from '../utils/api';
 import { registerFCMToken } from '../../../services/pushNotificationService';
 
@@ -69,7 +69,7 @@ export const AuthProvider = ({ children }) => {
     verifyToken();
   }, [logout]);
 
-  const login = async (userData, token = null) => {
+  const login = useCallback(async (userData, token = null) => {
     setIsAuthenticated(true);
     setUser(userData);
     localStorage.setItem('isAuthenticated', 'true');
@@ -97,10 +97,18 @@ export const AuthProvider = ({ children }) => {
     } else {
       console.warn('⚠️ No token provided to login function');
     }
-  };
+  }, []);
+
+  const value = useMemo(() => ({
+    isAuthenticated,
+    user,
+    login,
+    logout,
+    loading
+  }), [isAuthenticated, user, login, logout, loading]);
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, user, login, logout, loading }}>
+    <AuthContext.Provider value={value}>
       {children}
     </AuthContext.Provider>
   );

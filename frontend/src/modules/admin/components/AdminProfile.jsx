@@ -1,8 +1,8 @@
 import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
 import { useAdminAuth } from '../../shared/context/AdminAuthContext';
-import { apiRequest } from '../../shared/utils/api';
 import { usePageTranslation } from '../../../hooks/usePageTranslation';
+import { apiRequest } from '../../shared/utils/api';
 import {
   FaUser,
   FaEnvelope,
@@ -23,13 +23,14 @@ const AdminProfile = () => {
   const { admin, login } = useAdminAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [isChangingPassword, setIsChangingPassword] = useState(false);
+  const [testLoading, setTestLoading] = useState(false);
   const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    role: '',
-    department: '',
-    bio: ''
+    name: admin?.name || '',
+    email: admin?.email || '',
+    phone: admin?.phone || '',
+    role: admin?.role || '',
+    department: admin?.department || '',
+    bio: admin?.bio || ''
   });
   const [passwordData, setPasswordData] = useState({
     currentPassword: '',
@@ -94,6 +95,37 @@ const AdminProfile = () => {
     }
   }, [admin]);
 
+  const handleTestNotification = async () => {
+    const token = localStorage.getItem('fcm_token_web');
+    if (!token) {
+      alert('FCM Token not found. Please ensure notifications are enabled.');
+      return;
+    }
+
+    setTestLoading(true);
+    try {
+      const response = await apiRequest('/fcm-tokens/test-notification', {
+        method: 'POST',
+        body: JSON.stringify({
+          token: token,
+          title: 'Admin Test Notification 🔔',
+          body: 'This is a test notification from Admin Profile!'
+        })
+      });
+
+      if (response.success) {
+        alert('Test notification sent successfully!');
+      } else {
+        alert('Failed to send test notification: ' + (response.error || 'Unknown error'));
+      }
+    } catch (error) {
+      console.error('Test notification error:', error);
+      alert('Error: ' + error.message);
+    } finally {
+      setTestLoading(false);
+    }
+  };
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({
@@ -145,39 +177,6 @@ const AdminProfile = () => {
       ...prev,
       [type]: !prev[type]
     }));
-  };
-
-  const [testLoading, setTestLoading] = useState(false);
-
-  const handleTestNotification = async () => {
-    const token = localStorage.getItem('fcm_token_web');
-    if (!token) {
-      alert('FCM Token not found. Please ensure notifications are enabled.');
-      return;
-    }
-
-    setTestLoading(true);
-    try {
-      const response = await apiRequest('/fcm-tokens/test-notification', {
-        method: 'POST',
-        body: JSON.stringify({
-          token: token,
-          title: 'Admin Test Notification 🔔',
-          body: 'This is a test notification for Admin!'
-        })
-      });
-
-      if (response.success) {
-        alert('Test notification sent successfully!');
-      } else {
-        alert('Failed to send test notification: ' + (response.error || 'Unknown error'));
-      }
-    } catch (error) {
-      console.error('Test notification error:', error);
-      alert('Error: ' + error.message);
-    } finally {
-      setTestLoading(false);
-    }
   };
 
   if (!admin) {
@@ -577,7 +576,7 @@ const AdminProfile = () => {
               <FaBell className="inline mr-2" />
               {getTranslatedText("Notifications")}
             </h2>
-            <div className="space-y-3">
+            <div className="space-y-4">
               {Object.entries(notifications).map(([key, value]) => (
                 <div key={key} className="flex items-center justify-between">
                   <span className="text-sm font-medium" style={{ color: '#2d3748' }}>
@@ -585,8 +584,7 @@ const AdminProfile = () => {
                   </span>
                   <button
                     onClick={() => handleNotificationToggle(key)}
-                    className={`w-12 h-6 rounded-full transition-all relative ${value ? '' : ''
-                      }`}
+                    className={'w-12 h-6 rounded-full transition-all relative'}
                     style={{
                       backgroundColor: value ? '#64946e' : '#cbd5e0'
                     }}
@@ -598,6 +596,28 @@ const AdminProfile = () => {
                   </button>
                 </div>
               ))}
+
+              {/* Test Push Notification Button */}
+              <div className="pt-4 border-t border-slate-100">
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={handleTestNotification}
+                  disabled={testLoading}
+                  className="w-full py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-all shadow-sm"
+                  style={{
+                    backgroundColor: testLoading ? '#fef3c7' : '#fffbeb',
+                    color: '#d97706',
+                    border: '1px solid #fde68a'
+                  }}
+                >
+                  <FaBell className={testLoading ? "animate-bounce" : ""} />
+                  {testLoading ? "Sending Test..." : "Test Push Notification"}
+                </motion.button>
+                <p className="text-[10px] text-center mt-2" style={{ color: '#94a3b8' }}>
+                  Verify if your push notifications are working
+                </p>
+              </div>
             </div>
           </motion.div>
 
@@ -656,22 +676,6 @@ const AdminProfile = () => {
                   {new Date().toLocaleString()}
                 </p>
               </div>
-
-              {/* Test Notification Button */}
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={handleTestNotification}
-                disabled={testLoading}
-                className="w-full mt-4 p-3 rounded-xl border-2 border-dashed flex flex-col items-center justify-center gap-1 transition-all hover:border-orange-300 hover:bg-orange-50/50"
-                style={{ borderColor: '#fbd38d', color: '#dd6b20' }}
-              >
-                <div className="flex items-center gap-2 font-bold">
-                  <FaBell className={testLoading ? "animate-bounce" : ""} />
-                  <span>{testLoading ? "Sending..." : "Test Push Notification"}</span>
-                </div>
-                <p className="text-[10px] opacity-70">Verify if push notifications are working</p>
-              </motion.button>
             </div>
           </motion.div>
         </div>
@@ -681,4 +685,3 @@ const AdminProfile = () => {
 };
 
 export default AdminProfile;
-
