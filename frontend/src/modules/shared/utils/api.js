@@ -575,6 +575,15 @@ export const adminAPI = {
       body: JSON.stringify(data),
     });
   },
+  getSettings: async () => {
+    return apiRequest('/admin/settings', { method: 'GET' });
+  },
+  updateSetting: async (key, value) => {
+    return apiRequest(`/admin/settings/${key}`, {
+      method: 'PUT',
+      body: JSON.stringify({ value }),
+    });
+  },
   request: (endpoint, options) => apiRequest(endpoint, options),
 };
 

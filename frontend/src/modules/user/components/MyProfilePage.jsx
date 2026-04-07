@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../shared/context/AuthContext';
 import { walletService } from '../../shared/services/wallet.service';
-import { orderAPI } from '../../shared/utils/api';
+import { orderAPI, apiRequest } from '../../shared/utils/api';
 import { usePageTranslation } from "../../../hooks/usePageTranslation";
 import ReferAndEarn from './ReferAndEarn';
 import UserBottomNav from './UserBottomNav';
@@ -111,6 +111,7 @@ const MyProfilePage = () => {
   const [loadingActivity, setLoadingActivity] = useState(false);
   const [monthlyStats, setMonthlyStats] = useState([]);
   const [categoryStats, setCategoryStats] = useState([]);
+  const [testLoading, setTestLoading] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -283,6 +284,37 @@ const MyProfilePage = () => {
     }
   }, [user]);
 
+  const handleTestNotification = async () => {
+    const token = localStorage.getItem('fcm_token_web');
+    if (!token) {
+      alert('FCM Token not found. Please ensure notifications are enabled.');
+      return;
+    }
+
+    setTestLoading(true);
+    try {
+      const response = await apiRequest('/fcm-tokens/test-notification', {
+        method: 'POST',
+        body: JSON.stringify({
+          token: token,
+          title: 'Test Notification 🔔',
+          body: 'This is a test notification from your profile page!'
+        })
+      });
+
+      if (response.success) {
+        alert('Test notification sent successfully!');
+      } else {
+        alert('Failed to send test notification: ' + (response.error || 'Unknown error'));
+      }
+    } catch (error) {
+      console.error('Test notification error:', error);
+      alert('Error: ' + error.message);
+    } finally {
+      setTestLoading(false);
+    }
+  };
+
   const handleSave = () => {
     console.log('Saving profile:', formData);
     setIsEditMode(false);
@@ -344,7 +376,15 @@ const MyProfilePage = () => {
       desc: getTranslatedText("Read platform terms & conditions"),
       action: () => navigate("/terms"),
       color: "#10b981"
-    }
+    },
+    {
+        icon: <FaBell />,
+        title: testLoading ? "Sending..." : "Test Push",
+        desc: "Send a test notification",
+        action: handleTestNotification,
+        color: "#f59e0b",
+        isTest: true
+      }
   ];
 
   return (
@@ -675,7 +715,7 @@ const MyProfilePage = () => {
                   {getTranslatedText("Quick Actions")}
                 </h3>
                 <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
-                  {quickActions.map((action, index) => (
+                  {quickActions.filter(a => !a.isTest).map((action, index) => (
                     <motion.button
                       key={index}
                       initial={{ opacity: 0, scale: 0.9 }}
@@ -690,7 +730,10 @@ const MyProfilePage = () => {
                     >
                       <div
                         className="w-10 h-10 rounded-full flex items-center justify-center text-xl"
-                        style={{ backgroundColor: "#ecfdf5", color: "#10b981" }}
+                        style={{ 
+                            backgroundColor: "#ecfdf5", 
+                            color: "#10b981" 
+                        }}
                       >
                         {action.icon}
                       </div>
@@ -701,6 +744,31 @@ const MyProfilePage = () => {
                     </motion.button>
                   ))}
                 </div>
+
+                {/* Separate Section for Test Push Notification */}
+                {quickActions.filter(a => a.isTest).map((action, index) => (
+                    <motion.button
+                      key="test-push"
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      onClick={action.action}
+                      disabled={testLoading}
+                      className="w-full mt-4 p-4 rounded-xl border-2 border-dashed flex items-center gap-4 transition-all hover:bg-orange-50"
+                      style={{ 
+                          backgroundColor: "rgba(245, 158, 11, 0.05)", 
+                          borderColor: "rgba(245, 158, 11, 0.2)",
+                          color: "#f59e0b"
+                      }}
+                    >
+                      <div className="w-12 h-12 rounded-full bg-orange-100 flex items-center justify-center text-2xl flex-shrink-0">
+                        <FaBell className={testLoading ? "animate-bounce" : ""} />
+                      </div>
+                      <div className="text-left">
+                        <p className="text-sm font-bold text-orange-700">{action.title}</p>
+                        <p className="text-xs text-orange-600/70">{action.desc}</p>
+                      </div>
+                    </motion.button>
+                ))}
               </div>
             </motion.div>
           )}

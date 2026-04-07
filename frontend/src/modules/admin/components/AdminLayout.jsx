@@ -51,7 +51,8 @@ const AdminLayout = () => {
     "Admin Panel",
     "Scraptox",
     "Logout",
-    "Administrator"
+    "Administrator",
+    "System Settings"
   ];
   const { getTranslatedText } = usePageTranslation(staticTexts);
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -101,7 +102,8 @@ const AdminLayout = () => {
     { icon: FaGift, label: getTranslatedText('Coupons'), path: '/admin/coupons' },
     { icon: FaChartBar, label: getTranslatedText('Reports'), path: '/admin/reports' },
     { icon: FaBullhorn, label: getTranslatedText('Ad Banners'), path: '/admin/banners' },
-    { icon: FaCog, label: getTranslatedText('Help & Support'), path: '/admin/help-support' }
+    { icon: FaCog, label: getTranslatedText('Help & Support'), path: '/admin/help-support' },
+    { icon: FaCog, label: getTranslatedText('System Settings'), path: '/admin/settings' }
   ];
 
   const isActive = (item) => {

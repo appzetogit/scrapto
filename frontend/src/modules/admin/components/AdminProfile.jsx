@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
 import { useAdminAuth } from '../../shared/context/AdminAuthContext';
+import { apiRequest } from '../../shared/utils/api';
 import { usePageTranslation } from '../../../hooks/usePageTranslation';
 import {
   FaUser,
@@ -144,6 +145,39 @@ const AdminProfile = () => {
       ...prev,
       [type]: !prev[type]
     }));
+  };
+
+  const [testLoading, setTestLoading] = useState(false);
+
+  const handleTestNotification = async () => {
+    const token = localStorage.getItem('fcm_token_web');
+    if (!token) {
+      alert('FCM Token not found. Please ensure notifications are enabled.');
+      return;
+    }
+
+    setTestLoading(true);
+    try {
+      const response = await apiRequest('/fcm-tokens/test-notification', {
+        method: 'POST',
+        body: JSON.stringify({
+          token: token,
+          title: 'Admin Test Notification 🔔',
+          body: 'This is a test notification for Admin!'
+        })
+      });
+
+      if (response.success) {
+        alert('Test notification sent successfully!');
+      } else {
+        alert('Failed to send test notification: ' + (response.error || 'Unknown error'));
+      }
+    } catch (error) {
+      console.error('Test notification error:', error);
+      alert('Error: ' + error.message);
+    } finally {
+      setTestLoading(false);
+    }
   };
 
   if (!admin) {
@@ -622,6 +656,22 @@ const AdminProfile = () => {
                   {new Date().toLocaleString()}
                 </p>
               </div>
+
+              {/* Test Notification Button */}
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={handleTestNotification}
+                disabled={testLoading}
+                className="w-full mt-4 p-3 rounded-xl border-2 border-dashed flex flex-col items-center justify-center gap-1 transition-all hover:border-orange-300 hover:bg-orange-50/50"
+                style={{ borderColor: '#fbd38d', color: '#dd6b20' }}
+              >
+                <div className="flex items-center gap-2 font-bold">
+                  <FaBell className={testLoading ? "animate-bounce" : ""} />
+                  <span>{testLoading ? "Sending..." : "Test Push Notification"}</span>
+                </div>
+                <p className="text-[10px] opacity-70">Verify if push notifications are working</p>
+              </motion.button>
             </div>
           </motion.div>
         </div>

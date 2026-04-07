@@ -5,8 +5,10 @@ import {
   markNotificationAsRead, 
   getUnreadNotificationCount 
 } from '../utils/referralUtils';
+import notificationService from '../../../services/notificationService';
+import { socket } from '../utils/socketClient';
 import { useAuth } from '../context/AuthContext';
-import { FaBell, FaTimes } from 'react-icons/fa';
+import { FaBell, FaTimes, FaCircle } from 'react-icons/fa';
 
 const NotificationBell = ({ userType = 'user' }) => {
   const { user } = useAuth();
@@ -16,45 +18,79 @@ const NotificationBell = ({ userType = 'user' }) => {
 
   useEffect(() => {
     if (user) {
-      const userId = user.phone || user.id;
-      const scrapperUser = JSON.parse(localStorage.getItem('scrapperUser') || '{}');
-      const actualUserId = userType === 'scrapper' 
-        ? (scrapperUser.phone || scrapperUser.id || userId)
-        : userId;
+      loadNotifications();
       
-      loadNotifications(actualUserId);
+      // Listen for socket events for real-time updates
+      socket.on('new_notification', (data) => {
+        setNotifications(prev => [
+            { 
+                id: `realtime_${Date.now()}`, 
+                title: data.title, 
+                message: data.message, 
+                createdAt: data.createdAt || new Date().toISOString(), 
+                read: false,
+                isRealtime: true
+            }, 
+            ...prev
+        ]);
+        setUnreadCount(prev => prev + 1);
+        
+        // Show browser notification too if enabled
+        if ('Notification' in window && Notification.permission === 'granted') {
+          new Notification(data.title, { body: data.message });
+        }
+      });
       
-      // Check for new notifications periodically
-      const interval = setInterval(() => {
-        loadNotifications(actualUserId);
-      }, 5000);
-      
-      return () => clearInterval(interval);
+      return () => {
+        socket.off('new_notification');
+      };
     }
-  }, [user, userType]);
+  }, [user]);
 
-  const loadNotifications = (userId) => {
-    if (!userId) return;
+  const loadNotifications = async () => {
+    if (!user) return;
     
-    const notifs = getNotifications(userId, userType);
-    setNotifications(notifs);
-    
-    const unread = getUnreadNotificationCount(userId, userType);
-    setUnreadCount(unread);
+    try {
+        const response = await notificationService.getAll(1, 10);
+        if (response.success) {
+            const mapped = (response.data.notifications || []).map(n => ({
+                ...n,
+                read: n.isRead,
+                id: n._id
+            }));
+            setNotifications(mapped);
+            setUnreadCount(response.data.unreadCount || 0);
+        }
+    } catch (error) {
+        // Fallback to referralUtils for local-only notifications if needed, 
+        // but prefer backend
+        console.error('Failed to load notifications:', error);
+    }
   };
 
-  const handleMarkAsRead = (notificationId) => {
-    markNotificationAsRead(notificationId, userType);
-    loadNotifications(user?.phone || user?.id);
+  const handleMarkAsRead = async (notificationId) => {
+    // Optimistic update
+    setNotifications(prev => prev.map(n => n.id === notificationId ? { ...n, read: true } : n));
+    setUnreadCount(prev => Math.max(0, prev - 1));
+    
+    try {
+        if (!String(notificationId).startsWith('realtime_')) {
+            await notificationService.markAsRead(notificationId);
+        }
+    } catch (e) {
+        console.error(e);
+    }
   };
 
-  const handleMarkAllAsRead = () => {
-    notifications.forEach(notif => {
-      if (!notif.read) {
-        markNotificationAsRead(notif.id, userType);
-      }
-    });
-    loadNotifications(user?.phone || user?.id);
+  const handleMarkAllAsRead = async () => {
+    setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+    setUnreadCount(0);
+    
+    try {
+        await notificationService.markAllAsRead();
+    } catch (e) {
+        console.error(e);
+    }
   };
 
   return (

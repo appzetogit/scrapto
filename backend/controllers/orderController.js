@@ -5,6 +5,7 @@ import User from '../models/User.js';
 import Scrapper from '../models/Scrapper.js';
 import Payment from '../models/Payment.js';
 import WalletTransaction from '../models/WalletTransaction.js';
+import SystemSetting from '../models/SystemSetting.js';
 import { ORDER_STATUS, PAYMENT_STATUS } from '../config/constants.js';
 import logger from '../utils/logger.js';
 import { notifyUser } from '../services/socketService.js';
@@ -491,9 +492,12 @@ export const updateOrderStatus = asyncHandler(async (req, res) => {
           logger.info(`[Wallet] Deducted ₹${orderAmount} from Scrapper ${scrapper._id} for Order Payment`);
         }
 
-        // 2. Deduct 1% Commission
-        // Reload scrapper to be safe or use current object? Using object is fine as we awaited save
-        const commissionAmount = Math.max(1, Math.round(orderAmount * 0.01));
+        // 2. Deduct Dynamic Commission
+        // Fetch commission rate from settings (default to 1% if not found)
+        const commissionSetting = await SystemSetting.findOne({ key: 'scrap_commission_percentage' });
+        const commissionRate = commissionSetting ? (Number(commissionSetting.value) / 100) : 0.01;
+        
+        const commissionAmount = Math.max(1, Math.round(orderAmount * commissionRate));
         const balanceBeforeComm = scrapper.wallet.balance;
 
         scrapper.wallet.balance -= commissionAmount;
@@ -509,7 +513,7 @@ export const updateOrderStatus = asyncHandler(async (req, res) => {
           balanceAfter: scrapper.wallet.balance,
           category: 'COMMISSION',
           status: 'SUCCESS',
-          description: `Platform Fee (1%) for Order #${order._id}`,
+          description: `Platform Fee (${commissionRate * 100}%) for Order #${order._id}`,
           orderId: order._id,
           gateway: { provider: 'SYSTEM' }
         });

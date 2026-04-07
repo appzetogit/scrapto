@@ -12,6 +12,7 @@ import logger from '../utils/logger.js';
 import mongoose from 'mongoose';
 import { createContact, createFundAccount, initiatePayout } from '../services/payoutService.js';
 import WithdrawalRequest from '../models/WithdrawalRequest.js';
+import SystemSetting from '../models/SystemSetting.js';
 
 // ============================================
 // DASHBOARD & ANALYTICS
@@ -1560,5 +1561,55 @@ export const updateWithdrawalStatus = asyncHandler(async (req, res) => {
     sendError(res, error.message, 500);
   } finally {
     session.endSession();
+  }
+});
+
+// @desc    Get all system settings
+// @route   GET /api/admin/settings
+// @access  Private (Admin)
+export const getSystemSettings = asyncHandler(async (req, res) => {
+  try {
+    const settings = await SystemSetting.find();
+    
+    // If no settings exist yet, create a default scrap commission
+    if (settings.length === 0) {
+      const defaultSetting = await SystemSetting.create({
+        key: 'scrap_commission_percentage',
+        value: 1,
+        description: 'Platform commission percentage for scrap sell orders',
+        updatedBy: req.user.id
+      });
+      return sendSuccess(res, 'System settings retrieved', [defaultSetting]);
+    }
+    
+    sendSuccess(res, 'System settings retrieved', settings);
+  } catch (error) {
+    logger.error('[Admin] Error fetching settings:', error);
+    sendError(res, 'Failed to fetch settings', 500);
+  }
+});
+
+// @desc    Update a specific system setting
+// @route   PUT /api/admin/settings/:key
+// @access  Private (Admin)
+export const updateSystemSetting = asyncHandler(async (req, res) => {
+  try {
+    const { key } = req.params;
+    const { value } = req.body;
+
+    if (value === undefined) {
+      return sendError(res, 'Value is required', 400);
+    }
+
+    const setting = await SystemSetting.findOneAndUpdate(
+      { key },
+      { value, updatedBy: req.user.id },
+      { new: true, upsert: true }
+    );
+
+    sendSuccess(res, 'Setting updated successfully', setting);
+  } catch (error) {
+    logger.error('[Admin] Error updating setting:', error);
+    sendError(res, 'Failed to update setting', 500);
   }
 });

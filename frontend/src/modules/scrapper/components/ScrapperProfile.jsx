@@ -2,7 +2,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../shared/context/AuthContext';
-import { kycAPI, subscriptionAPI, reviewAPI, scrapperProfileAPI } from '../../shared/utils/api';
+import { kycAPI, subscriptionAPI, reviewAPI, scrapperProfileAPI, apiRequest } from '../../shared/utils/api';
 import RatingDisplay from '../../shared/components/RatingDisplay';
 import { usePageTranslation } from '../../../hooks/usePageTranslation';
 import EditProfileModal from './EditProfileModal';
@@ -61,6 +61,38 @@ const ScrapperProfile = () => {
   const [rating, setRating] = useState({ average: 0, count: 0, breakdown: null });
   const [showKycInfo, setShowKycInfo] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [testLoading, setTestLoading] = useState(false);
+
+  const handleTestNotification = async () => {
+    const token = localStorage.getItem('fcm_token_web');
+    if (!token) {
+      alert('FCM Token not found. Please ensure notifications are enabled.');
+      return;
+    }
+
+    setTestLoading(true);
+    try {
+      const response = await apiRequest('/fcm-tokens/test-notification', {
+        method: 'POST',
+        body: JSON.stringify({
+          token: token,
+          title: 'Scrapper Test Notification 🔔',
+          body: 'This is a test notification for scrapper!'
+        })
+      });
+
+      if (response.success) {
+        alert('Test notification sent successfully!');
+      } else {
+        alert('Failed to send test notification: ' + (response.error || 'Unknown error'));
+      }
+    } catch (error) {
+      console.error('Test notification error:', error);
+      alert('Error: ' + error.message);
+    } finally {
+      setTestLoading(false);
+    }
+  };
 
   const handleProfileUpdate = (updatedScrapper) => {
     // 1. Update local state
@@ -552,7 +584,7 @@ const ScrapperProfile = () => {
             <button
               type="button"
               onClick={() => navigate('/scrapper/help')}
-              className="w-full flex items-center justify-between px-3 md:px-4 py-3 md:py-3.5 text-left hover:bg-slate-50 transition-colors rounded-b-2xl"
+              className="w-full flex items-center justify-between px-3 md:px-4 py-3 md:py-3.5 text-left hover:bg-slate-50 transition-colors border-b border-slate-100"
             >
               <div>
                 <p className="text-xs md:text-sm font-semibold text-slate-800">
@@ -566,6 +598,28 @@ const ScrapperProfile = () => {
                 ›
               </span>
             </button>
+
+            {/* Test Notification Section */}
+            <div className="mt-4 pt-4 border-t border-slate-200">
+              <button
+                type="button"
+                onClick={handleTestNotification}
+                disabled={testLoading}
+                className="w-full flex items-center gap-4 px-4 py-3 text-left hover:bg-orange-50 transition-colors rounded-xl border-2 border-dashed border-orange-200 bg-orange-50/30"
+              >
+                <div className="w-10 h-10 rounded-full flex items-center justify-center bg-orange-100 text-orange-600 flex-shrink-0">
+                  <FaBell className={testLoading ? "animate-bounce" : ""} />
+                </div>
+                <div>
+                  <p className="text-sm font-bold text-orange-800">
+                    {testLoading ? "Sending Test..." : "Test Push Notification"}
+                  </p>
+                  <p className="text-[11px] text-orange-600/70">
+                    Verify if push notifications are working on this device
+                  </p>
+                </div>
+              </button>
+            </div>
           </div>
         </div>
       </div>

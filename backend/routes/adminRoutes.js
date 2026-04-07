@@ -45,7 +45,11 @@ import {
   updateAdminBankDetails,
   getCommissionTransactions,
   getAllWithdrawals,
-  updateWithdrawalStatus
+  updateWithdrawalStatus,
+
+  // Settings Management
+  getSystemSettings,
+  updateSystemSetting
 } from '../controllers/adminController.js';
 
 import { getScrapperEarningsForAdmin } from '../controllers/earningsController.js';
@@ -171,5 +175,11 @@ router.post('/coupons', createCoupon);
 router.get('/coupons', getAllCoupons);
 router.patch('/coupons/:id/status', toggleCouponStatus);
 router.delete('/coupons/:id', deleteCoupon);
+
+// ============================================
+// SETTINGS MANAGEMENT
+// ============================================
+router.get('/settings', getSystemSettings);
+router.put('/settings/:key', updateSystemSetting);
 
 export default router;

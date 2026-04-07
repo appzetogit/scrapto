@@ -29,6 +29,7 @@ import HelpSupport from './components/HelpSupport';
 import BannerManagement from './components/BannerManagement';
 import CouponsList from './components/CouponsList';
 import WithdrawalRequests from './components/WithdrawalRequests';
+import SystemSettings from './components/SystemSettings';
 import { usePageTranslation } from '../../hooks/usePageTranslation';
 
 // Protected Route Component
@@ -104,6 +105,8 @@ const AdminModuleRoutes = () => {
         <Route path="withdrawals" element={<WithdrawalRequests />} />
         {/* Help & Support */}
         <Route path="help-support" element={<HelpSupport />} />
+        {/* System Settings */}
+        <Route path="settings" element={<SystemSettings />} />
         {/* Profile */}
         <Route path="profile" element={<AdminProfile />} />
         {/* Placeholder routes for future pages */}
