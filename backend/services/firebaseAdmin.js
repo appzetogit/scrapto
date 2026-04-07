@@ -7,88 +7,100 @@ const require = createRequire(import.meta.url);
 let serviceAccount;
 
 try {
-    // Check if we are in production and have the JSON string
+    const isProduction = process.env.NODE_ENV === 'production' || process.env.NODE_ENV === 'prod';
+    console.log(`Firebase Admin: Environment is '${process.env.NODE_ENV}', isProduction: ${isProduction}`);
+
+    // Option 1: Env Variable (Prioritize this if present)
     if (process.env.FIREBASE_SERVICE) {
+        console.log('Firebase Admin: Found FIREBASE_SERVICE env variable. Attempting to parse...');
         try {
             let jsonStr = process.env.FIREBASE_SERVICE.trim();
+            
             // Helper to recursively parse JSON if it's double-encoded as a string
             const multiParse = (str) => {
                 let current = str;
-                
-                // Handle double-escaped strings common in some ENV configurations
                 if (typeof current === 'string' && current.includes('\\"')) {
                     current = current.replace(/\\"/g, '"');
                 }
-
-                // Strip outer quotes if the entire JSON is wrapped in literal quotes
                 if (typeof current === 'string' && current.startsWith('"') && current.endsWith('"')) {
                     current = current.slice(1, -1);
                 }
 
                 try {
-                    let parsed = JSON.parse(current);
-                    // If result is still a string, it was double-encoded. Parse again.
-                    if (typeof parsed === 'string') return multiParse(parsed);
-                    return parsed;
+                     let parsed = JSON.parse(current);
+                     if (typeof parsed === 'string') return multiParse(parsed);
+                     return parsed;
                 } catch (e) {
-                    throw e;
+                     return null;
                 }
             };
 
-            serviceAccount = multiParse(jsonStr);
+            const parsed = multiParse(jsonStr);
+            if (parsed && typeof parsed === 'object') {
+                serviceAccount = parsed;
+                console.log('Firebase Admin: Successfully parsed FIREBASE_SERVICE JSON object.');
+            } else {
+                console.error('Firebase Admin: FIREBASE_SERVICE was found but multiParse returned null or non-object.');
+            }
 
             // Fix private_key newlines if they are literal escaped characters
             if (serviceAccount && serviceAccount.private_key) {
-                serviceAccount.private_key = serviceAccount.private_key.replace(/\\n/g, '\n');
+                if (serviceAccount.private_key.includes('\\n')) {
+                    serviceAccount.private_key = serviceAccount.private_key.replace(/\\n/g, '\n');
+                    console.log('Firebase Admin: Fixed escaped newlines in private_key.');
+                }
             }
-
-            console.log('Firebase Admin: Using FIREBASE_SERVICE (JSON) credentials');
         } catch (error) {
-            console.error('Firebase Admin: Failed to parse FIREBASE_SERVICE JSON', error.message);
+            console.error('Firebase Admin: Fatal error during FIREBASE_SERVICE parsing:', error.message);
         }
     }
 
-    // If not found yet (or strict local preference), check for file path
-    // We prioritize path in development if both are present to match user request "local mei Path use karna hai"
-    // However, if we parsed successfully above and we are PROD, we are good. 
-    // If we are DEV, we might want to override with PATH if specified.
-
-    const isProduction = process.env.NODE_ENV === 'production';
-
-    // If (Dev AND Path Exists) OR (No Service Account yet AND Path Exists)
-    if ((!isProduction && process.env.FIREBASE_SERVICE_ACCOUNT_PATH) || (!serviceAccount && process.env.FIREBASE_SERVICE_ACCOUNT_PATH)) {
+    // Option 2: File Path (Used in dev, or if variable failed/missing)
+    const canUseFilePath = process.env.FIREBASE_SERVICE_ACCOUNT_PATH;
+    
+    // We use file path if:
+    // 1. We are NOT in production
+    // 2. OR we are in production but the environment variable failed to provide a serviceAccount
+    if (canUseFilePath && (!isProduction || !serviceAccount)) {
+        console.log(`Firebase Admin: Trying to load credentials from file path: ${process.env.FIREBASE_SERVICE_ACCOUNT_PATH}`);
         try {
-            // content of path is relative to project root (e.g. ./config/...)
-            // we use process.cwd() to resolve it
             const serviceAccountPath = path.resolve(process.cwd(), process.env.FIREBASE_SERVICE_ACCOUNT_PATH);
             serviceAccount = require(serviceAccountPath);
-            console.log(`Firebase Admin: Using credentials from file: ${process.env.FIREBASE_SERVICE_ACCOUNT_PATH}`);
+            console.log('Firebase Admin: Successfully loaded credentials from file.');
         } catch (error) {
-            console.error(`Firebase Admin: Failed to load credentials from file ${process.env.FIREBASE_SERVICE_ACCOUNT_PATH}`, error);
+            console.error(`Firebase Admin: Failed to load file from ${process.env.FIREBASE_SERVICE_ACCOUNT_PATH}:`, error.message);
         }
     }
 
     // Fallback to hardcoded path if nothing else worked
     if (!serviceAccount) {
+        console.log('Firebase Admin: No credentials from ENV or Path. Trying default fallback file...');
         try {
             serviceAccount = require('../config/firebase-service-account.json');
-            console.log('Firebase Admin: Using default fallback file: ../config/firebase-service-account.json');
+            console.log('Firebase Admin: Loaded fallback file.');
         } catch (error) {
-            // Ignore fallback error if we are going to fail safely
+            // Ignore if fallback missing
         }
     }
 
-    if (serviceAccount) {
-        admin.initializeApp({
-            credential: admin.credential.cert(serviceAccount)
-        });
-        console.log('Firebase Admin Initialized');
+    // FINAL INITIALIZATION
+    if (serviceAccount && serviceAccount.project_id && (serviceAccount.private_key || serviceAccount.privateKey)) {
+        if (admin.apps.length === 0) {
+            admin.initializeApp({
+                credential: admin.credential.cert(serviceAccount)
+            });
+            console.log(`Firebase Admin: Initialized for project: ${serviceAccount.project_id}`);
+        } else {
+            console.log('Firebase Admin: Already initialized.');
+        }
     } else {
-        throw new Error('No valid credentials found (FIREBASE_SERVICE or file path)');
+        const reason = !serviceAccount ? 'No credentials found' : 
+                       !serviceAccount.project_id ? 'Missing project_id' : 'Missing private_key';
+        throw new Error(`Initialization aborted: ${reason}`);
     }
 
 } catch (error) {
-    console.log('Firebase Admin Initialization Skipped/Failed (Check credentials):', error.message);
+    console.error('❌ Firebase Admin Setup Error:', error.message);
 }
 
 // Function to send notification
