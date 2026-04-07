@@ -24,6 +24,8 @@ try {
     if (!serviceAccount) {
         try {
             serviceAccount = require('../config/firebase-service-account.json');
+            serviceAccount.private_key = serviceAccount.private_key.replace(/\\n/g, '\n');
+
             console.log('Firebase Admin: Using default fallback file: ../config/firebase-service-account.json');
         } catch (error) {
             // Fallback error is expected if file doesn't exist
@@ -32,7 +34,11 @@ try {
 
     // 3. Final Initialization with validation
     if (serviceAccount && serviceAccount.project_id && (serviceAccount.private_key || serviceAccount.privateKey)) {
+
         if (admin.apps.length === 0) {
+            if (serviceAccount && serviceAccount.private_key) {
+                serviceAccount.private_key = serviceAccount.private_key.replace(/\\n/g, '\n');
+            }
             admin.initializeApp({
                 credential: admin.credential.cert(serviceAccount)
             });
