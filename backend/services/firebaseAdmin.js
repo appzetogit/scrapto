@@ -19,18 +19,38 @@ try {
             // Helper to recursively parse JSON if it's double-encoded as a string
             const multiParse = (str) => {
                 let current = str;
-                if (typeof current === 'string' && current.includes('\\"')) {
-                    current = current.replace(/\\"/g, '"');
-                }
-                if (typeof current === 'string' && current.startsWith('"') && current.endsWith('"')) {
-                    current = current.slice(1, -1);
+                if (!current) return null;
+
+                // 1. Initial cleanup: replace literal newlines that break JSON.parse
+                // and handle escaped quotes.
+                if (typeof current === 'string') {
+                    // Replace literal newlines with \n string
+                    current = current.replace(/\n/g, '\\n');
+                    
+                    if (current.includes('\\"')) {
+                        current = current.replace(/\\"/g, '"');
+                    }
+                    if (current.startsWith('"') && current.endsWith('"')) {
+                        current = current.slice(1, -1);
+                    }
                 }
 
                 try {
                      let parsed = JSON.parse(current);
+                     // If result is still a string (double encoded), parse again.
                      if (typeof parsed === 'string') return multiParse(parsed);
                      return parsed;
                 } catch (e) {
+                     console.error(`Firebase Admin: multiParse error at pass:`, e.message);
+                     // Fallback: If it starts with { but failed, try cleaning control characters
+                     try {
+                         if (typeof current === 'string' && current.trim().startsWith('{')) {
+                             const sanitized = current.replace(/[\u0000-\u001F\u007F-\u009F]/g, " ");
+                             return JSON.parse(sanitized);
+                         }
+                     } catch (err) {
+                         console.error(`Firebase Admin: multiParse fallback also failed:`, err.message);
+                     }
                      return null;
                 }
             };
