@@ -11,20 +11,31 @@ try {
     if (process.env.FIREBASE_SERVICE) {
         try {
             let jsonStr = process.env.FIREBASE_SERVICE.trim();
-            // Try simplistic parse first
-            try {
-                serviceAccount = JSON.parse(jsonStr);
-            } catch (e) {
-                // Heuristic cleanup for escaped strings (e.g. from some env configurations)
-                // 1. Strip surrounding quotes if present
-                if (jsonStr.startsWith('"') && jsonStr.endsWith('"')) {
-                    jsonStr = jsonStr.slice(1, -1);
+            // Helper to recursively parse JSON if it's double-encoded as a string
+            const multiParse = (str) => {
+                let current = str;
+                
+                // Handle double-escaped strings common in some ENV configurations
+                if (typeof current === 'string' && current.includes('\\"')) {
+                    current = current.replace(/\\"/g, '"');
                 }
-                // 2. Unescape escaped quotes
-                jsonStr = jsonStr.replace(/\\"/g, '"');
 
-                serviceAccount = JSON.parse(jsonStr);
-            }
+                // Strip outer quotes if the entire JSON is wrapped in literal quotes
+                if (typeof current === 'string' && current.startsWith('"') && current.endsWith('"')) {
+                    current = current.slice(1, -1);
+                }
+
+                try {
+                    let parsed = JSON.parse(current);
+                    // If result is still a string, it was double-encoded. Parse again.
+                    if (typeof parsed === 'string') return multiParse(parsed);
+                    return parsed;
+                } catch (e) {
+                    throw e;
+                }
+            };
+
+            serviceAccount = multiParse(jsonStr);
 
             // Fix private_key newlines if they are literal escaped characters
             if (serviceAccount && serviceAccount.private_key) {
