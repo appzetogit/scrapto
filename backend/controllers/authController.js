@@ -7,19 +7,17 @@ import { sendOTP, sendWelcomeSMS } from '../utils/otpService.js';
 import logger from '../utils/logger.js';
 import { USER_ROLES } from '../config/constants.js';
 
-// Helper: bypass OTP sending for specific test numbers (disabled in production by default)
-const isBypassEnabled = process.env.ENABLE_BYPASS_OTP !== 'false' && process.env.NODE_ENV !== 'production';
 // User test numbers
 const userBypassList = new Set(['9685974247', '9876543210', '9999999999', '7610416911', '6260491554']);
 // Scrapper test numbers (dedicated for scrapper testing)
 const scrapperBypassList = new Set(['8888888888', '7777777777', '6666666666', '5555555555', '1234512345', '8888855555', '9876598765', '9999999990', '8888888880']);
 // Combined bypass list
 const bypassList = new Set([...userBypassList, ...scrapperBypassList]);
+
 const isBypassOtpNumber = (phone) => {
-  // Always bypass for these specific numbers even in production
-  const alwaysBypassList = new Set(['9876598765', '9999999990', '8888888880']);
-  if (alwaysBypassList.has(phone)) return true;
-  return isBypassEnabled && bypassList.has(phone);
+  // Always bypass for these specific test numbers (Scrapppers & Users) 
+  // as per requirement for them to have default OTPs in both dev and prod.
+  return bypassList.has(phone);
 };
 // Get bypass OTP for a phone number
 const getBypassOtp = (phone) => {
