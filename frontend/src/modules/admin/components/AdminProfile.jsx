@@ -96,7 +96,26 @@ const AdminProfile = () => {
   }, [admin]);
 
   const handleTestNotification = async () => {
-    const token = localStorage.getItem('fcm_token_web');
+    let token = localStorage.getItem('fcm_token_web');
+    
+    if (!token) {
+      setTestLoading(true);
+      try {
+        const { registerFCMToken } = await import('../../../services/pushNotificationService');
+        token = await registerFCMToken(true);
+        if (!token) {
+          alert('Could not enable notifications. Please check site permissions in your browser.');
+           setTestLoading(false);
+          return;
+        }
+      } catch (err) {
+        console.error('Failed to register FCM token during test:', err);
+        alert('Failed to enable notifications: ' + err.message);
+        setTestLoading(false);
+        return;
+      }
+    }
+
     if (!token) {
       alert('FCM Token not found. Please ensure notifications are enabled.');
       return;
