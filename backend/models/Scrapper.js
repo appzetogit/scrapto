@@ -122,6 +122,10 @@ const scrapperSchema = new mongoose.Schema({
     cancellationReason: {
       type: String,
       default: null
+    },
+    usedPickups: {
+      type: Number,
+      default: 0
     }
   },
   marketSubscription: {
@@ -162,6 +166,10 @@ const scrapperSchema = new mongoose.Schema({
     cancellationReason: {
       type: String,
       default: null
+    },
+    usedPickups: {
+      type: Number,
+      default: 0
     }
   },
   liveLocation: {

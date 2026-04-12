@@ -83,6 +83,38 @@ export const subscribe = asyncHandler(async (req, res) => {
     }
   }
 
+  // Handle Free Plans (Price = 0)
+  if (plan.price === 0) {
+    logger.info(`[Subscription] Activating free plan for scrapper ${scrapperId}: ${plan.name}`);
+    
+    // Create a completed payment record for the free plan
+    const payment = await Payment.create({
+      user: scrapperId,
+      entityType: 'subscription',
+      amount: 0,
+      currency: plan.currency || 'INR',
+      status: PAYMENT_STATUS.COMPLETED,
+      planId: planId,
+      durationDays: plan.getDurationInDays(),
+      paidAt: new Date(),
+      notes: JSON.stringify({
+        planName: plan.name,
+        planType: plan.type,
+        planDuration: plan.durationType,
+        isFree: true
+      })
+    });
+
+    // Activate subscription immediately
+    const subscriptionResult = await activateSubscription(scrapperId, payment._id);
+
+    return sendSuccess(res, 'Free subscription activated successfully', {
+      subscription: subscriptionResult.subscription,
+      plan: subscriptionResult.plan,
+      payment
+    });
+  }
+
   // Validate Razorpay configuration
   if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
     logger.error('[Subscription] Razorpay keys not configured');

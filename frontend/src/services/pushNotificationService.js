@@ -108,19 +108,27 @@ export async function registerFCMToken(forceUpdate = false) {
 
 // Setup foreground notification handler
 export function setupForegroundNotificationHandler(handler) {
-    onMessage(messaging, (payload) => {
+    onMessage(messaging, async (payload) => {
         console.log('📬 Foreground message received:', payload);
 
-        // Show notification
-        if ('Notification' in window && Notification.permission === 'granted') {
-            new Notification(payload.notification.title, {
-                body: payload.notification.body,
-                icon: payload.notification.icon || '/favicon.png',
-                data: payload.data
-            });
+        // Force System Notification even in foreground
+        try {
+            if ('serviceWorker' in navigator && Notification.permission === 'granted') {
+                const registration = await navigator.serviceWorker.ready;
+                registration.showNotification(payload.notification.title, {
+                    body: payload.notification.body,
+                    icon: payload.notification.icon || '/favicon.png',
+                    tag: payload.data?.notificationId || Date.now().toString(),
+                    data: payload.data,
+                    vibrate: [200, 100, 200],
+                    requireInteraction: false
+                });
+            }
+        } catch (err) {
+            console.error('Error showing foreground notification:', err);
         }
 
-        // Call custom handler
+        // Call custom handler (for UI toasts etc)
         if (handler) {
             handler(payload);
         }

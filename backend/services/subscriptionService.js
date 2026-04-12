@@ -87,6 +87,7 @@ export const createSubscription = async (scrapperId, planId, paymentData) => {
     scrapper[targetField].autoRenew = true; // Default to auto-renew
     scrapper[targetField].cancelledAt = null;
     scrapper[targetField].cancellationReason = null;
+    scrapper[targetField].usedPickups = 0;
 
     await scrapper.save();
 
@@ -257,6 +258,7 @@ export const renewSubscription = async (scrapperId, planId) => {
     scrapper.subscription.autoRenew = true;
     scrapper.subscription.cancelledAt = null;
     scrapper.subscription.cancellationReason = null;
+    scrapper.subscription.usedPickups = 0;
 
     await scrapper.save();
 

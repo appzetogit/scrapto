@@ -313,7 +313,7 @@ export const acceptOrder = asyncHandler(async (req, res) => {
   }
 
   // Check Scrapper Wallet Balance
-  const scrapper = await Scrapper.findById(scrapperId);
+  const scrapper = await Scrapper.findById(scrapperId).populate('subscription.planId');
   if (!scrapper) {
     return sendError(res, 'Scrapper profile not found', 404);
   }
@@ -331,6 +331,16 @@ export const acceptOrder = asyncHandler(async (req, res) => {
 
   if (!isSubscribed) {
     return sendError(res, 'Active subscription required to accept orders. Please subscribe first.', 403);
+  }
+
+  // Check Pickup Limit (maxPickups)
+  if (scrapper.subscription.planId && scrapper.subscription.planId.maxPickups !== null) {
+    const limit = scrapper.subscription.planId.maxPickups;
+    const used = scrapper.subscription.usedPickups || 0;
+    
+    if (used >= limit) {
+      return sendError(res, `Your current plan limit (${limit} pickups) has been reached. Please upgrade your subscription to continue accepting orders.`, 403);
+    }
   }
 
   // Assign scrapper to order
@@ -462,9 +472,26 @@ export const updateOrderStatus = asyncHandler(async (req, res) => {
     // Case B: Scrap Sell (Scrapper pays User)
     // Action 1: Deduct Order Amount from Scrapper Wallet (Payment to User)
     // Action 2: Deduct 1% Commission from Scrapper Wallet (Platform Fee)
+    // Action 3: Increment Subscription Usage
     else if (order.scrapper) {
-      const scrapper = await Scrapper.findById(order.scrapper);
+      const scrapper = await Scrapper.findById(order.scrapper).populate('subscription.planId');
       if (scrapper) {
+        // ---------------------------------------------------------
+        // 3. Increment Subscription Usage (New Logic)
+        // ---------------------------------------------------------
+        if (scrapper.subscription && scrapper.subscription.status === 'active') {
+          scrapper.subscription.usedPickups = (scrapper.subscription.usedPickups || 0) + 1;
+          
+          // Check if limit reached
+          if (scrapper.subscription.planId && scrapper.subscription.planId.maxPickups !== null) {
+            if (scrapper.subscription.usedPickups >= scrapper.subscription.planId.maxPickups) {
+              scrapper.subscription.status = 'expired';
+              logger.info(`[Subscription] Plan limit reached for scrapper ${scrapper._id}. Subscription marked as expired.`);
+            }
+          }
+        }
+        // ---------------------------------------------------------
+
         // 1. Deduct Order Amount (Payment to User)
         const orderAmount = order.totalAmount || 0;
 
