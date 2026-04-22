@@ -98,7 +98,8 @@ export const register = asyncHandler(async (req, res) => {
         name,
         email,
         services: req.body.services || ['scrap_pickup'],
-        vehicleInfo: defaultVehicleInfo
+        vehicleInfo: defaultVehicleInfo,
+        kyc: { status: 'verified' }
       });
     } catch (scrapperError) {
       // If scrapper creation fails, log error but don't block registration

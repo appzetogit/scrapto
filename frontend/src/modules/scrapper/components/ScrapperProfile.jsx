@@ -424,7 +424,7 @@ const ScrapperProfile = () => {
 
           {/* All actions / links in one list */}
           <div className="rounded-2xl border border-slate-200 bg-white/95 backdrop-blur-sm divide-y divide-slate-100 shadow-sm">
-            {/* KYC status */}
+            {/* KYC status - Hidden
             <div className="flex flex-col border-b border-slate-100 last:border-0">
               <button
                 type="button"
@@ -454,7 +454,6 @@ const ScrapperProfile = () => {
                 </div>
               </button>
 
-              {/* Inline KYC Details Card */}
               {showKycInfo && kycStatus !== 'not_submitted' && (
                 <motion.div
                   initial={{ height: 0, opacity: 0 }}
@@ -498,6 +497,7 @@ const ScrapperProfile = () => {
                 </motion.div>
               )}
             </div>
+            */}
 
             {/* Subscription */}
             <button

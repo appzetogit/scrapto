@@ -161,7 +161,8 @@ const ScrapperModule = () => {
   // A "soft" authenticated check that allows for context initialization delay
   const isTransitioning = !scrapperIsAuthenticated && hasScrapperSession;
 
-  const kycStatus = scrapperIsAuthenticated ? getKYCStatus() : 'not_submitted';
+  const kycStatus = 'verified'; // KYC hidden - always verified
+  // const kycStatus = scrapperIsAuthenticated ? getKYCStatus() : 'not_submitted';
   const subscriptionStatus = scrapperIsAuthenticated && kycStatus === 'verified' ? getSubscriptionStatus() : 'not_subscribed';
 
   if (isVerifying) {

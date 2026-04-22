@@ -191,6 +191,9 @@ const ScrapperLogin = () => {
             localStorage.setItem('scrapperKYC', JSON.stringify(kyc));
           }
 
+          // KYC Hidden - Always navigate to dashboard
+          navigate('/scrapper', { replace: true });
+          /*
           if (kycStatus === 'not_submitted') {
             navigate('/scrapper/kyc', { replace: true });
           } else if (kycStatus === 'pending') {
@@ -207,10 +210,11 @@ const ScrapperLogin = () => {
           } else if (kycStatus === 'verified') {
             navigate('/scrapper', { replace: true });
           }
+          */
         } catch (error) {
           console.error('Failed to fetch initial status:', error);
-          // Fallback to KYC page if error
-          navigate('/scrapper/kyc', { replace: true });
+          // Fallback to Dashboard if error
+          navigate('/scrapper', { replace: true });
         }
         setShouldRedirect(false);
         setLoading(false);

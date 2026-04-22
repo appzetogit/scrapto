@@ -342,6 +342,7 @@ const ScrapperDashboard = () => {
         // Redirect based on REAL backend data
         const backendKycStatus = kyc?.status || 'not_submitted';
 
+        /* KYC Hidden - Bypassing redirection
         // If KYC not submitted or rejected, redirect to KYC page
         if (!kyc || backendKycStatus === 'rejected' || backendKycStatus === 'not_submitted') {
           navigate('/scrapper/kyc', { replace: true });
@@ -353,12 +354,13 @@ const ScrapperDashboard = () => {
           navigate('/scrapper/kyc-status', { replace: true });
           return;
         }
+        */
 
         // If verified, proceed with dashboard loading
-        if (backendKycStatus === 'verified') {
+        // if (backendKycStatus === 'verified') {
            migrateOldActiveRequest();
            loadDashboardData();
-        }
+        // }
       } catch (error) {
         console.error('Error fetching KYC/Subscription status:', error);
         // On error, check localStorage as fallback
