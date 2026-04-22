@@ -1570,7 +1570,7 @@ export const updateWithdrawalStatus = asyncHandler(async (req, res) => {
 export const getSystemSettings = asyncHandler(async (req, res) => {
   try {
     const settings = await SystemSetting.find();
-    
+
     // If no settings exist yet, create a default scrap commission
     if (settings.length === 0) {
       const defaultSetting = await SystemSetting.create({
@@ -1581,7 +1581,7 @@ export const getSystemSettings = asyncHandler(async (req, res) => {
       });
       return sendSuccess(res, 'System settings retrieved', [defaultSetting]);
     }
-    
+
     sendSuccess(res, 'System settings retrieved', settings);
   } catch (error) {
     logger.error('[Admin] Error fetching settings:', error);

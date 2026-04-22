@@ -1,3 +1,6 @@
+import path from "path";
+import { fileURLToPath } from "url";
+import fs from "fs";
 import express from "express";
 import cors from "cors";
 import helmet from "helmet";
@@ -39,6 +42,9 @@ try {
   logger.error("Environment validation failed:", error.message);
   process.exit(1);
 }
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 const PORT = process.env.PORT || 7000;
@@ -122,6 +128,17 @@ app.get("/health", (req, res) => {
     uptime: process.uptime(),
     environment: process.env.NODE_ENV || "development",
   });
+});
+
+// Route to serve app-ads.txt for app store verification
+app.get("/app-ads.txt", (req, res) => {
+  const filePath = path.join(__dirname, "../frontend/public/app-ads.txt");
+  if (fs.existsSync(filePath)) {
+    res.sendFile(filePath);
+  } else {
+    // Fallback if file doesn't exist at the expected location
+    res.status(404).send("app-ads.txt not found");
+  }
 });
 
 // API documentation endpoint
