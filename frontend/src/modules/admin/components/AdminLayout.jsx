@@ -18,7 +18,8 @@ import {
   FaBars,
   FaTimes,
   FaGift,
-  FaBullhorn
+  FaBullhorn,
+  FaTag
 } from 'react-icons/fa';
 import siteLogo from '../../../assets/scraptox-removebg-preview.png';
 
@@ -79,6 +80,7 @@ const AdminLayout = () => {
     },
     { icon: FaRupeeSign, label: getTranslatedText('Price Feed'), path: '/admin/prices' },
     { icon: FaFileInvoice, label: getTranslatedText('Requests'), path: '/admin/requests' },
+    { icon: FaTag, label: 'Marketplace', path: '/admin/marketplace' },
     { icon: FaRupeeSign, label: getTranslatedText('Earnings'), path: '/admin/earnings' },
     { icon: FaMoneyCheckAlt, label: getTranslatedText('Withdrawals'), path: '/admin/withdrawals' },
     {

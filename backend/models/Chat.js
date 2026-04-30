@@ -4,8 +4,14 @@ const chatSchema = new mongoose.Schema({
   orderId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Order',
-    required: true,
-    unique: true
+    required: false,
+    index: { unique: false, sparse: true }
+  },
+  marketplaceRequestId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'MarketplaceRequest',
+    required: false,
+    index: true
   },
   user: {
     type: mongoose.Schema.Types.ObjectId,
@@ -46,8 +52,14 @@ const chatSchema = new mongoose.Schema({
   participants: [{
     userId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
-      required: true
+      required: true,
+      refPath: 'participants.onModel'
+    },
+    onModel: {
+      type: String,
+      required: true,
+      enum: ['User', 'Scrapper'],
+      default: 'User'
     },
     userType: {
       type: String,

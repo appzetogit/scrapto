@@ -3,6 +3,7 @@ import Message from '../models/Message.js';
 import Order from '../models/Order.js';
 import User from '../models/User.js';
 import Scrapper from '../models/Scrapper.js';
+import MarketplaceRequest from '../models/MarketplaceRequest.js';
 import logger from '../utils/logger.js';
 
 /**
@@ -54,11 +55,13 @@ export const getOrCreateChat = async (orderId, userId, userType) => {
       participants: [
         {
           userId: order.user._id,
+          onModel: 'User',
           userType: 'user',
           role: 'user'
         },
         {
           userId: order.scrapper._id,
+          onModel: 'Scrapper',
           userType: 'scrapper',
           role: 'scrapper'
         }
@@ -75,6 +78,78 @@ export const getOrCreateChat = async (orderId, userId, userType) => {
     return chat;
   } catch (error) {
     logger.error('Error in getOrCreateChat:', error);
+    throw error;
+  }
+};
+
+/**
+ * Get or create a chat for a marketplace request
+ * @param {string} requestId - Marketplace Request ID
+ * @param {string} scrapperId - Scrapper ID
+ * @returns {Promise<Object>} Chat object
+ */
+export const getOrCreateMarketplaceChat = async (requestId, scrapperId) => {
+  try {
+    // Check if chat already exists for this request and scrapper
+    let chat = await Chat.findOne({ marketplaceRequestId: requestId, scrapper: scrapperId })
+      .populate('user', 'name phone email')
+      .populate('scrapper', 'name phone email');
+
+    if (chat) {
+      return chat;
+    }
+
+    // Get marketplace request to find owner
+    const request = await MarketplaceRequest.findById(requestId);
+    if (!request) {
+      throw new Error('Marketplace request not found');
+    }
+
+    // Try to find or create atomically
+    const ownerId = request.userId || request.adminId;
+    if (!ownerId) {
+      throw new Error('No owner found for this request');
+    }
+
+    // Use findOneAndUpdate with upsert to avoid race conditions
+    chat = await Chat.findOneAndUpdate(
+      { marketplaceRequestId: requestId, scrapper: scrapperId },
+      {
+        $setOnInsert: {
+          marketplaceRequestId: requestId,
+          user: ownerId,
+          scrapper: scrapperId,
+          participants: [
+            {
+              userId: ownerId,
+              onModel: 'User',
+              userType: 'user',
+              role: 'user'
+            },
+            {
+              userId: scrapperId,
+              onModel: 'Scrapper',
+              userType: 'scrapper',
+              role: 'scrapper'
+            }
+          ],
+          status: 'active',
+          lastMessageAt: new Date()
+        }
+      },
+      { new: true, upsert: true, runValidators: true }
+    );
+
+    // Populate and return
+    chat = await Chat.findById(chat._id)
+      .populate('user', 'name phone email')
+      .populate('scrapper', 'name phone email')
+      .populate('marketplaceRequestId', 'customerName');
+
+    logger.info(`Chat created for marketplace request: ${requestId} by scrapper: ${scrapperId}`);
+    return chat;
+  } catch (error) {
+    logger.error('Error in getOrCreateMarketplaceChat:', error);
     throw error;
   }
 };
@@ -101,7 +176,8 @@ export const getChatById = async (chatId, userId, userType, options = {}) => {
       ]
     })
       .populate('user', 'name phone email profileImage')
-      .populate('scrapper', 'name phone email profilePic');
+      .populate('scrapper', 'name phone email profilePic')
+      .populate('marketplaceRequestId', 'customerName');
 
     if (!chat) {
       throw new Error('Chat not found or unauthorized');
@@ -158,7 +234,7 @@ export const getChatMessages = async (chatId, userId, userType, options = {}) =>
 
     // Verify user is participant
     const isParticipant = chat.participants.some(
-      p => p.userId.toString() === userId.toString()
+      p => p.userId.toString() === userId.toString() && p.userType === userType
     );
 
     if (!isParticipant) {
@@ -259,7 +335,7 @@ export const sendMessage = async (chatId, senderId, senderType, message, attachm
 
     // Verify sender is participant
     const isParticipant = chat.participants.some(
-      p => p.userId.toString() === senderId.toString()
+      p => p.userId.toString() === senderId.toString() && p.userType === senderType
     );
 
     if (!isParticipant) {
@@ -319,7 +395,7 @@ export const markAsRead = async (chatId, userId, userType) => {
 
     // Verify user is participant
     const isParticipant = chat.participants.some(
-      p => p.userId.toString() === userId.toString()
+      p => p.userId.toString() === userId.toString() && p.userType === userType
     );
 
     if (!isParticipant) {

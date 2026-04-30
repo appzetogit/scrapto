@@ -64,10 +64,13 @@ const ChatPage = () => {
   const currentPageRef = useRef(1);
   const chatIdRef = useRef(null);
 
-  // Get orderId from location state or URL
+  // Get IDs from location state or URL
   const orderId =
     location.state?.orderId ||
     new URLSearchParams(location.search).get("orderId");
+  const marketplaceRequestId = 
+    location.state?.marketplaceRequestId || 
+    new URLSearchParams(location.search).get("marketplaceRequestId");
   const chatId = chatIdParam || location.state?.chatId;
 
   // Initialize chat - create or get existing
@@ -78,8 +81,23 @@ const ChatPage = () => {
 
       let currentChatId = chatId;
 
-      // If orderId provided but no chatId, create/get chat for that order
-      if (orderId && !currentChatId) {
+      // If marketplaceRequestId provided but no chatId, create/get chat for that request
+      if (marketplaceRequestId && !currentChatId) {
+        const createResponse = await chatAPI.getOrCreateMarketplaceChat(marketplaceRequestId);
+        if (createResponse.success && createResponse.data?.chat) {
+          currentChatId = createResponse.data.chat._id;
+          chatIdRef.current = currentChatId;
+          setChat(createResponse.data.chat);
+
+          // Load messages for the chat
+          const messagesResponse = await chatAPI.getMessages(currentChatId);
+          if (messagesResponse.success && messagesResponse.data?.messages) {
+            setMessages(messagesResponse.data.messages || []);
+          }
+        } else {
+          throw new Error(getTranslatedText("Failed to create/get chat"));
+        }
+      } else if (orderId && !currentChatId) {
         const createResponse = await chatAPI.getOrCreate(orderId);
         if (createResponse.success && createResponse.data?.chat) {
           currentChatId = createResponse.data.chat._id;
@@ -100,9 +118,14 @@ const ChatPage = () => {
         const messagesResponse = await chatAPI.getMessages(currentChatId);
         if (messagesResponse.success && messagesResponse.data?.messages) {
           setMessages(messagesResponse.data.messages || []);
-          // Try to get chat info from order if available
+          // Try to get chat info from order/marketplace if available
           if (orderId) {
             const chatResponse = await chatAPI.getOrCreate(orderId);
+            if (chatResponse.success && chatResponse.data?.chat) {
+              setChat(chatResponse.data.chat);
+            }
+          } else if (marketplaceRequestId) {
+            const chatResponse = await chatAPI.getOrCreateMarketplaceChat(marketplaceRequestId);
             if (chatResponse.success && chatResponse.data?.chat) {
               setChat(chatResponse.data.chat);
             }
@@ -111,10 +134,9 @@ const ChatPage = () => {
           throw new Error(getTranslatedText("Failed to load messages"));
         }
       } else {
-        // If neither orderId nor chatId is present, we cannot initialize chat
+        // If neither ID is present, we cannot initialize chat
         console.warn(getTranslatedText("Missing Order ID or Chat ID"));
         setLoading(false);
-        // Don't throw error immediately, let UI handle empty state if needed
         return;
       }
 

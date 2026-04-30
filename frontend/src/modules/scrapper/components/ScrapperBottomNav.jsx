@@ -1,6 +1,6 @@
 import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { FaHome, FaBolt, FaWallet, FaUser } from 'react-icons/fa';
+import { FaHome, FaBolt, FaWallet, FaUser, FaStore } from 'react-icons/fa';
 
 const ScrapperBottomNav = () => {
     const navigate = useNavigate();
@@ -8,6 +8,7 @@ const ScrapperBottomNav = () => {
 
     const navItems = [
         { id: 'home', icon: FaHome, label: 'Home', path: '/scrapper' },
+        { id: 'marketplace', icon: FaStore, label: 'Market', path: '/scrapper/marketplace' },
         { id: 'active', icon: FaBolt, label: 'Request', path: '/scrapper/my-active-requests' },
         { id: 'wallet', icon: FaWallet, label: 'Wallet', path: '/scrapper/wallet' },
         { id: 'profile', icon: FaUser, label: 'Profile', path: '/scrapper/profile' },

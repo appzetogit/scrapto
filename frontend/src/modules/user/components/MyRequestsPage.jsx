@@ -22,7 +22,7 @@ import {
 } from "react-icons/fa";
 import { HiClock, HiCheckCircle, HiXCircle } from "react-icons/hi";
 import { MdPending, MdLocalShipping, MdDone } from "react-icons/md";
-import { orderAPI } from "../../shared/utils/api";
+import { orderAPI, marketplaceAPI } from "../../shared/utils/api";
 import { usePageTranslation } from "../../../hooks/usePageTranslation";
 
 const MyRequestsPage = () => {
@@ -135,6 +135,40 @@ const MyRequestsPage = () => {
       address,
       notes: order.notes || "",
       hasReview: !!order.review, // Check if review ID exists
+      isMarketplace: false
+    };
+  };
+
+  // Transform marketplace request to frontend format
+  const transformMarketplaceRequest = (mreq) => {
+    const categories = [mreq.category.charAt(0).toUpperCase() + mreq.category.slice(1)];
+    const images = mreq.images?.map((img) => img.url || img) || [];
+    const address = `${mreq.location.city}, ${mreq.location.state}`;
+    const requestId = `MP - ${mreq._id.toString().slice(-6).toUpperCase()} `;
+    
+    // Find accepted bid to get scrapper info
+    const acceptedBid = mreq.bids?.find(b => b.status === 'accepted');
+    const scrapperName = acceptedBid?.scrapperId?.name || null;
+    const scrapperPhone = acceptedBid?.scrapperId?.phone || null;
+    const scrapperUserId = acceptedBid?.scrapperId?.userId || acceptedBid?.scrapperId?._id; // We need the User ID for chat
+
+    return {
+      id: mreq._id,
+      requestId,
+      categories,
+      images,
+      weight: 0, // Marketplace requests might not have weight yet
+      estimatedPrice: mreq.basePrice || 0,
+      status: (mreq.status === 'open' || mreq.status === 'bidding') ? 'pending' : (mreq.status === 'deal_closed') ? 'accepted' : (mreq.status === 'completed') ? 'completed' : mreq.status === 'cancelled' ? 'cancelled' : 'pending',
+      createdAt: mreq.createdAt,
+      address,
+      notes: mreq.description || "",
+      isMarketplace: true,
+      bids: mreq.bids || [],
+      scrapperName,
+      scrapperPhone,
+      scrapperUserId, // This is important for the chat logic
+      winnerScrapper: mreq.winnerScrapper
     };
   };
 
@@ -148,16 +182,27 @@ const MyRequestsPage = () => {
           } `
           : "";
       const response = await orderAPI.getMy(queryParams);
+      const mpResponse = await marketplaceAPI.getMyRequests();
+
+      let allTransformed = [];
 
       if (response.success && response.data?.orders) {
-        const transformedOrders = response.data.orders.map(transformOrder);
-        setRequests(transformedOrders);
-      } else {
+        allTransformed = [...response.data.orders.map(transformOrder)];
+      }
+
+      if (mpResponse.success && mpResponse.data) {
+        allTransformed = [...allTransformed, ...mpResponse.data.map(transformMarketplaceRequest)];
+      }
+
+      // Sort by date
+      allTransformed.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      setRequests(allTransformed);
+
+      if (!response.success && !mpResponse.success) {
         setError(getTranslatedText("Failed to load requests"));
-        setRequests([]);
       }
     } catch (err) {
-      console.error("Error fetching orders:", err);
+      console.error("Error fetching requests:", err);
       setError(err.message || getTranslatedText("Failed to load requests"));
       setRequests([]);
     } finally {
@@ -202,6 +247,7 @@ const MyRequestsPage = () => {
   }, [fetchOrders]);
 
   // Cancel order handler
+  // Cancel order handler
   const handleCancelOrder = async (orderId) => {
     if (
       !window.confirm(
@@ -221,6 +267,24 @@ const MyRequestsPage = () => {
       alert(err.message || getTranslatedText("Failed to cancel request"));
     } finally {
       setCancellingId(null);
+    }
+  };
+
+  const handleAcceptBid = async (bidId) => {
+    if (!window.confirm("Do you want to accept this bid? This will close the deal with this scrapper.")) return;
+
+    try {
+      setLoading(true);
+      const response = await marketplaceAPI.acceptBid(bidId);
+      if (response.success) {
+        alert("Deal closed successfully! You can now contact the scrapper.");
+        fetchOrders();
+      }
+    } catch (err) {
+      console.error("Error accepting bid:", err);
+      alert(err.message || "Failed to accept bid");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -668,6 +732,50 @@ const MyRequestsPage = () => {
                       </div>
                     )}
 
+                    {/* Bids Section for Marketplace */}
+                    {request.isMarketplace && request.bids && request.bids.length > 0 && (
+                      <div className="mt-4 pt-3 border-t border-dashed border-slate-200">
+                        <div className="flex items-center justify-between mb-2">
+                          <h4 className="text-[10px] font-bold text-slate-400 uppercase">
+                            Bids from Scrappers ({request.bids.length})
+                          </h4>
+                        </div>
+                        <div className="space-y-2">
+                          {request.bids.map((bid) => (
+                            <div 
+                              key={bid._id} 
+                              className="flex items-center justify-between bg-slate-50/50 p-2 rounded-lg border border-slate-100 group hover:border-emerald-200 transition-all"
+                            >
+                              <div className="flex items-center gap-2">
+                                <div className="w-8 h-8 rounded-full bg-emerald-100 overflow-hidden border border-emerald-50 flex items-center justify-center">
+                                  {bid.scrapperId.profilePic ? (
+                                    <img src={bid.scrapperId.profilePic} alt={bid.scrapperId.name} className="w-full h-full object-cover" />
+                                  ) : (
+                                    <span className="text-[10px] font-bold text-emerald-600">{bid.scrapperId.name?.[0]}</span>
+                                  )}
+                                </div>
+                                <div>
+                                  <p className="text-xs font-bold text-slate-800">{bid.scrapperId.name}</p>
+                                  <p className="text-[10px] font-bold text-emerald-600">Offer: ₹{bid.bidAmount}</p>
+                                </div>
+                              </div>
+                              {request.status === 'pending' && (
+                                <button 
+                                  onClick={() => handleAcceptBid(bid._id)}
+                                  className="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white text-[10px] font-bold rounded-lg transition-all shadow-sm"
+                                >
+                                  Accept
+                                </button>
+                              )}
+                              {bid.status === 'accepted' && (
+                                <span className="px-2 py-0.5 bg-emerald-100 text-emerald-700 text-[10px] font-bold rounded">WINNER</span>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
                     {/* Status Timeline */}
                     {request.status === "completed" && request.completedAt && (
                       <div
@@ -757,7 +865,16 @@ const MyRequestsPage = () => {
                           <button
                             onClick={() =>
                               navigate(`/chat`, {
-                                state: { orderId: request.id },
+                                state: request.isMarketplace 
+                                  ? { 
+                                      marketplaceRequestId: request.id,
+                                      scrapperName: request.scrapperName,
+                                      scrapperId: request.winnerScrapper 
+                                    } 
+                                  : { 
+                                      orderId: request.id,
+                                      scrapperName: request.scrapperName
+                                    },
                               })
                             }
                             className="flex-1 py-2 px-4 rounded-lg text-sm font-semibold text-white text-center transition-all flex items-center justify-center gap-2"
@@ -828,7 +945,9 @@ const MyRequestsPage = () => {
                         <button
                           onClick={() =>
                             navigate(`/chat`, {
-                              state: { orderId: request.id },
+                              state: request.isMarketplace 
+                                ? { marketplaceRequestId: request.id } 
+                                : { orderId: request.id },
                             })
                           }
                           className="flex-1 py-2 px-4 rounded-lg text-sm font-semibold text-white text-center transition-all flex items-center justify-center gap-2"
@@ -842,6 +961,18 @@ const MyRequestsPage = () => {
                           <FaComments size={14} />
                           {getTranslatedText("Chat")}
                         </button>
+                        {request.scrapperPhone && (
+                          <a
+                            href={`tel:${request.scrapperPhone.replace(/\s/g, "")}`}
+                            className="flex-1 py-2 px-4 rounded-lg text-sm font-semibold text-white text-center transition-all flex items-center justify-center gap-2"
+                            style={{ backgroundColor: "#8b5cf6" }}
+                            onMouseEnter={(e) => { e.target.style.backgroundColor = "#7c3aed"; }}
+                            onMouseLeave={(e) => { e.target.style.backgroundColor = "#8b5cf6"; }}
+                          >
+                            <FaPhone size={14} />
+                            {getTranslatedText("Call")}
+                          </a>
+                        )}
                       </div>
                     )}
                   </motion.div>

@@ -752,6 +752,30 @@ const ScrapperDashboard = () => {
             </div>
           </div>
         </motion.div>
+        
+        {/* Marketplace Bidding Card */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.32 }}
+          onClick={() => navigate('/scrapper/marketplace')}
+          className="rounded-2xl p-4 md:p-6 shadow-lg bg-gradient-to-r from-emerald-600 to-teal-700 text-white cursor-pointer relative overflow-hidden"
+        >
+          <div className="relative z-10">
+            <div className="flex justify-between items-center mb-2">
+              <span className="bg-white/20 px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider">New Opportunity</span>
+              <FaChartLine className="text-emerald-200" />
+            </div>
+            <h2 className="text-xl font-bold mb-1">Bidding Marketplace</h2>
+            <p className="text-sm text-emerald-50 text-opacity-90">Bid on bulk scrap requests and grow your business.</p>
+            <button className="mt-4 bg-white text-emerald-700 px-4 py-2 rounded-xl text-sm font-bold shadow-md">
+              Browse Requests
+            </button>
+          </div>
+          <div className="absolute -right-4 -bottom-4 opacity-10">
+            <FaChartLine size={120} />
+          </div>
+        </motion.div>
 
 
 

@@ -27,6 +27,17 @@ export const SCRAP_CATEGORIES = {
   PAPER: 'paper',
   ELECTRONIC: 'electronic',
   GLASS: 'glass',
+  VEHICLES: 'vehicles',
+  EDUCATIONAL: 'educational',
+  DOLLS: 'dolls',
+  BLOCKS: 'blocks',
+  SOFT_TOYS: 'soft toys',
+  ROLE_PLAY: 'role play',
+  MUSICAL: 'musical',
+  FIGURES: 'figures',
+  ACTION_TOYS: 'action toys',
+  OUTDOOR: 'outdoor',
+  PUZZLE: 'puzzle',
   OTHER: 'other'
 };
 

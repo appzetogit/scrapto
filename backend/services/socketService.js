@@ -74,7 +74,8 @@ export const initializeSocket = (server) => {
 
         // Check if user is participant
         const isParticipant = chat.participants.some(
-          p => p.userId.toString() === socket.userId.toString()
+          p => p.userId.toString() === socket.userId.toString() && 
+               (p.userType === socket.userType || (socket.userType === 'admin' && p.userType === 'user'))
         );
 
         if (!isParticipant) {

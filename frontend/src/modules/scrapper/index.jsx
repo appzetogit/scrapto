@@ -17,6 +17,8 @@ import ChatPage from './components/ChatPage';
 import ChatListPage from './components/ChatListPage';
 import ScrapperWallet from './components/ScrapperWallet';
 import ScrapperEarningsPage from './components/ScrapperEarningsPage';
+import MarketplacePage from './components/marketplace/MarketplacePage';
+import MarketplaceRequestDetails from './components/marketplace/MarketplaceRequestDetails';
 import { authAPI, getAuthToken } from '../shared/utils/api';
 import { FaHome, FaList, FaRegComments, FaUser, FaWallet } from 'react-icons/fa';
 import WebViewHeader from '../shared/components/WebViewHeader';
@@ -198,9 +200,9 @@ const ScrapperModule = () => {
 
   const navItems = [
     { label: 'Dashboard', path: '/scrapper/dashboard', icon: FaHome },
-    { label: 'Active Requests', path: '/scrapper/active-requests', icon: FaList },
+    { label: 'Marketplace', path: '/scrapper/marketplace', icon: FaList },
     { label: 'Chats', path: '/scrapper/chats', icon: FaRegComments },
-    { label: 'Wallet', path: '/scrapper/wallet', icon: FaWallet }, // Added Wallet Option
+    { label: 'Wallet', path: '/scrapper/wallet', icon: FaWallet },
     { label: 'Profile', path: '/scrapper/profile', icon: FaUser },
   ];
 
@@ -229,6 +231,10 @@ const ScrapperModule = () => {
 
         {/* Active Request Details Route - after accepting a request */}
         <Route path="/active-request/:requestId" element={<ActiveRequestDetailsPage />} />
+
+        {/* Marketplace Routes (Bidding) */}
+        <Route path="/marketplace" element={<MarketplacePage />} />
+        <Route path="/marketplace/:requestId" element={<MarketplaceRequestDetails />} />
 
         {/* Help & Support */}
         <Route path="/help" element={<ScrapperHelpSupport />} />

@@ -61,6 +61,7 @@ const ChatPage = () => {
       setError(null);
 
       let currentChatId = chatId;
+      const requestId = location.state?.requestId || new URLSearchParams(location.search).get('requestId');
 
       // If orderId provided but no chatId, create/get chat for that order
       if (orderId && !currentChatId) {
@@ -81,6 +82,24 @@ const ChatPage = () => {
         } else {
           throw new Error('Failed to create/get chat');
         }
+      } else if (requestId && !currentChatId) {
+        // Handle Marketplace Request Chat
+        const createResponse = await chatAPI.getOrCreateMarketplaceChat(requestId);
+        if (createResponse.success && createResponse.data?.chat) {
+          currentChatId = createResponse.data.chat._id;
+          chatIdRef.current = currentChatId;
+          setChat(createResponse.data.chat);
+
+          const messagesResponse = await chatAPI.getMessages(currentChatId);
+          if (messagesResponse.success && messagesResponse.data?.messages) {
+            const msgs = messagesResponse.data.messages || [];
+            setMessages(msgs);
+            setHasMoreMessages(msgs.length >= 50);
+            currentPageRef.current = 1;
+          }
+        } else {
+          throw new Error('Failed to create/get marketplace chat');
+        }
       } else if (currentChatId) {
         // Get existing chat - first get chat info, then messages
         chatIdRef.current = currentChatId;
@@ -92,9 +111,14 @@ const ChatPage = () => {
           setMessages(msgs);
           setHasMoreMessages(msgs.length >= 50); // Check if we might have more pages
 
-          // Try to get chat info from order if available
+          // Try to get chat info from order or marketplace if available
           if (orderId) {
             const chatResponse = await chatAPI.getOrCreate(orderId);
+            if (chatResponse.success && chatResponse.data?.chat) {
+              setChat(chatResponse.data.chat);
+            }
+          } else if (requestId) {
+            const chatResponse = await chatAPI.getOrCreateMarketplaceChat(requestId);
             if (chatResponse.success && chatResponse.data?.chat) {
               setChat(chatResponse.data.chat);
             }
@@ -103,8 +127,8 @@ const ChatPage = () => {
           throw new Error('Failed to load messages');
         }
       } else {
-        // If neither orderId nor chatId is present, we cannot initialize chat
-        console.warn('Missing Order ID or Chat ID');
+        // If neither orderId nor chatId nor requestId is present, we cannot initialize chat
+        console.warn('Missing Context ID (Order/Marketplace/Chat)');
         setLoading(false);
         return;
       }
@@ -476,7 +500,9 @@ const ChatPage = () => {
             <div
               className="w-10 h-10 rounded-full flex items-center justify-center text-base font-bold relative bg-emerald-900/30 text-emerald-400"
             >
-              {otherUser.name?.split(' ').map(n => n[0]).join('') || getTranslatedText('U')}
+              {chat?.marketplaceRequestId?.customerName 
+                ? chat.marketplaceRequestId.customerName.split(' ').map(n => n[0]).join('')
+                : otherUser.name?.split(' ').map(n => n[0]).join('') || getTranslatedText('U')}
               {/* Online indicator */}
               <div
                 className="absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 bg-emerald-500 border-zinc-900"
@@ -484,7 +510,7 @@ const ChatPage = () => {
             </div>
             <div className="flex-1 min-w-0">
               <h3 className="text-base font-semibold truncate text-white">
-                {otherUser.name || getTranslatedText('Unknown User')}
+                {chat?.marketplaceRequestId?.customerName || otherUser.name || getTranslatedText('Unknown User')}
               </h3>
               <div className="flex items-center gap-1">
                 {otherUserTyping && (

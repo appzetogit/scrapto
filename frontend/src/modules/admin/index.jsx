@@ -30,6 +30,7 @@ import BannerManagement from './components/BannerManagement';
 import CouponsList from './components/CouponsList';
 import WithdrawalRequests from './components/WithdrawalRequests';
 import SystemSettings from './components/SystemSettings';
+import MarketplaceManager from './components/MarketplaceManager';
 import { usePageTranslation } from '../../hooks/usePageTranslation';
 
 // Protected Route Component
@@ -82,6 +83,8 @@ const AdminModuleRoutes = () => {
         {/* Request Management */}
         <Route path="requests" element={<ActiveRequests />} />
         <Route path="orders" element={<CompletedOrders />} />
+        {/* Marketplace Management */}
+        <Route path="marketplace" element={<MarketplaceManager />} />
         {/* Subscription Management */}
         <Route path="subscriptions" element={<SubscriptionsList />} />
         <Route path="subscriptions/plans" element={<SubscriptionPlanManagement />} />

@@ -406,6 +406,9 @@ export const chatAPI = {
   getOrCreate: async (orderId) => {
     return apiRequest(`/chats/order/${orderId}`, { method: 'GET' });
   },
+  getOrCreateMarketplaceChat: async (requestId) => {
+    return apiRequest(`/chats/marketplace/${requestId}`, { method: 'GET' });
+  },
   getMessages: async (chatId, page = 1, limit = 50) => {
     return apiRequest(`/chats/${chatId}/messages?page=${page}&limit=${limit}`, { method: 'GET' });
   },
@@ -713,6 +716,54 @@ export const referralAPI = {
     return apiRequest(`/admin/referral-system/referrals/${id}`, {
       method: 'PATCH',
       body: JSON.stringify({ status }),
+    });
+  },
+};
+
+// Marketplace API
+export const marketplaceAPI = {
+  getRequests: async (filters = {}) => {
+    const params = new URLSearchParams(filters).toString();
+    return apiRequest(`/marketplace/requests?${params}`, { method: 'GET' });
+  },
+  getMyRequests: async () => {
+    return apiRequest('/marketplace/my-requests', { method: 'GET', role: 'user' });
+  },
+  getRequestById: async (id) => {
+    return apiRequest(`/marketplace/requests/${id}`, { method: 'GET' });
+  },
+  placeBid: async (id, bidData) => {
+    return apiRequest(`/marketplace/requests/${id}/bids`, {
+      method: 'POST',
+      body: JSON.stringify(bidData),
+    });
+  },
+  acceptBid: async (bidId) => {
+    return apiRequest(`/marketplace/bids/${bidId}/accept`, {
+      method: 'PATCH',
+    });
+  },
+  uploadImages: async (formData) => {
+    return apiRequest('/marketplace/upload', {
+      method: 'POST',
+      body: formData,
+    });
+  },
+  createRequests: async (data) => {
+    return apiRequest('/marketplace/requests', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  },
+  reportRequest: async (id, reason = 'Spam') => {
+    return apiRequest(`/marketplace/requests/${id}/report`, {
+      method: 'POST',
+      body: JSON.stringify({ reason }),
+    });
+  },
+  deleteRequest: async (id) => {
+    return apiRequest(`/marketplace/requests/${id}`, {
+      method: 'DELETE',
     });
   },
 };

@@ -75,6 +75,45 @@ export const getOrCreateChatForOrder = asyncHandler(async (req, res) => {
   sendSuccess(res, 'Chat retrieved/created successfully', { chat });
 });
 
+// @desc    Get or create chat for a marketplace request (GET)
+// @route   GET /api/chats/marketplace/:requestId
+// @access  Private (Scrapper only)
+export const getOrCreateChatForMarketplace = asyncHandler(async (req, res) => {
+  const { requestId } = req.params;
+  const userId = req.user.id;
+  const userRole = req.user.role;
+
+  if (!requestId) {
+    return sendError(res, 'Request ID is required', 400);
+  }
+
+  // Verify access: Either scrapper or request owner
+  const MarketplaceRequest = (await import('../models/MarketplaceRequest.js')).default;
+  const request = await MarketplaceRequest.findById(requestId);
+  
+  if (!request) {
+    return sendError(res, 'Marketplace request not found', 404);
+  }
+
+  const isOwner = request.userId?.toString() === userId || request.adminId?.toString() === userId;
+  const isWinner = request.winnerScrapper && (req.user.scrapperId?.toString() === request.winnerScrapper.toString());
+
+  if (userRole !== 'admin' && !isOwner && !isWinner && userRole !== 'scrapper') {
+    return sendError(res, 'You are not authorized to access this chat', 403);
+  }
+
+  // If user is scrapper, use their scrapperId, else use their userId
+  const scrapperId = userRole === 'scrapper' ? (req.user.scrapperId || req.user.id) : request.winnerScrapper;
+
+  if (!scrapperId) {
+    return sendError(res, 'No scrapper associated with this deal yet', 400);
+  }
+
+  const chat = await chatService.getOrCreateMarketplaceChat(requestId, scrapperId);
+
+  sendSuccess(res, 'Chat retrieved/created successfully', { chat });
+});
+
 // @desc    Create or get chat for an order (POST)
 // @route   POST /api/chats
 // @access  Private

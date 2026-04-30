@@ -5,6 +5,7 @@ import {
   getChatMessages,
   createChat,
   getOrCreateChatForOrder,
+  getOrCreateChatForMarketplace,
   sendMessage,
   markAsRead,
   archiveChat,
@@ -31,6 +32,9 @@ router.get('/', getMyChats); // Alias for backward compatibility
 
 // Get or create chat for an order (GET method)
 router.get('/order/:orderId', getOrCreateChatForOrder);
+
+// Get or create chat for a marketplace request
+router.get('/marketplace/:requestId', getOrCreateChatForMarketplace);
 
 // Create or get chat for an order (POST method)
 router.post('/', createChatValidator, validate, createChat);
