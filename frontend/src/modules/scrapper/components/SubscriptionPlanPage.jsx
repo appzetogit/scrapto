@@ -107,10 +107,12 @@ const SubscriptionPlanPage = () => {
             if (subscription?.status === 'active') {
               localStorage.setItem('scrapperSubscriptionStatus', 'active');
             }
+            return subRes.data; // Return data for use in handleSubscribe if needed
           }
         } catch (subError) {
           console.log('No active subscription found');
         }
+        return null;
       } catch (err) {
         console.error('Error fetching subscription data:', err);
         setError(err.message || 'Failed to load subscription plans');
@@ -219,7 +221,13 @@ const SubscriptionPlanPage = () => {
               console.error('Error processing milestone:', err);
             }
 
-            navigate('/scrapper', { replace: true });
+            // Show success toast or state before navigating
+            toast.success(getTranslatedText('Subscription activated successfully!'));
+            
+            // Short delay to let the user see success before redirecting
+            setTimeout(() => {
+              navigate('/scrapper/dashboard', { replace: true });
+            }, 1500);
           } catch (err) {
             console.error('Verification failed', err);
             alert(err.message || getTranslatedText('Payment verification failed. Please contact support.'));
@@ -340,30 +348,41 @@ const SubscriptionPlanPage = () => {
         {/* Current Subscription Info */}
         {isTabActive && (
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="mb-6 rounded-2xl p-6 shadow-lg bg-zinc-900 border-2 border-emerald-500/50"
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="mb-8 rounded-3xl p-8 shadow-2xl bg-zinc-900 border-2 border-emerald-500 relative overflow-hidden"
           >
-            <div className="flex items-center justify-between flex-wrap gap-4">
-              <div>
-                <h3 className="text-lg font-bold mb-1 text-white">
-                  {getTranslatedText("Current Subscription: {plan}", { plan: activeSubForTab.planId?.name || 'Active Plan' })}
+            {/* Background Glow */}
+            <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/10 blur-3xl -mr-16 -mt-16 rounded-full" />
+            <div className="absolute bottom-0 left-0 w-32 h-32 bg-emerald-500/10 blur-3xl -ml-16 -mb-16 rounded-full" />
+
+            <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
+              <div className="text-center md:text-left">
+                <div className="flex items-center justify-center md:justify-start gap-2 mb-2">
+                  <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                  <span className="text-emerald-400 font-bold uppercase tracking-wider text-xs">
+                    {getTranslatedText("Active")}
+                  </span>
+                </div>
+                <h3 className="text-2xl font-black mb-1 text-white uppercase tracking-tight">
+                  {activeSubForTab.planId?.name || 'Your Active Plan'}
                 </h3>
-                <p className="text-sm text-gray-400">
+                <p className="text-sm text-gray-400 font-medium">
                   {getTranslatedText("Expires: {date}", { date: activeSubForTab.expiryDate ? new Date(activeSubForTab.expiryDate).toLocaleDateString() : 'N/A' })}
                 </p>
               </div>
-              <div className="flex items-center gap-3">
-                <button
-                  onClick={() => navigate('/scrapper/dashboard')}
-                  className="px-6 py-2 rounded-xl font-bold bg-white/10 text-white hover:bg-white/20 transition-all border border-white/20"
-                >
-                  Go to Dashboard
-                </button>
-                <div className="px-4 py-2 rounded-lg font-semibold bg-emerald-900/30 text-emerald-400">
-                  {getTranslatedText("Active")}
-                </div>
-              </div>
+              
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => navigate('/scrapper/dashboard')}
+                className="w-full md:w-auto px-10 py-4 rounded-2xl font-black bg-emerald-600 text-white hover:bg-emerald-700 transition-all shadow-[0_0_20px_rgba(16,185,129,0.4)] flex items-center justify-center gap-3"
+              >
+                <span>CONTINUE TO DASHBOARD</span>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M5 12h14M12 5l7 7-7 7" />
+                </svg>
+              </motion.button>
             </div>
           </motion.div>
         )}
