@@ -87,8 +87,8 @@ const scrapperSchema = new mongoose.Schema({
   subscription: {
     status: {
       type: String,
-      enum: ['active', 'expired', 'cancelled'],
-      default: 'expired'
+      enum: ['active', 'expired', 'cancelled', 'none'],
+      default: 'none'
     },
     planId: {
       type: mongoose.Schema.Types.ObjectId,
@@ -131,8 +131,8 @@ const scrapperSchema = new mongoose.Schema({
   marketSubscription: {
     status: {
       type: String,
-      enum: ['active', 'expired', 'cancelled'],
-      default: 'expired'
+      enum: ['active', 'expired', 'cancelled', 'none'],
+      default: 'none'
     },
     planId: {
       type: mongoose.Schema.Types.ObjectId,

@@ -67,6 +67,9 @@ export const API_ENDPOINTS = {
     subscriptionPlans: '/admin/subscriptions/plans',
     subscriptionPlanById: (id) => `/admin/subscriptions/plans/${id}`,
   },
+  scrappers: {
+    stats: '/scrappers/stats',
+  },
   translate: {
     root: '/translate',
     batch: '/translate/batch',

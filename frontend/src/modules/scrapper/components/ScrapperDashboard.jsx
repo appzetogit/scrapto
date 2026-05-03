@@ -68,7 +68,18 @@ const ScrapperDashboard = () => {
     "No Completed Orders Yet",
     "Your completed orders will appear here",
     "Completed on:",
-    "Active subscription required to go online. Please subscribe first."
+    "Active subscription required to go online. Please subscribe first.",
+    "No Subscription",
+    "Take subscription to receive requests",
+    "Subscribe Now",
+    "Subscription Active",
+    "Subscription Expired",
+    "Renew Now",
+    "Your Activity",
+    "Upcoming Pickups",
+    "Collectors",
+    "Under Negotiation",
+    "Open Items"
   ];
   const { getTranslatedText } = usePageTranslation(staticTexts);
   const navigate = useNavigate();
@@ -92,6 +103,12 @@ const ScrapperDashboard = () => {
     activeRequests: 0
   });
   const [marketSubStatus, setMarketSubStatus] = useState('inactive'); // for real-time market price subscription
+  const [activityStats, setActivityStats] = useState({
+    upcomingPickups: 0,
+    collectors: 0,
+    underNegotiation: 0,
+    openItems: 0
+  });
 
   const [completedOrders, setCompletedOrders] = useState([]);
   const [activeRequests, setActiveRequests] = useState([]);
@@ -224,6 +241,16 @@ const ScrapperDashboard = () => {
     const marketStatus =
       localStorage.getItem('scrapperMarketPriceSubscriptionStatus') || 'inactive';
     setMarketSubStatus(marketStatus);
+
+    try {
+      // Load activity stats from backend
+      const statsResponse = await scrapperProfileAPI.getStats();
+      if (statsResponse.success && statsResponse.data?.stats) {
+        setActivityStats(statsResponse.data.stats);
+      }
+    } catch (error) {
+      console.error('Failed to load activity stats from backend:', error);
+    }
   };
 
   // Handle availability toggle
@@ -554,6 +581,87 @@ const ScrapperDashboard = () => {
           </motion.button>
         </motion.div>
 
+        {/* Welcome Section */}
+        <div className="mb-6 mt-6">
+          <h2 className="text-2xl font-bold text-slate-900">
+            {getTranslatedText('Welcome, {name}! 👋', { name: user?.name?.split(' ')[0] || 'Scrapper' })}
+          </h2>
+        </div>
+
+        {/* Your Activity Section */}
+        <div className="mt-8 mb-8">
+          <h3 className="text-lg font-bold text-slate-900 mb-4">{getTranslatedText('Your Activity')}</h3>
+          <div className="grid grid-cols-2 gap-4">
+            {/* Upcoming Pickups */}
+            <motion.div 
+              whileHover={{ y: -2 }}
+              onClick={() => navigate('/scrapper/my-active-requests')}
+              className="bg-[#e8d5b7] p-3 rounded-3xl relative overflow-hidden h-32 shadow-sm cursor-pointer"
+            >
+              <h4 className="text-white text-sm font-bold leading-tight w-24">
+                {getTranslatedText('Upcoming Pickups')}
+              </h4>
+              <div className="absolute bottom-3 left-3 bg-[#a67c52] w-12 h-12 rounded-full flex items-center justify-center shadow-inner">
+                <span className="text-white text-2xl font-black">{activityStats.upcomingPickups}</span>
+              </div>
+              <div className="absolute right-0 bottom-0 w-20 h-20 opacity-80 pointer-events-none translate-x-2 translate-y-2">
+                 <FaCheck className="text-white/20 w-full h-full p-4" />
+              </div>
+            </motion.div>
+
+            {/* Collectors */}
+            <motion.div 
+              whileHover={{ y: -2 }}
+              onClick={() => navigate('/scrapper/earnings')}
+              className="bg-[#e8d5b7] p-3 rounded-3xl relative overflow-hidden h-32 shadow-sm cursor-pointer"
+            >
+              <h4 className="text-white text-sm font-bold leading-tight w-24">
+                {getTranslatedText('Collectors')}
+              </h4>
+              <div className="absolute bottom-3 left-3 bg-[#a67c52] w-12 h-12 rounded-full flex items-center justify-center shadow-inner">
+                <span className="text-white text-2xl font-black">{activityStats.collectors}</span>
+              </div>
+              <div className="absolute right-0 bottom-0 w-20 h-20 opacity-80 pointer-events-none translate-x-2 translate-y-2">
+                 <FaChartLine className="text-white/20 w-full h-full p-4" />
+              </div>
+            </motion.div>
+
+            {/* Under Negotiation */}
+            <motion.div 
+              whileHover={{ y: -2 }}
+              onClick={() => navigate('/scrapper/marketplace?tab=my_bids')}
+              className="bg-[#e8d5b7] p-3 rounded-3xl relative overflow-hidden h-32 shadow-sm cursor-pointer"
+            >
+              <h4 className="text-white text-sm font-bold leading-tight w-24">
+                {getTranslatedText('Under Negotiation')}
+              </h4>
+              <div className="absolute bottom-3 left-3 bg-[#a67c52] w-12 h-12 rounded-full flex items-center justify-center shadow-inner">
+                <span className="text-white text-2xl font-black">{activityStats.underNegotiation}</span>
+              </div>
+              <div className="absolute right-0 bottom-0 w-20 h-20 opacity-80 pointer-events-none translate-x-2 translate-y-2">
+                 <FaGift className="text-white/20 w-full h-full p-4" />
+              </div>
+            </motion.div>
+
+            {/* Open Items */}
+            <motion.div 
+              whileHover={{ y: -2 }}
+              onClick={() => navigate('/scrapper/marketplace')}
+              className="bg-[#e8d5b7] p-3 rounded-3xl relative overflow-hidden h-32 shadow-sm cursor-pointer"
+            >
+              <h4 className="text-white text-sm font-bold leading-tight w-24">
+                {getTranslatedText('Open Items')}
+              </h4>
+              <div className="absolute bottom-3 left-3 bg-[#a67c52] w-12 h-12 rounded-full flex items-center justify-center shadow-inner">
+                <span className="text-white text-2xl font-black">{activityStats.openItems}</span>
+              </div>
+              <div className="absolute right-0 bottom-0 w-20 h-20 opacity-80 pointer-events-none translate-x-2 translate-y-2">
+                 <FaGift className="text-white/20 w-full h-full p-4" />
+              </div>
+            </motion.div>
+          </div>
+        </div>
+
         {/* Platform Subscription Status Card */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
@@ -576,12 +684,18 @@ const ScrapperDashboard = () => {
               <div className="flex-1 min-w-0">
                 <p className="text-[10px] md:text-xs font-bold uppercase tracking-wider mb-0.5" 
                    style={{ color: subscriptionData?.isPlatformActive ? '#059669' : '#dc2626' }}>
-                  {subscriptionData?.isPlatformActive ? getTranslatedText('Subscription Active') : getTranslatedText('Subscription Expired')}
+                  {subscriptionData?.isPlatformActive 
+                    ? getTranslatedText('Subscription Active') 
+                    : subscriptionData?.platform?.planId 
+                      ? getTranslatedText('Subscription Expired') 
+                      : getTranslatedText('No Subscription')}
                 </p>
                 <h3 className="text-sm md:text-base font-bold text-slate-800">
                   {subscriptionData?.isPlatformActive 
                     ? getTranslatedText('Access to all pickup requests')
-                    : getTranslatedText('Renew to receive requests')}
+                    : subscriptionData?.platform?.planId
+                      ? getTranslatedText('Renew to receive requests')
+                      : getTranslatedText('Take subscription to receive requests')}
                 </h3>
                 {subscriptionData?.isPlatformActive && subscriptionData?.platform?.expiryDate && (
                   <p className="text-[11px] text-slate-500 mt-0.5">
@@ -596,7 +710,7 @@ const ScrapperDashboard = () => {
                   type="button"
                   className="px-4 py-1.5 rounded-full text-xs font-bold bg-red-600 text-white shadow-sm hover:bg-red-700 transition-colors"
                 >
-                  {getTranslatedText("Renew Now")}
+                  {subscriptionData?.platform?.planId ? getTranslatedText("Renew Now") : getTranslatedText("Subscribe Now")}
                 </button>
               )}
               {subscriptionData?.isPlatformActive && (

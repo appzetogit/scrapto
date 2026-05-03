@@ -604,6 +604,9 @@ export const scrapperProfileAPI = {
   getPublicProfile: async (id) => {
     return apiRequest(`/scrappers/${id}/profile`, { method: 'GET' });
   },
+  getStats: async () => {
+    return apiRequest(API_ENDPOINTS.scrappers.stats, { method: 'GET' });
+  },
 };
 
 // Banner API

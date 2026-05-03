@@ -1,7 +1,11 @@
 import Scrapper from '../models/Scrapper.js';
 import User from '../models/User.js';
+import Order from '../models/Order.js';
+import Bid from '../models/Bid.js';
+import MarketplaceRequest from '../models/MarketplaceRequest.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 import { sendSuccess, sendError } from '../utils/responseHandler.js';
+import { ORDER_STATUS } from '../config/constants.js';
 import logger from '../utils/logger.js';
 
 export const getMyProfile = asyncHandler(async (req, res) => {
@@ -157,4 +161,42 @@ export const updateFcmToken = asyncHandler(async (req, res) => {
     }
 
     sendSuccess(res, 'FCM token updated successfully');
+});
+
+export const getScrapperStats = asyncHandler(async (req, res) => {
+    const scrapperId = req.user.id;
+
+    // 1. Upcoming Pickups (Assigned but not completed/cancelled)
+    // We use CONFIRMED and IN_PROGRESS as active states
+    const upcomingPickups = await Order.countDocuments({
+        scrapper: scrapperId,
+        status: { $in: [ORDER_STATUS.CONFIRMED, ORDER_STATUS.IN_PROGRESS] }
+    });
+
+    // 2. Collectors (Unique users served)
+    const completedOrders = await Order.find({
+        scrapper: scrapperId,
+        status: ORDER_STATUS.COMPLETED
+    }).distinct('user');
+    const collectorsCount = completedOrders.length;
+
+    // 3. Under Negotiation (Pending bids on marketplace)
+    const underNegotiation = await Bid.countDocuments({
+        scrapperId: scrapperId,
+        status: 'pending'
+    });
+
+    // 4. Open Items (Available marketplace requests)
+    const openItems = await MarketplaceRequest.countDocuments({
+        status: { $in: ['open', 'bidding'] }
+    });
+
+    sendSuccess(res, 'Scrapper stats fetched successfully', {
+        stats: {
+            upcomingPickups,
+            collectors: collectorsCount,
+            underNegotiation,
+            openItems
+        }
+    });
 });
