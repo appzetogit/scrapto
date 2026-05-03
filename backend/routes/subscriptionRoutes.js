@@ -7,7 +7,8 @@ import {
   verifyPayment,
   cancel,
   renew,
-  getHistory
+  getHistory,
+  validateCoupon
 } from '../controllers/subscriptionController.js';
 import { protect } from '../middleware/auth.js';
 import { isScrapper } from '../middleware/auth.js';
@@ -28,6 +29,7 @@ router.post('/verify-payment', verifyPayment);
 router.post('/cancel', cancel);
 router.post('/renew', renew);
 router.get('/history', getHistory);
+router.post('/validate-coupon', validateCoupon);
 
 export default router;
 

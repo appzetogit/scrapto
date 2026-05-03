@@ -5,6 +5,7 @@ import { useAuth } from '../../shared/context/AuthContext';
 import { checkAndProcessMilestone } from '../../shared/utils/referralUtils';
 import { subscriptionAPI } from '../../shared/utils/api';
 import { usePageTranslation } from '../../../hooks/usePageTranslation';
+import toast from 'react-hot-toast';
 
 const SubscriptionPlanPage = () => {
   const staticTexts = [
@@ -54,6 +55,12 @@ const SubscriptionPlanPage = () => {
   const [error, setError] = useState(null);
   const [currentSubscription, setCurrentSubscription] = useState(null);
   const [planType, setPlanType] = useState(initialType);
+
+  // Coupon State
+  const [couponCode, setCouponCode] = useState('');
+  const [isValidatingCoupon, setIsValidatingCoupon] = useState(false);
+  const [appliedCoupon, setAppliedCoupon] = useState(null);
+  const [couponError, setCouponError] = useState(null);
 
   // Check if user is authenticated as scrapper
   useEffect(() => {
@@ -132,6 +139,37 @@ const SubscriptionPlanPage = () => {
 
   const handlePlanSelect = (planId) => {
     setSelectedPlan(planId);
+    // Reset coupon when plan changes
+    setAppliedCoupon(null);
+    setCouponCode('');
+    setCouponError(null);
+  };
+
+  const handleApplyCoupon = async () => {
+    if (!couponCode.trim()) return;
+    if (!selectedPlan) {
+      toast.error(getTranslatedText('Please select a subscription plan first'));
+      return;
+    }
+
+    try {
+      setIsValidatingCoupon(true);
+      setCouponError(null);
+      const res = await subscriptionAPI.validateCoupon(couponCode, selectedPlan);
+      
+      if (res.success) {
+        setAppliedCoupon(res.data);
+        toast.success(getTranslatedText('Coupon applied successfully!'));
+      } else {
+        setCouponError(res.message || 'Invalid coupon');
+        toast.error(res.message || 'Invalid coupon');
+      }
+    } catch (err) {
+      setCouponError(err.message || 'Failed to validate coupon');
+      toast.error(err.message || 'Failed to validate coupon');
+    } finally {
+      setIsValidatingCoupon(false);
+    }
   };
 
   const loadRazorpay = () => {
@@ -168,9 +206,9 @@ const SubscriptionPlanPage = () => {
 
     try {
       await loadRazorpay();
-
-      // Use new subscription API
-      const createRes = await subscriptionAPI.subscribe(selectedPlan);
+      
+      // Pass coupon code if applied
+      const createRes = await subscriptionAPI.subscribe(selectedPlan, appliedCoupon?.code);
 
       if (!createRes.success) {
         throw new Error(createRes.error || 'Failed to create subscription order');
@@ -450,6 +488,67 @@ const SubscriptionPlanPage = () => {
           ))}
         </div>
 
+        {/* Coupon Section */}
+        {selectedPlan && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-6 bg-zinc-900 border border-white/10 rounded-2xl p-6"
+          >
+            <div className="flex flex-col gap-4">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-semibold text-gray-300">Have a Coupon?</span>
+                {appliedCoupon && (
+                  <button 
+                    onClick={() => {
+                      setAppliedCoupon(null);
+                      setCouponCode('');
+                    }}
+                    className="text-xs text-red-400 hover:text-red-300 font-medium"
+                  >
+                    Remove
+                  </button>
+                )}
+              </div>
+              
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={couponCode}
+                  onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                  placeholder="Enter coupon code"
+                  disabled={appliedCoupon || isValidatingCoupon}
+                  className="flex-1 bg-zinc-800 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500 disabled:opacity-50 font-mono uppercase"
+                />
+                <button
+                  onClick={handleApplyCoupon}
+                  disabled={!couponCode.trim() || appliedCoupon || isValidatingCoupon}
+                  className="px-6 py-3 bg-zinc-800 hover:bg-zinc-700 text-emerald-400 font-bold rounded-xl transition-colors disabled:opacity-50"
+                >
+                  {isValidatingCoupon ? '...' : 'Apply'}
+                </button>
+              </div>
+
+              {appliedCoupon && (
+                <motion.div 
+                  initial={{ opacity: 0 }} 
+                  animate={{ opacity: 1 }}
+                  className="flex items-center gap-2 text-emerald-400 text-sm font-medium bg-emerald-400/10 p-3 rounded-lg border border-emerald-400/20"
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
+                  <span>{appliedCoupon.title}: ₹{appliedCoupon.amount} OFF applied!</span>
+                </motion.div>
+              )}
+              
+              {couponError && !appliedCoupon && (
+                <p className="text-red-400 text-xs mt-1">{couponError}</p>
+              )}
+            </div>
+          </motion.div>
+        )}
+
         {/* Subscribe Button */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -478,7 +577,20 @@ const SubscriptionPlanPage = () => {
                 <span>{getTranslatedText("Processing...")}</span>
               </div>
             ) : (
-              `${getTranslatedText("Subscribe")} - ₹${selectedPlan ? plans.find(p => p.id === selectedPlan).price : '0'}/${selectedPlan ? formatDuration(plans.find(p => p.id === selectedPlan).duration, plans.find(p => p.id === selectedPlan).durationType) : getTranslatedText('month')}`
+              <div className="flex flex-col items-center">
+                <div className="flex items-center gap-2">
+                  <span>{getTranslatedText("Subscribe")} - </span>
+                  {appliedCoupon ? (
+                    <div className="flex items-center gap-2">
+                      <span className="line-through text-white/50 text-sm">₹{plans.find(p => p.id === selectedPlan).price}</span>
+                      <span className="text-emerald-300">₹{Math.max(0, plans.find(p => p.id === selectedPlan).price - appliedCoupon.amount)}</span>
+                    </div>
+                  ) : (
+                    <span>₹{selectedPlan ? plans.find(p => p.id === selectedPlan).price : '0'}</span>
+                  )}
+                  <span>/{selectedPlan ? formatDuration(plans.find(p => p.id === selectedPlan).duration, plans.find(p => p.id === selectedPlan).durationType) : getTranslatedText('month')}</span>
+                </div>
+              </div>
             )}
           </motion.button>
         </motion.div>

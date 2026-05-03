@@ -237,10 +237,10 @@ export const subscriptionAPI = {
   getMySubscription: async () => {
     return apiRequest('/subscriptions/my-subscription', { method: 'GET' });
   },
-  subscribe: async (planId) => {
+  subscribe: async (planId, couponCode = null) => {
     return apiRequest('/subscriptions/subscribe', {
       method: 'POST',
-      body: JSON.stringify({ planId }),
+      body: JSON.stringify({ planId, couponCode }),
     });
   },
   verifyPayment: async (paymentData) => {
@@ -255,14 +255,20 @@ export const subscriptionAPI = {
       body: JSON.stringify({ type, reason }),
     });
   },
-  renew: async (planId) => {
+  renew: async (planId, couponCode = null) => {
     return apiRequest('/subscriptions/renew', {
       method: 'POST',
-      body: JSON.stringify({ planId }),
+      body: JSON.stringify({ planId, couponCode }),
     });
   },
   getHistory: async () => {
     return apiRequest('/subscriptions/history', { method: 'GET' });
+  },
+  validateCoupon: async (code, planId = null) => {
+    return apiRequest('/subscriptions/validate-coupon', {
+      method: 'POST',
+      body: JSON.stringify({ code, planId }),
+    });
   },
 };
 

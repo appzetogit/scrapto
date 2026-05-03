@@ -13,8 +13,11 @@ import { createOrder } from '../services/paymentService.js';
 import Payment from '../models/Payment.js';
 import Scrapper from '../models/Scrapper.js';
 import SubscriptionPlan from '../models/SubscriptionPlan.js';
+import Coupon from '../models/CouponModel.js';
+import CouponUsage from '../models/CouponUsageModel.js';
 import { PAYMENT_STATUS } from '../config/constants.js';
 import logger from '../utils/logger.js';
+import mongoose from 'mongoose';
 
 // @desc    Get all active subscription plans
 // @route   GET /api/subscriptions/plans
@@ -49,7 +52,7 @@ export const getMySubscription = asyncHandler(async (req, res) => {
 // @route   POST /api/subscriptions/subscribe
 // @access  Private (Scrapper)
 export const subscribe = asyncHandler(async (req, res) => {
-  const { planId } = req.body;
+  const { planId, couponCode } = req.body;
   const scrapperId = req.user.id;
 
   if (!planId) {
@@ -83,9 +86,45 @@ export const subscribe = asyncHandler(async (req, res) => {
     }
   }
 
+  // Handle Coupons
+  let discountAmount = 0;
+  let appliedCoupon = null;
+
+  if (couponCode) {
+    const coupon = await Coupon.findOne({ code: couponCode.toUpperCase(), isActive: true });
+    if (!coupon) {
+      return sendError(res, 'Invalid coupon code', 400);
+    }
+
+    // Basic Validation
+    const now = new Date();
+    if (now < coupon.validFrom || now > coupon.validTo) {
+      return sendError(res, 'Coupon is not valid at this time', 400);
+    }
+
+    if (coupon.applicableRole !== 'ALL' && coupon.applicableRole !== 'SCRAPPER') {
+      return sendError(res, 'Coupon not applicable for your role', 400);
+    }
+
+    if (coupon.usageType === 'LIMITED' && coupon.usedCount >= coupon.limit) {
+      return sendError(res, 'Coupon usage limit reached', 400);
+    }
+
+    // Check if user already used this coupon
+    const existingUsage = await CouponUsage.findOne({ couponId: coupon._id, scrapperId });
+    if (existingUsage) {
+      return sendError(res, 'You have already used this coupon', 400);
+    }
+
+    discountAmount = coupon.amount;
+    appliedCoupon = coupon;
+  }
+
+  const finalPrice = Math.max(0, plan.price - discountAmount);
+
   // Handle Free Plans (Price = 0)
-  if (plan.price === 0) {
-    logger.info(`[Subscription] Activating free plan for scrapper ${scrapperId}: ${plan.name}`);
+  if (finalPrice === 0) {
+    logger.info(`[Subscription] Activating free plan (or 100% discount) for scrapper ${scrapperId}: ${plan.name}`);
     
     // Create a completed payment record for the free plan
     const payment = await Payment.create({
@@ -101,9 +140,25 @@ export const subscribe = asyncHandler(async (req, res) => {
         planName: plan.name,
         planType: plan.type,
         planDuration: plan.durationType,
-        isFree: true
+        isFree: plan.price === 0,
+        couponApplied: !!appliedCoupon,
+        couponCode: appliedCoupon?.code,
+        originalPrice: plan.price,
+        discountAmount
       })
     });
+
+    // Record Coupon Usage if applied
+    if (appliedCoupon) {
+      await CouponUsage.create({
+        couponId: appliedCoupon._id,
+        scrapperId,
+        userType: 'Scrapper',
+        amount: discountAmount
+      });
+      appliedCoupon.usedCount += 1;
+      await appliedCoupon.save();
+    }
 
     // Activate subscription immediately
     const subscriptionResult = await activateSubscription(scrapperId, payment._id);
@@ -133,10 +188,12 @@ export const subscribe = asyncHandler(async (req, res) => {
       planId: planId.toString(),
       planName: plan.name,
       planType: plan.type, // Store type in notes
-      durationDays: plan.getDurationInDays()
+      durationDays: plan.getDurationInDays(),
+      couponCode: appliedCoupon?.code,
+      discountAmount
     };
 
-    razorpayOrder = await createOrder(plan.price, plan.currency || 'INR', receiptId, notes);
+    razorpayOrder = await createOrder(finalPrice, plan.currency || 'INR', receiptId, notes);
   } catch (error) {
     logger.error('[Subscription] Razorpay order creation error:', error);
     return sendError(res, 'Failed to create payment order. Please try again.', 500);
@@ -147,7 +204,10 @@ export const subscribe = asyncHandler(async (req, res) => {
     user: scrapperId,
     order: null, // No order for subscription
     entityType: 'subscription',
-    amount: plan.price,
+    amount: finalPrice,
+    originalAmount: plan.price,
+    discountAmount: discountAmount,
+    couponCode: appliedCoupon?.code,
     currency: plan.currency || 'INR',
     status: PAYMENT_STATUS.PENDING,
     razorpayOrderId: razorpayOrder.id,
@@ -172,10 +232,62 @@ export const subscribe = asyncHandler(async (req, res) => {
       id: plan._id,
       name: plan.name,
       price: plan.price,
+      finalPrice: finalPrice,
+      discountAmount: discountAmount,
       duration: plan.duration,
       durationType: plan.durationType,
       type: plan.type
     }
+  });
+});
+
+// @desc    Validate coupon for subscription
+// @route   POST /api/subscriptions/validate-coupon
+// @access  Private (Scrapper)
+export const validateCoupon = asyncHandler(async (req, res) => {
+  const { code, planId } = req.body;
+  const scrapperId = req.user.id;
+
+  if (!code) {
+    return sendError(res, 'Coupon code is required', 400);
+  }
+
+  const coupon = await Coupon.findOne({ code: code.toUpperCase(), isActive: true });
+  if (!coupon) {
+    return sendError(res, 'Invalid coupon code', 400);
+  }
+
+  // Basic Validation
+  const now = new Date();
+  if (now < coupon.validFrom || now > coupon.validTo) {
+    return sendError(res, 'Coupon has expired or is not yet valid', 400);
+  }
+
+  if (coupon.applicableRole !== 'ALL' && coupon.applicableRole !== 'SCRAPPER') {
+    return sendError(res, 'This coupon is not applicable for your account type', 400);
+  }
+
+  if (coupon.usageType === 'LIMITED' && coupon.usedCount >= coupon.limit) {
+    return sendError(res, 'This coupon has reached its usage limit', 400);
+  }
+
+  // Check if user already used this coupon
+  const existingUsage = await CouponUsage.findOne({ couponId: coupon._id, scrapperId });
+  if (existingUsage) {
+    return sendError(res, 'You have already redeemed this coupon', 400);
+  }
+
+  // Get plan details to calculate discount (optional if we just want to return coupon amount)
+  let plan = null;
+  if (planId) {
+    plan = await SubscriptionPlan.findById(planId);
+  }
+
+  sendSuccess(res, 'Coupon is valid', {
+    code: coupon.code,
+    amount: coupon.amount,
+    title: coupon.title,
+    discountedPrice: plan ? Math.max(0, plan.price - coupon.amount) : null
   });
 });
 
@@ -244,6 +356,34 @@ export const verifyPayment = asyncHandler(async (req, res) => {
     // Activate subscription
     const subscriptionResult = await activateSubscription(scrapperId, payment._id);
 
+    // If coupon was used, record usage (for non-free plans)
+    if (payment.couponCode) {
+      const coupon = await Coupon.findOne({ code: payment.couponCode.toUpperCase() });
+      if (coupon) {
+        // Check if usage already recorded (to avoid double recording on retry)
+        const existingUsage = await CouponUsage.findOne({ 
+          couponId: coupon._id, 
+          scrapperId: scrapperId,
+          paymentId: payment._id 
+        });
+
+        if (!existingUsage) {
+          await CouponUsage.create({
+            couponId: coupon._id,
+            scrapperId: scrapperId,
+            userType: 'Scrapper',
+            paymentId: payment._id,
+            amount: payment.discountAmount || 0
+          });
+          
+          // Increment used count
+          coupon.usedCount = (coupon.usedCount || 0) + 1;
+          await coupon.save();
+          logger.info(`[Subscription] Coupon ${coupon.code} usage recorded for scrapper ${scrapperId}`);
+        }
+      }
+    }
+
     logger.info(`[Subscription] Subscription activated for scrapper ${scrapperId}`);
 
     sendSuccess(res, 'Subscription activated successfully', {
@@ -272,7 +412,7 @@ export const cancel = asyncHandler(async (req, res) => {
 // @route   POST /api/subscriptions/renew
 // @access  Private (Scrapper)
 export const renew = asyncHandler(async (req, res) => {
-  const { planId } = req.body;
+  const { planId, couponCode } = req.body;
   const scrapperId = req.user.id;
 
   if (!planId) {
@@ -284,6 +424,31 @@ export const renew = asyncHandler(async (req, res) => {
   if (!plan || !plan.isActive) {
     return sendError(res, 'Plan not found or inactive', 404);
   }
+
+  // Handle Coupons
+  let discountAmount = 0;
+  let appliedCoupon = null;
+
+  if (couponCode) {
+    const coupon = await Coupon.findOne({ code: couponCode.toUpperCase(), isActive: true });
+    if (coupon) {
+      // Basic Validation
+      const now = new Date();
+      const isValid = now >= coupon.validFrom && now <= coupon.validTo;
+      const isRoleValid = coupon.applicableRole === 'ALL' || coupon.applicableRole === 'SCRAPPER';
+      const isLimitValid = coupon.usageType !== 'LIMITED' || coupon.usedCount < coupon.limit;
+
+      if (isValid && isRoleValid && isLimitValid) {
+        const existingUsage = await CouponUsage.findOne({ couponId: coupon._id, scrapperId });
+        if (!existingUsage) {
+          discountAmount = coupon.amount;
+          appliedCoupon = coupon;
+        }
+      }
+    }
+  }
+
+  const finalPrice = Math.max(0, plan.price - discountAmount);
 
   // Validate Razorpay configuration
   if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
@@ -302,10 +467,12 @@ export const renew = asyncHandler(async (req, res) => {
       planId: planId.toString(),
       planName: plan.name,
       durationDays: plan.getDurationInDays(),
-      action: 'renewal'
+      action: 'renewal',
+      couponCode: appliedCoupon?.code,
+      discountAmount
     };
 
-    razorpayOrder = await createOrder(plan.price, plan.currency || 'INR', receiptId, notes);
+    razorpayOrder = await createOrder(finalPrice, plan.currency || 'INR', receiptId, notes);
   } catch (error) {
     logger.error('[Subscription] Razorpay order creation error:', error);
     return sendError(res, 'Failed to create payment order. Please try again.', 500);
@@ -316,16 +483,20 @@ export const renew = asyncHandler(async (req, res) => {
     user: scrapperId,
     order: null,
     entityType: 'subscription',
-    amount: plan.price,
-    currency: plan.currency || 'INR',
     status: PAYMENT_STATUS.PENDING,
     razorpayOrderId: razorpayOrder.id,
     planId: planId,
+    amount: finalPrice,
+    originalAmount: plan.price,
+    discountAmount: discountAmount,
+    couponCode: appliedCoupon?.code,
     durationDays: plan.getDurationInDays(),
     notes: JSON.stringify({
       planName: plan.name,
       planDuration: plan.durationType,
-      action: 'renewal'
+      action: 'renewal',
+      couponCode: appliedCoupon?.code,
+      discountAmount
     })
   });
 
@@ -339,6 +510,8 @@ export const renew = asyncHandler(async (req, res) => {
       id: plan._id,
       name: plan.name,
       price: plan.price,
+      finalPrice: finalPrice,
+      discountAmount: discountAmount,
       duration: plan.duration,
       durationType: plan.durationType
     }
