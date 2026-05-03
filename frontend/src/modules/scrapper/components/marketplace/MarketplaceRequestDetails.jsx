@@ -28,7 +28,6 @@ const MarketplaceRequestDetails = () => {
       const response = await marketplaceAPI.getRequestById(requestId);
       if (response.success) {
         setRequest(response.data);
-        setBidAmount(response.data.basePrice.toString());
       }
     } catch (error) {
       console.error('Failed to fetch request details:', error);
@@ -145,14 +144,6 @@ const MarketplaceRequestDetails = () => {
               <span>{request.location.city}, {request.location.state}</span>
             </div>
             
-            <div className="p-4 bg-emerald-50 rounded-2xl mb-4 border border-emerald-100">
-              <div className="flex items-center text-emerald-800 font-bold mb-1">
-                <FaTag className="mr-2 text-emerald-500" />
-                <span className="text-2xl">₹{request.basePrice}</span>
-              </div>
-              <p className="text-xs text-emerald-600 italic">Expected price set by Admin</p>
-            </div>
-
             <h3 className="font-bold text-emerald-800 mb-2 flex items-center">
               <FaInfoCircle className="mr-2 text-emerald-500" /> Description
             </h3>
@@ -286,7 +277,7 @@ const MarketplaceRequestDetails = () => {
                     <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
                   ) : (
                     <>
-                      <FaHandHoldingUsd /> {parseFloat(bidAmount) === request.basePrice ? 'Agree to Price' : 'Place Bid'}
+                      <FaHandHoldingUsd /> Place Bid
                     </>
                   )}
                 </button>

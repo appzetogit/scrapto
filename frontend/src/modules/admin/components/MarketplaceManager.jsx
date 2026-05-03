@@ -14,7 +14,6 @@ const MarketplaceManager = () => {
     description: '',
     name: '', // Added for auto-registration
     category: 'metal',
-    basePrice: '',
     city: '',
     state: '',
     fullAddress: '',
@@ -96,7 +95,6 @@ const MarketplaceManager = () => {
           description: '',
           name: '',
           category: 'metal',
-          basePrice: '',
           city: '',
           state: '',
           fullAddress: '',
@@ -195,7 +193,6 @@ const MarketplaceManager = () => {
             <tr>
               <th className="px-6 py-4 font-bold text-gray-700">Request Details</th>
               <th className="px-6 py-4 font-bold text-gray-700">Category</th>
-              <th className="px-6 py-4 font-bold text-gray-700">Price (Base)</th>
               <th className="px-6 py-4 font-bold text-gray-700">Location</th>
               <th className="px-6 py-4 font-bold text-gray-700">Status</th>
               <th className="px-6 py-4 font-bold text-gray-700">Actions</th>
@@ -221,7 +218,6 @@ const MarketplaceManager = () => {
                     </div>
                   </td>
                   <td className="px-6 py-4 capitalize">{req.category}</td>
-                  <td className="px-6 py-4 font-bold">₹{req.basePrice}</td>
                   <td className="px-6 py-4 text-sm">{req.location.city}, {req.location.state}</td>
                   <td className="px-6 py-4">
                     <span className={`px-2 py-1 rounded-full text-xs font-bold uppercase ${
@@ -337,15 +333,6 @@ const MarketplaceManager = () => {
                 )}
               </div>
               <div>
-                <label className="block text-sm font-bold mb-1">Base Price (₹)</label>
-                <input 
-                  type="number" required
-                  className="w-full p-2 border rounded-lg"
-                  value={newRequest.basePrice}
-                  onChange={e => setNewRequest({...newRequest, basePrice: e.target.value})}
-                />
-              </div>
-              <div>
                 <label className="block text-sm font-bold mb-1">City</label>
                 <input 
                   type="text" required
@@ -400,7 +387,6 @@ const MarketplaceManager = () => {
     "title": "Old Iron Pipes",
     "description": "50kg of mixed iron pipes",
     "category": "metal",
-    "basePrice": 1200,
     "city": "Indore",
     "state": "MP",
     "fullAddress": "Address here",
@@ -446,10 +432,6 @@ const MarketplaceManager = () => {
                 <div className="col-span-2">
                   <h3 className="text-xs font-bold text-gray-400 uppercase mb-1">Description</h3>
                   <p className="text-gray-700 whitespace-pre-line">{selectedRequest.description}</p>
-                </div>
-                <div className="col-span-2 md:col-span-1">
-                  <h3 className="text-xs font-bold text-gray-400 uppercase mb-1">Base Price</h3>
-                  <p className="font-bold text-indigo-600 text-xl">₹{selectedRequest.basePrice}</p>
                 </div>
                 <div className="col-span-2 md:col-span-1">
                   <h3 className="text-xs font-bold text-gray-400 uppercase mb-1">Status</h3>

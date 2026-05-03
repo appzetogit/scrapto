@@ -120,12 +120,7 @@ const MarketplacePage = () => {
                     <span>{request.location.city}, {request.location.state}</span>
                   </div>
 
-                  <div className="mt-3 flex items-center justify-between">
-                    <div className="flex items-center text-emerald-800 font-bold">
-                      <FaTag className="mr-2 text-emerald-500" />
-                      <span className="text-xl">₹{request.basePrice}</span>
-                      <span className="text-xs font-normal text-emerald-500 ml-1">(Admin Price)</span>
-                    </div>
+                  <div className="mt-3 flex items-center justify-end">
                     <button className="bg-emerald-600 text-white p-2 rounded-xl group-hover:bg-emerald-700 transition-colors">
                       <FaChevronRight />
                     </button>
