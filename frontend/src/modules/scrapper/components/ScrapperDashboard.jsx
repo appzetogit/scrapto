@@ -582,15 +582,15 @@ const ScrapperDashboard = () => {
         </motion.div>
 
         {/* Welcome Section */}
-        <div className="mb-6 mt-6">
+        <div className="mt-4 mb-1">
           <h2 className="text-2xl font-bold text-slate-900">
             {getTranslatedText('Welcome, {name}! 👋', { name: user?.name?.split(' ')[0] || 'Scrapper' })}
           </h2>
         </div>
 
         {/* Your Activity Section */}
-        <div className="mt-8 mb-8">
-          <h3 className="text-lg font-bold text-slate-900 mb-4">{getTranslatedText('Your Activity')}</h3>
+        <div className="mt-2 mb-6">
+          <h3 className="text-lg font-bold text-slate-900 mb-3">{getTranslatedText('Your Activity')}</h3>
           <div className="grid grid-cols-2 gap-4">
             {/* Upcoming Pickups */}
             <motion.div 
@@ -668,65 +668,71 @@ const ScrapperDashboard = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.12 }}
           onClick={() => navigate('/scrapper/subscription?type=general')}
-          className={`mt-4 rounded-2xl shadow-md p-4 md:p-5 border cursor-pointer relative overflow-hidden group transition-all duration-300 ${
+          className={`mt-3 rounded-2xl shadow-lg p-3 md:p-4 border cursor-pointer relative overflow-hidden group transition-all duration-500 ${
             subscriptionData?.isPlatformActive 
-            ? 'bg-white border-emerald-100 hover:border-emerald-200 shadow-sm' 
-            : 'bg-red-50 border-red-100 hover:border-red-200'
+            ? 'bg-[#0a0a0a] border-white/5 shadow-emerald-500/5' 
+            : 'bg-red-50 border-red-100'
           }`}
         >
+          {/* Animated Background Glow for Active Status */}
+          {subscriptionData?.isPlatformActive && (
+            <div className="absolute -top-16 -right-16 w-32 h-32 bg-emerald-500/10 blur-[60px] rounded-full pointer-events-none group-hover:bg-emerald-500/20 transition-all duration-700"></div>
+          )}
+
           <div className="flex items-center justify-between gap-3 relative z-10">
             <div className="flex items-center gap-3">
-              <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                subscriptionData?.isPlatformActive ? 'bg-emerald-100' : 'bg-red-100'
+              <div className={`w-9 h-9 rounded-xl flex items-center justify-center transition-transform duration-500 group-hover:rotate-12 ${
+                subscriptionData?.isPlatformActive ? 'bg-emerald-500/10' : 'bg-red-100'
               }`}>
-                <FaGift className={subscriptionData?.isPlatformActive ? 'text-emerald-600' : 'text-red-600'} />
+                <FaGift className={`text-base ${subscriptionData?.isPlatformActive ? 'text-emerald-400' : 'text-red-600'}`} />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-[10px] md:text-xs font-bold uppercase tracking-wider mb-0.5" 
-                   style={{ color: subscriptionData?.isPlatformActive ? '#059669' : '#dc2626' }}>
-                  {subscriptionData?.isPlatformActive 
-                    ? getTranslatedText('Subscription Active') 
-                    : subscriptionData?.platform?.planId 
-                      ? getTranslatedText('Subscription Expired') 
+                <div className="flex items-center gap-2 mb-0.5">
+                  <p className={`text-[9px] font-black uppercase tracking-[0.15em] ${
+                    subscriptionData?.isPlatformActive ? 'text-emerald-400' : 'text-red-600'
+                  }`}>
+                    {subscriptionData?.isPlatformActive 
+                      ? getTranslatedText('Subscription Active') 
                       : getTranslatedText('No Subscription')}
-                </p>
-                <h3 className="text-sm md:text-base font-bold text-slate-800">
-                  {subscriptionData?.isPlatformActive 
-                    ? getTranslatedText('Access to all pickup requests')
-                    : subscriptionData?.platform?.planId
-                      ? getTranslatedText('Renew to receive requests')
-                      : getTranslatedText('Take subscription to receive requests')}
-                </h3>
-                {subscriptionData?.isPlatformActive && subscriptionData?.platform?.expiryDate && (
-                  <p className="text-[11px] text-slate-500 mt-0.5">
-                    {getTranslatedText('Valid until {date}', { date: new Date(subscriptionData.platform.expiryDate).toLocaleDateString() })}
                   </p>
+                  {subscriptionData?.isPlatformActive && (
+                    <span className="w-1 h-1 rounded-full bg-emerald-400 animate-pulse"></span>
+                  )}
+                </div>
+                {!subscriptionData?.isPlatformActive && (
+                  <h3 className="text-[13px] font-bold leading-tight text-slate-800">
+                    {getTranslatedText('Renew to receive requests')}
+                  </h3>
                 )}
               </div>
             </div>
-            <div className="flex flex-col items-end gap-2 flex-shrink-0">
-              {!subscriptionData?.isPlatformActive && (
+            <div className="flex items-center gap-3 flex-shrink-0">
+              {subscriptionData?.isPlatformActive ? (
+                <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/10">
+                  <FaCheck className="text-[9px] text-emerald-400" />
+                  <span className="text-[9px] font-black text-emerald-400 uppercase">{getTranslatedText('Active')}</span>
+                </div>
+              ) : (
                 <button
                   type="button"
-                  className="px-4 py-1.5 rounded-full text-xs font-bold bg-red-600 text-white shadow-sm hover:bg-red-700 transition-colors"
+                  className="px-4 py-1.5 rounded-full text-[10px] font-black bg-red-600 text-white shadow-lg shadow-red-600/20 hover:bg-red-700 transition-all active:scale-95"
                 >
-                  {subscriptionData?.platform?.planId ? getTranslatedText("Renew Now") : getTranslatedText("Subscribe Now")}
+                  {getTranslatedText("Renew")}
                 </button>
-              )}
-              {subscriptionData?.isPlatformActive && (
-                <div className="flex items-center gap-1 text-emerald-600">
-                  <FaCheck className="text-xs" />
-                  <span className="text-xs font-bold">{getTranslatedText('Active')}</span>
-                </div>
               )}
             </div>
           </div>
           
-          {/* Decorative background element */}
-          <div className={`absolute top-0 right-0 w-24 h-full opacity-10 pointer-events-none ${
-            subscriptionData?.isPlatformActive ? 'bg-emerald-500' : 'bg-red-500'
-          }`} 
-          style={{ clipPath: 'polygon(100% 0, 0 0, 100% 100%)' }}></div>
+          {subscriptionData?.isPlatformActive && subscriptionData?.platform?.expiryDate && (
+             <div className="mt-2 pt-2 border-t border-white/5 flex items-center justify-between">
+                <p className="text-[9px] text-slate-500 flex items-center gap-1">
+                  <span className="opacity-60">{getTranslatedText('Valid until')}</span>
+                  <span className="font-bold text-emerald-400/60">
+                    {new Date(subscriptionData.platform.expiryDate).toLocaleDateString()}
+                  </span>
+                </p>
+             </div>
+          )}
         </motion.div>
 
         {/* Live Market Prices */}
