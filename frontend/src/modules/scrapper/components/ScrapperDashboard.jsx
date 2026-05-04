@@ -596,7 +596,7 @@ const ScrapperDashboard = () => {
             <motion.div 
               whileHover={{ y: -2 }}
               onClick={() => navigate('/scrapper/my-active-requests')}
-              className="bg-[#e8d5b7] p-3 rounded-3xl relative overflow-hidden h-32 shadow-sm cursor-pointer"
+              className="bg-black p-3 rounded-3xl relative overflow-hidden h-32 shadow-sm cursor-pointer"
             >
               <h4 className="text-white text-sm font-bold leading-tight w-24">
                 {getTranslatedText('Upcoming Pickups')}
@@ -613,7 +613,7 @@ const ScrapperDashboard = () => {
             <motion.div 
               whileHover={{ y: -2 }}
               onClick={() => navigate('/scrapper/earnings')}
-              className="bg-[#e8d5b7] p-3 rounded-3xl relative overflow-hidden h-32 shadow-sm cursor-pointer"
+              className="bg-black p-3 rounded-3xl relative overflow-hidden h-32 shadow-sm cursor-pointer"
             >
               <h4 className="text-white text-sm font-bold leading-tight w-24">
                 {getTranslatedText('Collectors')}
@@ -630,7 +630,7 @@ const ScrapperDashboard = () => {
             <motion.div 
               whileHover={{ y: -2 }}
               onClick={() => navigate('/scrapper/marketplace?tab=my_bids')}
-              className="bg-[#e8d5b7] p-3 rounded-3xl relative overflow-hidden h-32 shadow-sm cursor-pointer"
+              className="bg-black p-3 rounded-3xl relative overflow-hidden h-32 shadow-sm cursor-pointer"
             >
               <h4 className="text-white text-sm font-bold leading-tight w-24">
                 {getTranslatedText('Under Negotiation')}
@@ -647,7 +647,7 @@ const ScrapperDashboard = () => {
             <motion.div 
               whileHover={{ y: -2 }}
               onClick={() => navigate('/scrapper/marketplace')}
-              className="bg-[#e8d5b7] p-3 rounded-3xl relative overflow-hidden h-32 shadow-sm cursor-pointer"
+              className="bg-black p-3 rounded-3xl relative overflow-hidden h-32 shadow-sm cursor-pointer"
             >
               <h4 className="text-white text-sm font-bold leading-tight w-24">
                 {getTranslatedText('Open Items')}
@@ -743,8 +743,8 @@ const ScrapperDashboard = () => {
           <BannerSlider audience="scrapper" />
         </div>
 
-        {/* Market Price Management Card */}
-        {!subscriptionData?.isMarketActive && (
+        {/* Market Price Management Card Hidden */}
+        {/* {!subscriptionData?.isMarketActive && (
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -785,7 +785,7 @@ const ScrapperDashboard = () => {
               </div>
             </div>
           </motion.div>
-        )}
+        )} */}
       </div>
 
       {/* Content */}
