@@ -46,7 +46,7 @@ const SubscriptionPlanPage = () => {
   const { user } = useAuth();
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
-  const initialType = queryParams.get('type') === 'market_price' ? 'market_price' : 'general';
+  const initialType = 'general'; // Force general plan type, market price hidden
   
   const [selectedPlan, setSelectedPlan] = useState(null);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -365,7 +365,8 @@ const SubscriptionPlanPage = () => {
                 )
             }
           </h1>
-          {!queryParams.has('type') && (
+          {/* Plan Type Toggle Hidden */}
+          {/* {!queryParams.has('type') && (
             <div className="flex justify-center gap-4 mt-4 mb-6">
               <button
                 onClick={() => { setPlanType('general'); setSelectedPlan(null); }}
@@ -380,7 +381,7 @@ const SubscriptionPlanPage = () => {
                 {getTranslatedText("Market Prices")}
               </button>
             </div>
-          )}
+          )} */}
         </motion.div>
 
         {/* Current Subscription Info */}
@@ -427,7 +428,7 @@ const SubscriptionPlanPage = () => {
 
         {/* Plans Grid */}
         <div className="grid md:grid-cols-2 gap-4 md:gap-6 mb-6">
-          {plans.filter(p => (p.type || 'general') === planType).map((plan, index) => (
+          {plans.filter(p => (p.type || 'general') === planType && p.price > 0).map((plan, index) => (
             <motion.div
               key={plan.id}
               initial={{ opacity: 0, y: 20 }}

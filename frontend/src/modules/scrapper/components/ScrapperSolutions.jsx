@@ -34,12 +34,7 @@ const ScrapperSolutions = () => {
       description: getTranslatedText('Get consistent daily pickup requests. No more waiting for orders, steady income guaranteed.'),
       color: '#64946e'
     },
-    {
-      icon: FaChartLine,
-      title: getTranslatedText('Transparent Rates'),
-      description: getTranslatedText("See real-time market rates before accepting orders. Know exactly what you'll earn upfront."),
-      color: '#64946e'
-    },
+
     {
       icon: FaRupeeSign,
       title: getTranslatedText('Higher Income'),

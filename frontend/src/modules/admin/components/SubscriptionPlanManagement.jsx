@@ -59,7 +59,9 @@ const SubscriptionPlanManagement = () => {
     "Cancel",
     "Plan Type *",
     "Platform Access",
-    "Market Prices"
+    "Market Prices",
+    "Max Marketplace Requests (leave empty for unlimited)",
+    "Max {count} marketplace requests"
   ];
   const { getTranslatedText } = usePageTranslation(staticTexts);
 
@@ -76,7 +78,8 @@ const SubscriptionPlanManagement = () => {
     isActive: true,
     isPopular: false,
     sortOrder: 0,
-    type: 'general'
+    type: 'general',
+    maxMarketplaceRequests: ''
   });
   const [newFeature, setNewFeature] = useState('');
 
@@ -116,7 +119,8 @@ const SubscriptionPlanManagement = () => {
       isActive: true,
       isPopular: false,
       sortOrder: 0,
-      type: 'general'
+      type: 'general',
+      maxMarketplaceRequests: ''
     });
     setEditingId(null);
     setShowCreateModal(true);
@@ -136,7 +140,8 @@ const SubscriptionPlanManagement = () => {
       isActive: plan.isActive !== undefined ? plan.isActive : true,
       isPopular: plan.isPopular || false,
       sortOrder: plan.sortOrder || 0,
-      type: plan.type || 'general'
+      type: plan.type || 'general',
+      maxMarketplaceRequests: plan.maxMarketplaceRequests || ''
     });
     setEditingId(plan._id || plan.id);
     setShowCreateModal(true);
@@ -149,6 +154,7 @@ const SubscriptionPlanManagement = () => {
         price: parseFloat(formData.price),
         duration: parseInt(formData.duration),
         maxPickups: formData.maxPickups ? parseInt(formData.maxPickups) : null,
+        maxMarketplaceRequests: formData.maxMarketplaceRequests ? parseInt(formData.maxMarketplaceRequests) : null,
         priority: parseInt(formData.priority) || 0,
         sortOrder: parseInt(formData.sortOrder) || 0
       };
@@ -354,6 +360,11 @@ const SubscriptionPlanManagement = () => {
                       {getTranslatedText("Max {count} pickups", { count: plan.maxPickups })}
                     </span>
                   )}
+                  {plan.maxMarketplaceRequests && (
+                    <span className="text-xs" style={{ color: '#718096' }}>
+                      {getTranslatedText("Max {count} marketplace requests", { count: plan.maxMarketplaceRequests })}
+                    </span>
+                  )}
                 </div>
               </div>
               <div className="flex gap-2">
@@ -502,6 +513,20 @@ const SubscriptionPlanManagement = () => {
                     type="number"
                     value={formData.maxPickups}
                     onChange={(e) => setFormData({ ...formData, maxPickups: e.target.value })}
+                    className="w-full px-4 py-2 rounded-lg border-2 focus:outline-none focus:ring-2"
+                    style={{ borderColor: '#e2e8f0', focusBorderColor: '#64946e' }}
+                    min="0"
+                    placeholder={getTranslatedText("Unlimited")}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold mb-2" style={{ color: '#2d3748' }}>
+                    {getTranslatedText("Max Marketplace Requests (leave empty for unlimited)")}
+                  </label>
+                  <input
+                    type="number"
+                    value={formData.maxMarketplaceRequests}
+                    onChange={(e) => setFormData({ ...formData, maxMarketplaceRequests: e.target.value })}
                     className="w-full px-4 py-2 rounded-lg border-2 focus:outline-none focus:ring-2"
                     style={{ borderColor: '#e2e8f0', focusBorderColor: '#64946e' }}
                     min="0"

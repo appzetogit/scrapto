@@ -97,6 +97,7 @@ export const register = asyncHandler(async (req, res) => {
         phone,
         name,
         email,
+        city: req.body.city ? req.body.city.trim() : null,
         services: req.body.services || ['scrap_pickup'],
         vehicleInfo: defaultVehicleInfo,
         kyc: { status: 'verified' }

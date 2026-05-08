@@ -43,6 +43,11 @@ const subscriptionPlanSchema = new mongoose.Schema({
     default: null, // null = unlimited
     min: [0, 'Max pickups cannot be negative']
   },
+  maxMarketplaceRequests: {
+    type: Number,
+    default: null, // null = unlimited
+    min: [0, 'Max marketplace requests cannot be negative']
+  },
   priority: {
     type: Number,
     default: 0,

@@ -75,6 +75,9 @@ const ScrapperDashboard = () => {
     "Subscription Active",
     "Subscription Expired",
     "Renew Now",
+    "Renew to receive requests",
+    "Renew",
+    "Subscribe",
     "Your Activity",
     "Upcoming Pickups",
     "Collectors",
@@ -348,8 +351,8 @@ const ScrapperDashboard = () => {
         }
 
         // Handle Subscriptions
-        const platformSubActive = subscription?.status === 'active' && new Date(subscription.expiryDate) > new Date();
-        const marketSubActive = marketSubscription?.status === 'active' && new Date(marketSubscription.expiryDate) > new Date();
+        const platformSubActive = (subscription?.status === 'active' || subscription?.status === 'cancelled') && new Date(subscription.expiryDate) > new Date();
+        const marketSubActive = (marketSubscription?.status === 'active' || marketSubscription?.status === 'cancelled') && new Date(marketSubscription.expiryDate) > new Date();
 
         setSubscriptionData({
           platform: subscription,
@@ -358,7 +361,7 @@ const ScrapperDashboard = () => {
           isMarketActive: marketSubActive
         });
 
-        localStorage.setItem('scrapperSubscriptionStatus', platformSubActive ? 'active' : 'expired');
+        localStorage.setItem('scrapperSubscriptionStatus', platformSubActive ? 'active' : (subscription?.status === 'expired' ? 'expired' : 'none'));
         // We might want to store market status too
         if (marketSubActive) {
           localStorage.setItem('scrapperMarketPriceSubscriptionStatus', 'active');
@@ -693,7 +696,11 @@ const ScrapperDashboard = () => {
                   }`}>
                     {subscriptionData?.isPlatformActive 
                       ? getTranslatedText('Subscription Active') 
-                      : getTranslatedText('No Subscription')}
+                      : (subscriptionData?.platform?.status === 'expired' 
+                          ? getTranslatedText('Subscription Expired') 
+                          : getTranslatedText('No Subscription')
+                        )
+                    }
                   </p>
                   {subscriptionData?.isPlatformActive && (
                     <span className="w-1 h-1 rounded-full bg-emerald-400 animate-pulse"></span>
@@ -701,7 +708,10 @@ const ScrapperDashboard = () => {
                 </div>
                 {!subscriptionData?.isPlatformActive && (
                   <h3 className="text-[13px] font-bold leading-tight text-slate-800">
-                    {getTranslatedText('Renew to receive requests')}
+                    {subscriptionData?.platform?.status === 'expired' 
+                      ? getTranslatedText('Renew to receive requests') 
+                      : getTranslatedText('Take subscription to receive requests')
+                    }
                   </h3>
                 )}
               </div>
@@ -717,7 +727,10 @@ const ScrapperDashboard = () => {
                   type="button"
                   className="px-4 py-1.5 rounded-full text-[10px] font-black bg-red-600 text-white shadow-lg shadow-red-600/20 hover:bg-red-700 transition-all active:scale-95"
                 >
-                  {getTranslatedText("Renew")}
+                  {subscriptionData?.platform?.status === 'expired' 
+                    ? getTranslatedText("Renew") 
+                    : getTranslatedText("Subscribe")
+                  }
                 </button>
               )}
             </div>
@@ -735,14 +748,14 @@ const ScrapperDashboard = () => {
           )}
         </motion.div>
 
-        {/* Live Market Prices */}
-        <div className="mt-4">
+        {/* Live Market Prices Hidden */}
+        {/* <div className="mt-4">
           {subscriptionData?.isMarketActive && (
             <div className="relative">
               <PriceTicker />
             </div>
           )}
-        </div>
+        </div> */}
 
         {/* Ad Banners */}
         <div className="mt-4">

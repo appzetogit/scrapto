@@ -160,7 +160,9 @@ const MarketplaceRequestDetails = () => {
                   </div>
                   <div>
                     <h3 className="font-bold text-indigo-900">Pickup Details</h3>
-                    <p className="text-xs text-indigo-600">Disclosed to you as the winner</p>
+                    <p className="text-xs text-indigo-600">
+                      {request.status === 'deal_closed' ? 'Disclosed to you as the winner' : 'Unlocked with your active subscription'}
+                    </p>
                   </div>
                 </div>
                 
@@ -192,17 +194,19 @@ const MarketplaceRequestDetails = () => {
         {/* Right Column: Bidding Section */}
         <div className="space-y-6">
           {/* Privacy Note */}
-          <div className="bg-amber-50 border border-amber-100 rounded-3xl p-6">
-            <div className="flex items-start">
-              <FaLock className="text-amber-500 mt-1 mr-3 flex-shrink-0" />
-              <div>
-                <h3 className="font-bold text-amber-900 mb-1">Privacy Protected</h3>
-                <p className="text-amber-800 text-xs leading-relaxed">
-                  The user's full address and phone number are hidden. They will only be disclosed once the deal is finalized and both parties agree on the price.
-                </p>
+          {!request.fullAddress && (
+            <div className="bg-amber-50 border border-amber-100 rounded-3xl p-6">
+              <div className="flex items-start">
+                <FaLock className="text-amber-500 mt-1 mr-3 flex-shrink-0" />
+                <div>
+                  <h3 className="font-bold text-amber-900 mb-1">Privacy Protected</h3>
+                  <p className="text-amber-800 text-xs leading-relaxed">
+                    The user's full address and phone number are hidden. They will only be disclosed once the deal is finalized or via an active subscription.
+                  </p>
+                </div>
               </div>
             </div>
-          </div>
+          )}
 
           {/* Bidding Form */}
           <div className="bg-white rounded-3xl p-6 shadow-xl border border-emerald-100 sticky top-4">

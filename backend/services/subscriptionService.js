@@ -144,8 +144,8 @@ export const activateSubscription = async (scrapperId, paymentId) => {
 export const getScrapperSubscription = async (scrapperId) => {
   try {
     const scrapper = await Scrapper.findById(scrapperId)
-      .populate('subscription.planId', 'name price duration durationType features maxPickups type')
-      .populate('marketSubscription.planId', 'name price duration durationType features maxPickups type');
+      .populate('subscription.planId', 'name price duration durationType features maxPickups maxMarketplaceRequests type')
+      .populate('marketSubscription.planId', 'name price duration durationType features maxPickups maxMarketplaceRequests type');
 
     if (!scrapper) {
       throw new Error('Scrapper not found');

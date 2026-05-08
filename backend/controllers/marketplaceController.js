@@ -136,19 +136,56 @@ export const createMarketplaceRequests = asyncHandler(async (req, res) => {
  */
 export const getMarketplaceRequests = asyncHandler(async (req, res) => {
   const { city, category, status } = req.query;
+  const scrapperId = req.user.id;
+
+  // If scrapper, check subscription status and limits, and enforce city filter
+  let maxRequests = null;
+  if (req.user.role === 'scrapper') {
+    const Scrapper = (await import('../models/Scrapper.js')).default;
+    const scrapper = await Scrapper.findById(scrapperId).populate('subscription.planId');
+    
+    const sub = scrapper?.subscription;
+    const isPlatformActive = (sub?.status === 'active' || sub?.status === 'cancelled') && new Date(sub.expiryDate) > new Date();
+
+    if (!isPlatformActive) {
+      return sendError(res, 'Active subscription required to view marketplace', 403);
+    }
+
+    maxRequests = sub.planId?.maxMarketplaceRequests ?? null;
+
+    // Build query and enforce city filter
+    const query = {};
+    // Always only show 'open' requests to scrappers
+    query.status = 'open';
+    if (category) query.category = category;
+
+    // STRICT city filter: scrapper only sees their own city
+    if (scrapper.city) {
+      query['location.city'] = new RegExp(`^${scrapper.city}$`, 'i');
+    }
+    // If scrapper has no city set, show all (backward compatible for existing scrappers)
+
+    let dbQuery = MarketplaceRequest.find(query)
+      .sort({ createdAt: -1 });
+
+    if (maxRequests !== null) {
+      dbQuery = dbQuery.limit(maxRequests);
+    }
+
+    const requests = await dbQuery;
+    return sendSuccess(res, 'Marketplace requests retrieved successfully', requests);
+  }
   
+  // Admin path: no city or subscription restrictions
   const query = {};
   if (status) {
     query.status = status;
-  } else if (req.user.role !== 'admin') {
-    query.status = 'open';
   }
   if (city) query['location.city'] = new RegExp(city, 'i');
   if (category) query.category = category;
 
   const requests = await MarketplaceRequest.find(query)
-    .sort({ createdAt: -1 })
-    .select('-fullAddress -phoneNumber'); // Always hide sensitive info in list view
+    .sort({ createdAt: -1 });
 
   sendSuccess(res, 'Marketplace requests retrieved successfully', requests);
 });
@@ -165,9 +202,18 @@ export const getMarketplaceRequestById = asyncHandler(async (req, res) => {
     return sendError(res, 'Request not found', 404);
   }
 
-  // Privacy logic: Only show address if deal is closed and user is part of it
+  // Privacy logic: Show address if scrapper has active subscription, is admin, or is the winner
+  let hasActiveSubscription = false;
+  if (req.user.role === 'scrapper') {
+    const Scrapper = (await import('../models/Scrapper.js')).default;
+    const scrapper = await Scrapper.findById(req.user.id);
+    const sub = scrapper?.subscription;
+    hasActiveSubscription = (sub?.status === 'active' || sub?.status === 'cancelled') && new Date(sub.expiryDate) > new Date();
+  }
+
   const isAuthorized = 
     req.user.role === 'admin' || 
+    hasActiveSubscription ||
     (request.status === 'deal_closed' && request.winnerScrapper?.toString() === (req.user.scrapperId || req.user.id)?.toString());
 
   const data = request.toObject();

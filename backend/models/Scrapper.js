@@ -21,6 +21,11 @@ const scrapperSchema = new mongoose.Schema({
     trim: true,
     match: [/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/, 'Please provide a valid email']
   },
+  city: {
+    type: String,
+    trim: true,
+    default: null
+  },
   profilePic: {
     type: String,
     default: null

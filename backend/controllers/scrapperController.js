@@ -38,7 +38,7 @@ export const getMyProfile = asyncHandler(async (req, res) => {
 });
 
 export const updateMyProfile = asyncHandler(async (req, res) => {
-    const { name, vehicleInfo, availability, isOnline } = req.body;
+    const { name, vehicleInfo, availability, isOnline, city } = req.body;
     const userId = req.user.id || req.user._id;
 
     // 1. Update Scrapper Document
@@ -61,6 +61,7 @@ export const updateMyProfile = asyncHandler(async (req, res) => {
     } else {
         if (name) scrapper.name = name;
         if (vehicleInfo) scrapper.vehicleInfo = { ...scrapper.vehicleInfo, ...vehicleInfo };
+        if (city !== undefined && city !== null) scrapper.city = city.trim() || null;
 
         // Update Online Status
         if (availability !== undefined || isOnline !== undefined) {

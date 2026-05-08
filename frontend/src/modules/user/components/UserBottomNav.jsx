@@ -32,18 +32,18 @@ const UserBottomNav = () => {
                     <span className={`text-[10px] font-semibold tracking-wide ${isActive('/') ? 'text-emerald-400' : 'text-gray-400'}`}>Home</span>
                 </div>
 
-                {/* Price Tab */}
+                {/* Requests Tab */}
                 <div
                     className="flex-1 flex flex-col items-center justify-center gap-1 cursor-pointer active:scale-95 transition-transform duration-200 py-2"
-                    onClick={() => navigate('/prices')}
+                    onClick={() => navigate('/my-requests')}
                 >
-                    <div className={`p-1.5 rounded-xl transition-colors duration-300 ${isActive('/prices') ? 'bg-gray-800 text-emerald-400' : 'text-gray-400 hover:text-emerald-400'}`}>
+                    <div className={`p-1.5 rounded-xl transition-colors duration-300 ${isActive('/my-requests') ? 'bg-gray-800 text-emerald-400' : 'text-gray-400 hover:text-emerald-400'}`}>
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
-                            <line x1="7" y1="7" x2="7.01" y2="7"></line>
+                            <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
+                            <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
                         </svg>
                     </div>
-                    <span className={`text-[10px] font-semibold tracking-wide ${isActive('/prices') ? 'text-emerald-400' : 'text-gray-400'}`}>Price</span>
+                    <span className={`text-[10px] font-semibold tracking-wide ${isActive('/my-requests') ? 'text-emerald-400' : 'text-gray-400'}`}>Requests</span>
                 </div>
 
                 {/* Center Action Button (Floating) - SELL */}

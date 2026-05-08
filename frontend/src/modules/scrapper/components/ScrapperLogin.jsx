@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { useAuth } from '../../shared/context/AuthContext';
 import { validateReferralCode, createReferral, processSignupBonus, getReferralSettings } from '../../shared/utils/referralUtils';
@@ -40,6 +40,9 @@ const ScrapperLogin = () => {
     "Please specify (e.g., association, poster)",
     "Vehicle Information",
     "e.g., Truck - MH-12-AB-1234",
+    "Your City",
+    "Enter your city name",
+    "Please enter your city",
     "Have a referral code?",
     "Hide",
     "Enter referral code (e.g., SCRAP-ABC123)",
@@ -87,6 +90,7 @@ const ScrapperLogin = () => {
   const [heardFromOther, setHeardFromOther] = useState('');
   const [selectedServices, setSelectedServices] = useState(['scrap_pickup']);
   const [referralCode, setReferralCode] = useState('');
+  const [city, setCity] = useState('');
   const [referralCodeError, setReferralCodeError] = useState('');
   const [referrerName, setReferrerName] = useState('');
   const [showReferralCode, setShowReferralCode] = useState(false);
@@ -98,7 +102,65 @@ const ScrapperLogin = () => {
   const [error, setError] = useState('');
   const [resendTimer, setResendTimer] = useState(0);
   const inputRefs = useRef([]);
+  const cityInputRef = useRef(null);
+  const autocompleteRef = useRef(null);
   const { login, isAuthenticated, user } = useAuth();
+
+  // Google Places Autocomplete for city field
+  const initCityAutocomplete = useCallback(() => {
+    if (!cityInputRef.current || !window.google?.maps?.places) return;
+    if (autocompleteRef.current) return; // already initialized
+
+    const autocomplete = new window.google.maps.places.Autocomplete(cityInputRef.current, {
+      types: ['(cities)'],
+      componentRestrictions: { country: 'in' },
+      fields: ['address_components', 'name'],
+    });
+
+    autocomplete.addListener('place_changed', () => {
+      const place = autocomplete.getPlace();
+      // Extract just the city/locality name
+      const cityComponent = place.address_components?.find(
+        (c) => c.types.includes('locality') || c.types.includes('administrative_area_level_2')
+      );
+      const selectedCity = cityComponent?.long_name || place.name || '';
+      setCity(selectedCity);
+    });
+
+    autocompleteRef.current = autocomplete;
+  }, []);
+
+  // Initialize autocomplete when google is ready
+  useEffect(() => {
+    if (!isLogin) {
+      // Try immediately if Google is already loaded
+      if (window.google?.maps?.places) {
+        initCityAutocomplete();
+      } else {
+        // Ensure the Maps script is loaded (uses existing key)
+        const existingScript = document.querySelector('script[src*="maps.googleapis.com"]');
+        if (!existingScript) {
+          const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+          if (apiKey) {
+            const script = document.createElement('script');
+            script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places`;
+            script.async = true;
+            script.defer = true;
+            script.onload = initCityAutocomplete;
+            document.head.appendChild(script);
+          }
+        } else {
+          // Script exists but Google may not be ready yet
+          existingScript.addEventListener('load', initCityAutocomplete);
+        }
+      }
+    }
+
+    // Cleanup autocomplete ref on unmount
+    return () => {
+      autocompleteRef.current = null;
+    };
+  }, [isLogin, initCityAutocomplete]);
 
   // Handle resend timer
   useEffect(() => {
@@ -240,8 +302,13 @@ const ScrapperLogin = () => {
       return;
     }
 
-    if (!isLogin && (!name.trim() || !email.trim() || !vehicleInfo.trim())) {
+    if (!isLogin && (!name.trim() || !vehicleInfo.trim())) {
       setError(getTranslatedText('Please fill in all required fields'));
+      return;
+    }
+
+    if (!isLogin && !city.trim()) {
+      setError(getTranslatedText('Please enter your city'));
       return;
     }
 
@@ -278,6 +345,7 @@ const ScrapperLogin = () => {
           phone,
           password,
           role: 'scrapper',
+          city: city.trim(),
           services: selectedServices,
           referralCode: referralCode // Send referral code to backend
         });
@@ -538,6 +606,7 @@ const ScrapperLogin = () => {
                 setName('');
                 setEmail('');
                 setVehicleInfo('');
+                setCity('');
                 setSelectedServices(['scrap_pickup']);
               }}
               className={`px-5 py-2.5 rounded-full font-semibold text-xs md:text-sm transition-all duration-300 ${isLogin
@@ -555,6 +624,7 @@ const ScrapperLogin = () => {
                 setName('');
                 setEmail('');
                 setVehicleInfo('');
+                setCity('');
                 setSelectedServices(['scrap_pickup']);
               }}
               className={`px-5 py-2.5 rounded-full font-semibold text-xs md:text-sm transition-all duration-300 ${!isLogin
@@ -713,6 +783,55 @@ const ScrapperLogin = () => {
                         className={`w-full px-4 py-3 rounded-xl border-2 focus:outline-none focus:ring-2 transition-all text-sm md:text-base bg-black text-white placeholder-gray-600 ${vehicleInfo ? 'border-emerald-500' : 'border-zinc-700'}`}
                         required={!isLogin}
                       />
+                    </motion.div>
+                  )}
+
+                  {!isLogin && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      transition={{ duration: 0.3, delay: 0.12 }}
+                      className="relative"
+                    >
+                      <label className="block text-sm font-semibold mb-2 text-white">
+                        {getTranslatedText("Your City")} <span className="text-red-400">*</span>
+                      </label>
+                      <div className="relative">
+                        <input
+                          ref={cityInputRef}
+                          type="text"
+                          value={city}
+                          onChange={(e) => {
+                            setCity(e.target.value);
+                            // Re-init if Google is now available
+                            if (!autocompleteRef.current) initCityAutocomplete();
+                          }}
+                          onFocus={() => {
+                            if (!autocompleteRef.current) initCityAutocomplete();
+                          }}
+                          placeholder={getTranslatedText("Enter your city name")}
+                          className={`w-full px-4 py-3 pl-10 rounded-xl border-2 focus:outline-none focus:ring-2 transition-all text-sm md:text-base bg-black text-white placeholder-gray-600 ${city.trim() ? 'border-emerald-500 focus:ring-emerald-900/30' : 'border-zinc-700 focus:border-emerald-500 focus:ring-emerald-900/30'}`}
+                          required={!isLogin}
+                          autoComplete="off"
+                        />
+                        {/* Map pin icon inside input */}
+                        <svg
+                          className="absolute left-3 top-1/2 -translate-y-1/2 text-emerald-500 pointer-events-none"
+                          width="16" height="16" viewBox="0 0 24 24" fill="none"
+                          stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+                        >
+                          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                          <circle cx="12" cy="10" r="3"/>
+                        </svg>
+                      </div>
+                      {city.trim() && (
+                        <p className="text-xs text-emerald-400 mt-1 flex items-center gap-1">
+                          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+                            <polyline points="20 6 9 17 4 12"/>
+                          </svg>
+                          {city}
+                        </p>
+                      )}
                     </motion.div>
                   )}
 

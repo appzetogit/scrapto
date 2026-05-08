@@ -166,3 +166,53 @@ svg {
 .react-clock__mark__body {
   background-color: #d1d5db !important;
 }
+
+/* Google Places Autocomplete - Dark theme for scrapper registration */
+.pac-container {
+  background-color: #18181b !important;
+  border: 1px solid #3f3f46 !important;
+  border-radius: 12px !important;
+  margin-top: 4px !important;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6) !important;
+  font-family: inherit !important;
+  overflow: hidden !important;
+  z-index: 9999 !important;
+}
+
+.pac-item {
+  background-color: #18181b !important;
+  color: #d4d4d8 !important;
+  border-top: 1px solid #27272a !important;
+  padding: 10px 14px !important;
+  font-size: 13px !important;
+  cursor: pointer !important;
+  transition: background 0.15s !important;
+}
+
+.pac-item:first-child {
+  border-top: none !important;
+}
+
+.pac-item:hover,
+.pac-item.pac-item-selected {
+  background-color: #052e16 !important;
+}
+
+.pac-item-query {
+  color: #10b981 !important;
+  font-weight: 600 !important;
+  font-size: 14px !important;
+}
+
+.pac-matched {
+  color: #34d399 !important;
+  font-weight: 700 !important;
+}
+
+.pac-icon {
+  filter: invert(1) brightness(0.5) !important;
+}
+
+.pac-logo:after {
+  display: none !important;
+}

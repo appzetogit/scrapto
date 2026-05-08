@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FaMapMarkerAlt, FaTag, FaBoxOpen, FaChevronRight, FaFilter } from 'react-icons/fa';
+import { FaMapMarkerAlt, FaTag, FaBoxOpen, FaChevronRight, FaFilter, FaPhone } from 'react-icons/fa';
 import { marketplaceAPI } from '../../../shared/utils/api';
 import toast from 'react-hot-toast';
 
 const MarketplacePage = () => {
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [isSubRequired, setIsSubRequired] = useState(false);
   const [filters, setFilters] = useState({
     city: '',
     category: ''
@@ -20,13 +21,20 @@ const MarketplacePage = () => {
   const fetchRequests = async () => {
     try {
       setLoading(true);
+      setIsSubRequired(false);
       const response = await marketplaceAPI.getRequests(filters);
       if (response.success) {
         setRequests(response.data);
+      } else if (response.status === 403) {
+        setIsSubRequired(true);
       }
     } catch (error) {
-      console.error('Failed to fetch marketplace requests:', error);
-      toast.error('Failed to load marketplace');
+      if (error.status === 403 || error.response?.status === 403) {
+        setIsSubRequired(true);
+      } else {
+        console.error('Failed to fetch marketplace requests:', error);
+        toast.error('Failed to load marketplace');
+      }
     } finally {
       setLoading(false);
     }
@@ -49,32 +57,18 @@ const MarketplacePage = () => {
       </div>
 
       {/* Filters */}
-      <div className="bg-white rounded-2xl shadow-sm p-4 mb-6 border border-emerald-100 flex flex-wrap gap-3">
-        <div className="flex-1 min-w-[200px]">
-          <div className="relative">
-            <FaMapMarkerAlt className="absolute left-3 top-1/2 -translate-y-1/2 text-emerald-500" />
-            <input
-              type="text"
-              placeholder="Search by city..."
-              className="w-full pl-10 pr-4 py-2 bg-emerald-50 border-none rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none text-emerald-900"
-              value={filters.city}
-              onChange={(e) => setFilters({ ...filters, city: e.target.value })}
-            />
-          </div>
-        </div>
-        <div className="flex-grow min-w-[150px]">
-          <div className="relative">
-            <FaFilter className="absolute left-3 top-1/2 -translate-y-1/2 text-emerald-500" />
-            <select
-              className="w-full pl-10 pr-4 py-2 bg-emerald-50 border-none rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none text-emerald-900 appearance-none"
-              value={filters.category}
-              onChange={(e) => setFilters({ ...filters, category: e.target.value })}
-            >
-              {categories.map(cat => (
-                <option key={cat.id} value={cat.value}>{cat.name}</option>
-              ))}
-            </select>
-          </div>
+      <div className="bg-white rounded-2xl shadow-sm p-4 mb-6 border border-emerald-100">
+        <div className="relative">
+          <FaFilter className="absolute left-3 top-1/2 -translate-y-1/2 text-emerald-500" />
+          <select
+            className="w-full pl-10 pr-4 py-3 bg-emerald-50 border-none rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none text-emerald-900 appearance-none font-medium"
+            value={filters.category}
+            onChange={(e) => setFilters({ ...filters, category: e.target.value })}
+          >
+            {categories.map(cat => (
+              <option key={cat.id} value={cat.value}>{cat.name}</option>
+            ))}
+          </select>
         </div>
       </div>
 
@@ -82,6 +76,29 @@ const MarketplacePage = () => {
       {loading ? (
         <div className="flex justify-center py-12">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600"></div>
+        </div>
+      ) : isSubRequired ? (
+        <div className="bg-white rounded-3xl p-8 md:p-12 text-center border border-emerald-100 shadow-xl overflow-hidden relative">
+          {/* Decorative elements */}
+          <div className="absolute -top-10 -right-10 w-32 h-32 bg-emerald-50 rounded-full blur-3xl opacity-50"></div>
+          <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-emerald-50 rounded-full blur-3xl opacity-50"></div>
+          
+          <div className="relative z-10">
+            <div className="bg-emerald-100 w-24 h-24 rounded-2xl flex items-center justify-center mx-auto mb-6 rotate-3 shadow-inner">
+              <FaBoxOpen className="text-emerald-600 text-5xl" />
+            </div>
+            <h3 className="text-2xl font-black text-emerald-900 mb-3 uppercase tracking-tight">Marketplace Locked</h3>
+            <p className="text-emerald-600 mb-8 max-w-sm mx-auto font-medium">
+              You need an active subscription to browse the marketplace and place bids on high-value scrap requests.
+            </p>
+            <button 
+              onClick={() => navigate('/scrapper/subscription?type=general')}
+              className="bg-emerald-600 text-white px-8 py-4 rounded-2xl font-black text-lg shadow-lg shadow-emerald-600/30 hover:bg-emerald-700 transition-all active:scale-95 flex items-center gap-3 mx-auto"
+            >
+              Get Subscription Now
+              <FaChevronRight className="text-sm" />
+            </button>
+          </div>
         </div>
       ) : requests.length > 0 ? (
         <div className="space-y-4">
@@ -116,9 +133,15 @@ const MarketplacePage = () => {
                   </div>
 
                   <div className="mt-2 flex items-center text-emerald-600 text-sm">
-                    <FaMapMarkerAlt className="mr-1" />
-                    <span>{request.location.city}, {request.location.state}</span>
+                    <FaMapMarkerAlt className="mr-1 flex-shrink-0" />
+                    <span className="truncate">{request.fullAddress || `${request.location.city}, ${request.location.state}`}</span>
                   </div>
+                  {request.phoneNumber && (
+                    <div className="mt-1 flex items-center text-emerald-500 text-xs font-bold">
+                      <FaPhone className="mr-1 text-[10px]" />
+                      <span>{request.phoneNumber}</span>
+                    </div>
+                  )}
 
                   <div className="mt-3 flex items-center justify-end">
                     <button className="bg-emerald-600 text-white p-2 rounded-xl group-hover:bg-emerald-700 transition-colors">
