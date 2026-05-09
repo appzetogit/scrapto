@@ -1,6 +1,7 @@
 import { asyncHandler } from '../utils/asyncHandler.js';
 import { sendSuccess, sendError } from '../utils/responseHandler.js';
 import Price from '../models/Price.js';
+import SystemSetting from '../models/SystemSetting.js';
 import logger from '../utils/logger.js';
 
 // @desc    Get all active public prices
@@ -29,5 +30,24 @@ export const getPublicPrices = asyncHandler(async (req, res) => {
     } catch (error) {
         logger.error('[Public] Error fetching prices:', error);
         sendError(res, 'Failed to fetch prices', 500);
+    }
+});
+
+// @desc    Get system setting by key
+// @route   GET /api/public/settings/:key
+// @access  Public
+export const getSystemSetting = asyncHandler(async (req, res) => {
+    try {
+        const { key } = req.params;
+        const setting = await SystemSetting.findOne({ key });
+
+        if (!setting) {
+            return sendError(res, 'Setting not found', 404);
+        }
+
+        sendSuccess(res, 'Setting retrieved successfully', { setting });
+    } catch (error) {
+        logger.error(`[Public] Error fetching setting ${req.params.key}:`, error);
+        sendError(res, 'Failed to fetch setting', 500);
     }
 });

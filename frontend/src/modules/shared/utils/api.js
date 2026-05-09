@@ -18,6 +18,9 @@ export const getAuthToken = (role = null) => {
 export const apiRequest = async (endpoint, options = {}) => {
   const token = getAuthToken(options.role);
 
+  // Use the full URL if provided, otherwise prepend API_BASE_URL
+  const url = endpoint.startsWith('http') ? endpoint : `${API_BASE_URL}${endpoint}`;
+
   const isFormData = options.body instanceof FormData;
 
   // Build headers properly
@@ -37,7 +40,7 @@ export const apiRequest = async (endpoint, options = {}) => {
   };
 
   try {
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, config);
+    const response = await fetch(url, config);
     const data = await response.json();
 
     if (!response.ok) {
@@ -582,15 +585,24 @@ export const adminAPI = {
     return apiRequest(`/admin/finance/withdrawals/${id}`, {
       method: 'PUT',
       body: JSON.stringify(data),
+      role: 'admin'
     });
   },
   getSettings: async () => {
-    return apiRequest('/admin/settings', { method: 'GET' });
+    return apiRequest('/admin/settings', { method: 'GET', role: 'admin' });
   },
   updateSetting: async (key, value) => {
     return apiRequest(`/admin/settings/${key}`, {
       method: 'PUT',
       body: JSON.stringify({ value }),
+      role: 'admin'
+    });
+  },
+  uploadSystemMedia: async (formData) => {
+    return apiRequest('/uploads/system-media', {
+      method: 'POST',
+      body: formData,
+      role: 'admin'
     });
   },
   request: (endpoint, options) => apiRequest(endpoint, options),
@@ -784,6 +796,9 @@ export const publicAPI = {
   },
   getActivePrices: async () => {
     return apiRequest('/public/prices/active', { method: 'GET' });
+  },
+  getSetting: async (key) => {
+    return apiRequest(`/public/settings/${key}`, { method: 'GET' });
   },
 };
 

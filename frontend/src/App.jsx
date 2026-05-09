@@ -12,6 +12,7 @@ import RefundPolicy from './modules/shared/pages/RefundPolicy';
 import AboutUs from './modules/shared/pages/AboutUs';
 import ContactUs from './modules/shared/pages/ContactUs';
 import SharedTerms from './modules/shared/pages/SharedTerms';
+import { Toaster } from 'react-hot-toast';
 
 function App() {
   useEffect(() => {
@@ -23,6 +24,7 @@ function App() {
 
   return (
     <BrowserRouter>
+      <Toaster position="top-center" reverseOrder={false} />
       <div className="flex flex-col min-h-screen">
         <main className="flex-grow">
           <Routes>

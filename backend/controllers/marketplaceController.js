@@ -222,6 +222,13 @@ export const getMarketplaceRequestById = asyncHandler(async (req, res) => {
     delete data.phoneNumber;
   }
 
+  // Check if the current scrapper has already placed a bid
+  if (req.user.role === 'scrapper') {
+    const scrapperId = req.user.scrapperId || req.user.id;
+    const myBid = await Bid.findOne({ requestId: req.params.id, scrapperId });
+    data.myBid = myBid;
+  }
+
   sendSuccess(res, 'Marketplace request details retrieved successfully', data);
 });
 

@@ -853,7 +853,7 @@ export const getCommissionTransactions = asyncHandler(async (req, res) => {
 export const getAllPrices = asyncHandler(async (req, res) => {
   try {
     const page = parseInt(req.query.page) || PAGINATION.DEFAULT_PAGE;
-    const limit = parseInt(req.query.limit) || PAGINATION.DEFAULT_LIMIT;
+    const limit = parseInt(req.query.limit) || 1000;
     const skip = (page - 1) * limit;
 
     const filter = {};

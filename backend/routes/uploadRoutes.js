@@ -1,6 +1,6 @@
 import express from 'express';
-import { protect, isUser, isScrapper } from '../middleware/auth.js';
-import { uploadMultiple, uploadFields } from '../services/uploadService.js';
+import { protect, isUser, isScrapper, isAdmin, authorize } from '../middleware/auth.js';
+import { uploadMultiple, uploadFields, uploadFile } from '../services/uploadService.js';
 import { uploadOrderImages, uploadKycDocs } from '../controllers/uploadController.js';
 
 const router = express.Router();
@@ -25,6 +25,34 @@ router.post(
     { name: 'license', maxCount: 2 },
   ]),
   uploadKycDocs
+);
+
+// System media (admin)
+router.post(
+  '/system-media',
+  protect,
+  authorize('admin'),
+  uploadMultiple('media', 1),
+  async (req, res) => {
+    try {
+      if (!req.files || req.files.length === 0) {
+        return res.status(400).json({ success: false, message: 'No file uploaded' });
+      }
+
+      const file = req.files[0];
+      const resourceType = file.mimetype.startsWith('video/') ? 'video' : 'image';
+
+      const result = await uploadFile(file, {
+        folder: 'system',
+        resource_type: resourceType
+      });
+
+      res.status(200).json({ success: true, url: result.secure_url });
+    } catch (error) {
+      console.error('System media upload error:', error);
+      res.status(500).json({ success: false, message: error.message });
+    }
+  }
 );
 
 export default router;

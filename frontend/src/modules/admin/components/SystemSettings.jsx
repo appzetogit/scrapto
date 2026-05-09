@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { FaSave, FaCog, FaPercent, FaInfoCircle } from 'react-icons/fa';
+import { FaSave, FaCog, FaPercent, FaInfoCircle, FaVideo, FaUpload, FaPlayCircle, FaTrash } from 'react-icons/fa';
 import { adminAPI } from '../../shared/utils/api';
 import { usePageTranslation } from '../../../hooks/usePageTranslation';
 
@@ -22,7 +22,16 @@ const SystemSettings = () => {
     "Settings updated successfully",
     "Failed to update settings",
     "Loading settings...",
-    "Value"
+    "Value",
+    "App Tutorial Video (Scrappers)",
+    "Video showing how to use the scrapper app",
+    "Tutorial Video URL",
+    "Upload Video",
+    "Uploading video...",
+    "Video uploaded successfully",
+    "Failed to upload video",
+    "Remove Video",
+    "Are you sure you want to remove this video?"
   ];
   const { getTranslatedText } = usePageTranslation(staticTexts);
 
@@ -54,8 +63,15 @@ const SystemSettings = () => {
       
       if (response.success) {
         setMessage({ type: 'success', text: getTranslatedText("Settings updated successfully") });
-        // Update local state
-        setSettings(prev => prev.map(s => s.key === key ? { ...s, value } : s));
+        // Update local state - handling new keys correctly
+        setSettings(prev => {
+          const exists = prev.find(s => s.key === key);
+          if (exists) {
+            return prev.map(s => s.key === key ? { ...s, value } : s);
+          } else {
+            return [...prev, { key, value }];
+          }
+        });
       }
     } catch (error) {
       console.error('Error updating setting:', error);
@@ -63,6 +79,37 @@ const SystemSettings = () => {
     } finally {
       setSaving(false);
     }
+  };
+
+  const handleVideoUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    try {
+      setSaving(true);
+      setMessage({ type: '', text: '' });
+      
+      const formData = new FormData();
+      formData.append('media', file);
+      
+      const response = await adminAPI.uploadSystemMedia(formData);
+      
+      if (response.success) {
+        const videoUrl = response.url;
+        await handleUpdateSetting('scrapper_tutorial_video', videoUrl);
+        setMessage({ type: 'success', text: getTranslatedText("Video uploaded successfully") });
+      }
+    } catch (error) {
+      console.error('Error uploading video:', error);
+      setMessage({ type: 'error', text: getTranslatedText("Failed to upload video") });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDeleteVideo = async () => {
+    if (!window.confirm(getTranslatedText("Are you sure you want to remove this video?"))) return;
+    await handleUpdateSetting('scrapper_tutorial_video', '');
   };
 
   if (loading) {
@@ -160,6 +207,78 @@ const SystemSettings = () => {
                  </span>
                </p>
             </div>
+          </div>
+        </motion.div>
+
+        {/* Tutorial Video Card */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden"
+        >
+          <div className="p-6 border-b border-gray-50 flex items-center gap-3 bg-gray-50/50">
+            <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
+              <FaVideo />
+            </div>
+            <div>
+              <h2 className="text-lg font-bold text-gray-800">{getTranslatedText("App Tutorial Video (Scrappers)")}</h2>
+              <p className="text-xs text-gray-500">{getTranslatedText("Video showing how to use the scrapper app")}</p>
+            </div>
+          </div>
+
+          <div className="p-6 space-y-6">
+            <div className="flex flex-col gap-4 p-4 rounded-xl border border-gray-100 bg-white">
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div className="flex-1">
+                  <h3 className="font-bold text-gray-700">{getTranslatedText("Tutorial Video URL")}</h3>
+                  <p className="text-xs text-gray-500 mt-1">
+                    {settings.find(s => s.key === 'scrapper_tutorial_video')?.value || 'No video uploaded'}
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-3">
+                  {settings.find(s => s.key === 'scrapper_tutorial_video')?.value && (
+                    <button
+                      onClick={handleDeleteVideo}
+                      className="flex items-center gap-2 px-4 py-2 bg-red-50 text-red-600 rounded-lg font-semibold hover:bg-red-100 transition-colors text-sm border border-red-200"
+                      disabled={saving}
+                    >
+                      <FaTrash />
+                      {getTranslatedText("Remove Video")}
+                    </button>
+                  )}
+                  <label className="relative flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 cursor-pointer transition-colors text-sm">
+                    <FaUpload />
+                    {getTranslatedText("Upload Video")}
+                    <input
+                      type="file"
+                      accept="video/*"
+                      onChange={handleVideoUpload}
+                      className="hidden"
+                      disabled={saving}
+                    />
+                  </label>
+                </div>
+              </div>
+
+              {settings.find(s => s.key === 'scrapper_tutorial_video')?.value && (
+                <div className="mt-4 aspect-video bg-black rounded-xl overflow-hidden relative group">
+                  <video
+                    src={settings.find(s => s.key === 'scrapper_tutorial_video')?.value}
+                    className="w-full h-full object-contain"
+                    controls
+                  />
+                </div>
+              )}
+            </div>
+
+            {saving && (
+              <div className="flex items-center justify-center gap-2 text-sm text-blue-600 font-medium">
+                <div className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                {getTranslatedText("Saving...")}
+              </div>
+            )}
           </div>
         </motion.div>
       </div>

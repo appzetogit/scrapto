@@ -17,6 +17,7 @@ const MarketplaceRequestDetails = () => {
   const [bidAmount, setBidAmount] = useState('');
   const [bidMessage, setBidMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [hasJustBid, setHasJustBid] = useState(false);
 
   useEffect(() => {
     fetchRequestDetails();
@@ -39,11 +40,13 @@ const MarketplaceRequestDetails = () => {
   };
 
   const handlePlaceBid = async (e) => {
-    e.preventDefault();
+    if (e) e.preventDefault();
+    console.log('DEBUG: handlePlaceBid called', { bidAmount, requestId });
     if (!bidAmount || isNaN(bidAmount) || parseFloat(bidAmount) <= 0) {
       return toast.error('Please enter a valid bid amount');
     }
 
+    const loadingToast = toast.loading('Sending your offer...');
     try {
       setIsSubmitting(true);
       const response = await marketplaceAPI.placeBid(requestId, {
@@ -52,14 +55,16 @@ const MarketplaceRequestDetails = () => {
       });
 
       if (response.success) {
-        toast.success('Bid placed successfully!');
-        // After bidding, we could redirect or show a success state
-        // For now, let's refresh details
+        toast.success('Bid placed successfully!', { id: loadingToast });
+        setHasJustBid(true);
+        // Refresh details in background
         fetchRequestDetails();
+      } else {
+        toast.error(response.message || 'Failed to place bid', { id: loadingToast });
       }
     } catch (error) {
       console.error('Failed to place bid:', error);
-      toast.error(error.response?.data?.message || 'Failed to place bid');
+      toast.error(error.response?.data?.message || 'Failed to place bid', { id: loadingToast });
     } finally {
       setIsSubmitting(false);
     }
@@ -231,7 +236,7 @@ const MarketplaceRequestDetails = () => {
                       onClick={handlePreBidChat}
                       className="w-full mt-4 flex items-center justify-center gap-2 bg-indigo-50 text-indigo-700 font-bold py-3 rounded-2xl border-2 border-indigo-100 hover:bg-indigo-100 transition-all"
                     >
-                      <FaComments /> Start Chat with User
+                      <FaComments /> Chat
                     </button>
                   </div>
                 ) : (
@@ -244,6 +249,25 @@ const MarketplaceRequestDetails = () => {
                     </p>
                   </>
                 )}
+              </div>
+            ) : (request.myBid || hasJustBid) ? (
+              <div className="text-center py-10 animate-in zoom-in duration-500">
+                <div className="w-20 h-20 bg-emerald-100 rounded-xl flex items-center justify-center mx-auto mb-6 shadow-inner rotate-3">
+                  <FaHandHoldingUsd className="text-emerald-600 text-4xl" />
+                </div>
+                <h3 className="text-2xl font-black text-emerald-900 mb-2">Bid Placed!</h3>
+                <p className="text-emerald-600 font-medium px-4">
+                  Your offer of <span className="text-xl font-black text-emerald-900 ml-1">₹{request.myBid?.bidAmount || bidAmount}</span> has been submitted.
+                </p>
+                <div className="mt-8 p-4 bg-emerald-50 rounded-2xl border-2 border-emerald-100/50">
+                  <div className="flex items-center justify-center gap-2 text-emerald-700 font-bold uppercase tracking-wider text-xs">
+                    <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
+                    Status: Bidding Active
+                  </div>
+                </div>
+                <p className="mt-4 text-[10px] text-emerald-400 max-w-[200px] mx-auto italic">
+                  The user will be notified of your interest and can contact you via chat.
+                </p>
               </div>
             ) : (
               <form onSubmit={handlePlaceBid} className="space-y-4">
@@ -273,7 +297,8 @@ const MarketplaceRequestDetails = () => {
                 </div>
 
                 <button 
-                  type="submit"
+                  type="button"
+                  onClick={handlePlaceBid}
                   disabled={isSubmitting}
                   className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-4 rounded-2xl shadow-lg shadow-emerald-200 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
                 >
@@ -299,7 +324,7 @@ const MarketplaceRequestDetails = () => {
               onClick={handlePreBidChat}
               className="flex items-center justify-center gap-2 bg-white border-2 border-emerald-100 text-emerald-700 font-bold py-3 rounded-2xl hover:bg-emerald-50 transition-all"
             >
-              <FaComments /> Pre-Bid Chat
+              <FaComments /> Chat
             </button>
             <button 
               onClick={handleReport}

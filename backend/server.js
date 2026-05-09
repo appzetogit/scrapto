@@ -50,8 +50,17 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = process.env.PORT || 7000;
 
-// Security middleware
-app.use(helmet());
+// Security middleware with CSP configuration to allow Cloudinary
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      ...helmet.contentSecurityPolicy.getDefaultDirectives(),
+      "img-src": ["'self'", "data:", "https://res.cloudinary.com"],
+      "media-src": ["'self'", "https://res.cloudinary.com"],
+      "connect-src": ["'self'", "https://res.cloudinary.com", "http://localhost:7000", "ws://localhost:7000"],
+    },
+  },
+}));
 // CORS Configuration
 const allowedOrigins = process.env.FRONTEND_URL
   ? process.env.FRONTEND_URL.split(',').map(url => url.trim().replace(/\/$/, "")) // Remove trailing slash

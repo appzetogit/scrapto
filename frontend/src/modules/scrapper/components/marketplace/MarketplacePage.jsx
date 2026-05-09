@@ -131,17 +131,11 @@ const MarketplacePage = () => {
                       {request.category}
                     </span>
                   </div>
-
+                  
                   <div className="mt-2 flex items-center text-emerald-600 text-sm">
                     <FaMapMarkerAlt className="mr-1 flex-shrink-0" />
-                    <span className="truncate">{request.fullAddress || `${request.location.city}, ${request.location.state}`}</span>
+                    <span className="truncate">{request.location?.city}, {request.location?.state}</span>
                   </div>
-                  {request.phoneNumber && (
-                    <div className="mt-1 flex items-center text-emerald-500 text-xs font-bold">
-                      <FaPhone className="mr-1 text-[10px]" />
-                      <span>{request.phoneNumber}</span>
-                    </div>
-                  )}
 
                   <div className="mt-3 flex items-center justify-end">
                     <button className="bg-emerald-600 text-white p-2 rounded-xl group-hover:bg-emerald-700 transition-colors">

@@ -152,11 +152,6 @@ const KYCUploadPage = () => {
       return;
     }
 
-    if (!aadhaarPhoto) {
-      alert(getTranslatedText('Please upload Aadhaar photo'));
-      return;
-    }
-
     if (!selfiePhoto) {
       alert(getTranslatedText('Please upload selfie photo'));
       return;
@@ -282,7 +277,7 @@ const KYCUploadPage = () => {
           {/* Aadhaar Photo Upload */}
           <div>
             <label className="block text-sm font-semibold mb-2 text-white">
-              {getTranslatedText("Aadhaar Card Photo")} <span className="text-red-500">*</span>
+              {getTranslatedText("Aadhaar Card Photo")} <span className="text-gray-500 font-normal">(optional)</span>
             </label>
             <div className="space-y-3">
               <label className={`flex flex-col items-center justify-center w-full h-48 border-2 border-dashed rounded-xl cursor-pointer transition-all hover:border-emerald-500 bg-black ${aadhaarPhoto ? 'border-emerald-500' : 'border-zinc-700'}`}
@@ -305,7 +300,6 @@ const KYCUploadPage = () => {
                   className="hidden"
                   accept="image/*"
                   onChange={handleAadhaarPhotoChange}
-                  required
                 />
               </label>
               {aadhaarPhoto && (
@@ -438,7 +432,7 @@ const KYCUploadPage = () => {
             type="submit"
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
-            disabled={isSubmitting || !aadhaarNumber || aadhaarNumber.length !== 12 || !aadhaarPhoto || !selfiePhoto}
+            disabled={isSubmitting || !aadhaarNumber || aadhaarNumber.length !== 12 || !selfiePhoto}
             className="w-full py-4 md:py-5 rounded-xl font-bold text-base md:text-lg shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
             style={{ backgroundColor: '#64946e', color: '#ffffff' }}
           >

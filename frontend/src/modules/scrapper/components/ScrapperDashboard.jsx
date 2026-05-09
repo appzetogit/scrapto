@@ -2,11 +2,11 @@ import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../shared/context/AuthContext';
-import { FaGift, FaChartLine, FaCheck } from 'react-icons/fa';
+import { FaGift, FaChartLine, FaCheck, FaHandshake, FaStore, FaPlayCircle } from 'react-icons/fa';
 import PriceTicker from '../../user/components/PriceTicker';
 import ScrapperSolutions from './ScrapperSolutions';
 import { getActiveRequestsCount, getScrapperAssignedRequests, migrateOldActiveRequest } from '../../shared/utils/scrapperRequestUtils';
-import { earningsAPI, scrapperOrdersAPI, subscriptionAPI, kycAPI, scrapperProfileAPI, getAuthToken } from '../../shared/utils/api';
+import { earningsAPI, scrapperOrdersAPI, subscriptionAPI, kycAPI, scrapperProfileAPI, getAuthToken, publicAPI } from '../../shared/utils/api';
 import BannerSlider from '../../shared/components/BannerSlider';
 import { usePageTranslation } from '../../../hooks/usePageTranslation';
 import LanguageSelector from '../../shared/components/LanguageSelector';
@@ -82,7 +82,9 @@ const ScrapperDashboard = () => {
     "Upcoming Pickups",
     "Collectors",
     "Under Negotiation",
-    "Open Items"
+    "Open Items",
+    "How to use the App",
+    "Watch this tutorial to understand how to use Scraptox and maximize your earnings"
   ];
   const { getTranslatedText } = usePageTranslation(staticTexts);
   const navigate = useNavigate();
@@ -91,6 +93,7 @@ const ScrapperDashboard = () => {
   const [kycStatus, setKycStatus] = useState(null); // Backend KYC status
   const [subscriptionData, setSubscriptionData] = useState(null); // Backend subscription data
   const [isLoadingStatus, setIsLoadingStatus] = useState(true);
+  const [tutorialVideo, setTutorialVideo] = useState(null);
 
   // Load earnings and stats from localStorage
   const [earnings, setEarnings] = useState({
@@ -253,6 +256,16 @@ const ScrapperDashboard = () => {
       }
     } catch (error) {
       console.error('Failed to load activity stats from backend:', error);
+    }
+
+    try {
+      // Load tutorial video URL
+      const videoResponse = await publicAPI.getSetting('scrapper_tutorial_video');
+      if (videoResponse.success && videoResponse.data?.setting) {
+        setTutorialVideo(videoResponse.data.setting.value);
+      }
+    } catch (error) {
+      console.error('Failed to load tutorial video:', error);
     }
   };
 
@@ -604,7 +617,7 @@ const ScrapperDashboard = () => {
               <h4 className="text-white text-sm font-bold leading-tight w-24">
                 {getTranslatedText('Upcoming Pickups')}
               </h4>
-              <div className="absolute bottom-3 left-3 bg-[#a67c52] w-12 h-12 rounded-full flex items-center justify-center shadow-inner">
+              <div className="absolute bottom-3 left-3 bg-emerald-600 w-12 h-12 rounded-full flex items-center justify-center shadow-inner">
                 <span className="text-white text-2xl font-black">{activityStats.upcomingPickups}</span>
               </div>
               <div className="absolute right-0 bottom-0 w-20 h-20 opacity-80 pointer-events-none translate-x-2 translate-y-2">
@@ -621,7 +634,7 @@ const ScrapperDashboard = () => {
               <h4 className="text-white text-sm font-bold leading-tight w-24">
                 {getTranslatedText('Collectors')}
               </h4>
-              <div className="absolute bottom-3 left-3 bg-[#a67c52] w-12 h-12 rounded-full flex items-center justify-center shadow-inner">
+              <div className="absolute bottom-3 left-3 bg-sky-600 w-12 h-12 rounded-full flex items-center justify-center shadow-inner">
                 <span className="text-white text-2xl font-black">{activityStats.collectors}</span>
               </div>
               <div className="absolute right-0 bottom-0 w-20 h-20 opacity-80 pointer-events-none translate-x-2 translate-y-2">
@@ -638,11 +651,11 @@ const ScrapperDashboard = () => {
               <h4 className="text-white text-sm font-bold leading-tight w-24">
                 {getTranslatedText('Under Negotiation')}
               </h4>
-              <div className="absolute bottom-3 left-3 bg-[#a67c52] w-12 h-12 rounded-full flex items-center justify-center shadow-inner">
+              <div className="absolute bottom-3 left-3 bg-amber-600 w-12 h-12 rounded-full flex items-center justify-center shadow-inner">
                 <span className="text-white text-2xl font-black">{activityStats.underNegotiation}</span>
               </div>
               <div className="absolute right-0 bottom-0 w-20 h-20 opacity-80 pointer-events-none translate-x-2 translate-y-2">
-                 <FaGift className="text-white/20 w-full h-full p-4" />
+                 <FaHandshake className="text-white/20 w-full h-full p-4" />
               </div>
             </motion.div>
 
@@ -655,11 +668,11 @@ const ScrapperDashboard = () => {
               <h4 className="text-white text-sm font-bold leading-tight w-24">
                 {getTranslatedText('Open Items')}
               </h4>
-              <div className="absolute bottom-3 left-3 bg-[#a67c52] w-12 h-12 rounded-full flex items-center justify-center shadow-inner">
+              <div className="absolute bottom-3 left-3 bg-indigo-600 w-12 h-12 rounded-full flex items-center justify-center shadow-inner">
                 <span className="text-white text-2xl font-black">{activityStats.openItems}</span>
               </div>
               <div className="absolute right-0 bottom-0 w-20 h-20 opacity-80 pointer-events-none translate-x-2 translate-y-2">
-                 <FaGift className="text-white/20 w-full h-full p-4" />
+                 <FaStore className="text-white/20 w-full h-full p-4" />
               </div>
             </motion.div>
           </div>
@@ -761,6 +774,41 @@ const ScrapperDashboard = () => {
         <div className="mt-4">
           <BannerSlider audience="scrapper" />
         </div>
+
+        {/* Tutorial Video Section */}
+        {tutorialVideo && typeof tutorialVideo === 'string' && tutorialVideo.startsWith('http') && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.15 }}
+            className="mt-6 rounded-2xl overflow-hidden bg-white/40 backdrop-blur-sm border border-white/20 shadow-lg"
+          >
+            <div className="p-4 border-b border-white/10 flex items-center gap-2">
+               <div className="w-8 h-8 rounded-full bg-emerald-600 flex items-center justify-center text-white">
+                  <FaPlayCircle />
+               </div>
+               <div>
+                  <h3 className="text-sm font-bold text-slate-900">{getTranslatedText('How to use the App')}</h3>
+                  <p className="text-[10px] text-slate-600">{getTranslatedText('Watch this tutorial to understand how to use Scraptox and maximize your earnings')}</p>
+               </div>
+            </div>
+            <div className="aspect-video w-full bg-black relative group">
+               <video 
+                 src={tutorialVideo} 
+                 className="w-full h-full object-contain"
+                 controls
+                 playsInline
+                 preload="metadata"
+                 poster="https://res.cloudinary.com/dzt6v9g7w/image/upload/v1/scrapto/general/video-placeholder"
+               />
+               {!tutorialVideo && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-slate-900/10">
+                    <FaPlayCircle className="text-white/50 text-4xl" />
+                  </div>
+               )}
+            </div>
+          </motion.div>
+        )}
 
         {/* Market Price Management Card Hidden */}
         {/* {!subscriptionData?.isMarketActive && (

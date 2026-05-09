@@ -45,8 +45,8 @@ export const submitKyc = async (req, res) => {
     const selfieFile = files['selfie'] ? files['selfie'][0] : null;
     const licenseFile = files['license'] ? files['license'][0] : null;
 
-    if (!aadhaarFile || !selfieFile) {
-      return sendError(res, 'Aadhaar and Selfie photos are required.', 400);
+    if (!selfieFile) {
+      return sendError(res, 'Selfie photo is required.', 400);
     }
 
     if (!aadhaarNumber) {

@@ -14,10 +14,14 @@ const storage = multer.memoryStorage();
 
 // File filter
 const fileFilter = (req, file, cb) => {
-  if (FILE_TYPES.IMAGE.includes(file.mimetype) || FILE_TYPES.DOCUMENT.includes(file.mimetype)) {
+  if (
+    FILE_TYPES.IMAGE.includes(file.mimetype) || 
+    FILE_TYPES.DOCUMENT.includes(file.mimetype) ||
+    FILE_TYPES.VIDEO.includes(file.mimetype)
+  ) {
     cb(null, true);
   } else {
-    cb(new Error('Invalid file type. Only images and documents are allowed.'), false);
+    cb(new Error('Invalid file type. Only images, documents, and videos are allowed.'), false);
   }
 };
 
