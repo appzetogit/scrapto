@@ -147,9 +147,13 @@ export const getMarketplaceRequests = asyncHandler(async (req, res) => {
     const sub = scrapper?.subscription;
     const isPlatformActive = (sub?.status === 'active' || sub?.status === 'cancelled') && new Date(sub.expiryDate) > new Date();
 
+    // We no longer block the list view; restriction will happen at the details level
+    // and by masking sensitive info.
+    /*
     if (!isPlatformActive) {
       return sendError(res, 'Active subscription required to view marketplace', 403);
     }
+    */
 
     maxRequests = sub.planId?.maxMarketplaceRequests ?? null;
 

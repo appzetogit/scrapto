@@ -18,6 +18,8 @@ const MarketplaceManager = () => {
     state: '',
     fullAddress: '',
     phoneNumber: '',
+    item: '',
+    unit: '',
     images: []
   });
   const [selectedImages, setSelectedImages] = useState([]);
@@ -99,6 +101,8 @@ const MarketplaceManager = () => {
           state: '',
           fullAddress: '',
           phoneNumber: '',
+          item: '',
+          unit: '',
           images: []
         });
         setSelectedImages([]);
@@ -319,6 +323,26 @@ const MarketplaceManager = () => {
                   <option value="other">Other</option>
                 </select>
               </div>
+              <div>
+                <label className="block text-sm font-bold mb-1">Item Name</label>
+                <input 
+                  type="text"
+                  className="w-full p-2 border rounded-lg"
+                  value={newRequest.item}
+                  onChange={e => setNewRequest({...newRequest, item: e.target.value})}
+                  placeholder="e.g. Iron Rods, Plastic Bottles"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-bold mb-1">Unit</label>
+                <input 
+                  type="text"
+                  className="w-full p-2 border rounded-lg"
+                  value={newRequest.unit}
+                  onChange={e => setNewRequest({...newRequest, unit: e.target.value})}
+                  placeholder="e.g. 50kg, 2 Tons, 5 Units"
+                />
+              </div>
               <div className="col-span-2">
                 <label className="block text-sm font-bold mb-1">Images (Select up to 5)</label>
                 <input 
@@ -390,7 +414,9 @@ const MarketplaceManager = () => {
     "city": "Indore",
     "state": "MP",
     "fullAddress": "Address here",
-    "phoneNumber": "9876543210"
+    "phoneNumber": "9876543210",
+    "item": "Iron Pipes",
+    "unit": "100 kg"
   }
 ]'
                 value={bulkData}
@@ -428,6 +454,14 @@ const MarketplaceManager = () => {
                 <div className="col-span-2 md:col-span-1">
                   <h3 className="text-xs font-bold text-gray-400 uppercase mb-1">Category</h3>
                   <p className="capitalize text-gray-800">{selectedRequest.category}</p>
+                </div>
+                <div className="col-span-2 md:col-span-1">
+                  <h3 className="text-xs font-bold text-gray-400 uppercase mb-1">Item</h3>
+                  <p className="text-gray-800">{selectedRequest.item || 'N/A'}</p>
+                </div>
+                <div className="col-span-2 md:col-span-1">
+                  <h3 className="text-xs font-bold text-gray-400 uppercase mb-1">Unit</h3>
+                  <p className="text-gray-800">{selectedRequest.unit || 'N/A'}</p>
                 </div>
                 <div className="col-span-2">
                   <h3 className="text-xs font-bold text-gray-400 uppercase mb-1">Description</h3>

@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { 
   FaMapMarkerAlt, FaTag, FaBoxOpen, FaChevronLeft, 
-  FaInfoCircle, FaHandHoldingUsd, FaComments, FaLock, FaPhone 
+  FaInfoCircle, FaHandHoldingUsd, FaComments, FaLock, FaPhone,
+  FaCheckCircle, FaExclamationTriangle, FaChevronRight, FaUserAlt
 } from 'react-icons/fa';
 import { marketplaceAPI, chatAPI } from '../../../shared/utils/api';
 import { useAuth } from '../../../shared/context/AuthContext';
@@ -41,7 +42,6 @@ const MarketplaceRequestDetails = () => {
 
   const handlePlaceBid = async (e) => {
     if (e) e.preventDefault();
-    console.log('DEBUG: handlePlaceBid called', { bidAmount, requestId });
     if (!bidAmount || isNaN(bidAmount) || parseFloat(bidAmount) <= 0) {
       return toast.error('Please enter a valid bid amount');
     }
@@ -57,7 +57,6 @@ const MarketplaceRequestDetails = () => {
       if (response.success) {
         toast.success('Bid placed successfully!', { id: loadingToast });
         setHasJustBid(true);
-        // Refresh details in background
         fetchRequestDetails();
       } else {
         toast.error(response.message || 'Failed to place bid', { id: loadingToast });
@@ -148,51 +147,72 @@ const MarketplaceRequestDetails = () => {
               <FaMapMarkerAlt className="mr-2" />
               <span>{request.location.city}, {request.location.state}</span>
             </div>
+
+            <div className="flex flex-wrap gap-2 mb-6">
+              <span className="bg-emerald-100 text-emerald-700 text-xs px-3 py-1.5 rounded-xl font-bold uppercase tracking-wider">
+                {request.category}
+              </span>
+              {request.item && (
+                <div className="flex items-center text-xs text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-xl border border-emerald-100/50">
+                  <FaTag className="mr-1.5 text-[10px]" />
+                  <span className="font-bold">{request.item}</span>
+                </div>
+              )}
+              {request.unit && (
+                <div className="flex items-center text-xs text-indigo-600 bg-indigo-50 px-3 py-1.5 rounded-xl border border-indigo-100/50">
+                  <FaBoxOpen className="mr-1.5 text-[10px]" />
+                  <span className="font-bold">{request.unit}</span>
+                </div>
+              )}
+            </div>
             
             <h3 className="font-bold text-emerald-800 mb-2 flex items-center">
               <FaInfoCircle className="mr-2 text-emerald-500" /> Description
             </h3>
-            <p className="text-emerald-700 text-sm leading-relaxed whitespace-pre-line">
+            <p className="text-emerald-700 text-sm leading-relaxed whitespace-pre-line mb-6">
               {request.description || "No description provided for this item."}
             </p>
 
-            {/* Winner sensitive info */}
-            {request.fullAddress && (
-              <div className="mt-6 p-6 bg-indigo-50 border-2 border-indigo-100 rounded-3xl animate-in fade-in slide-in-from-bottom-4 duration-500">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white shadow-lg">
-                    <FaMapMarkerAlt />
-                  </div>
-                  <div>
-                    <h3 className="font-bold text-indigo-900">Pickup Details</h3>
-                    <p className="text-xs text-indigo-600">
-                      {request.status === 'deal_closed' ? 'Disclosed to you as the winner' : 'Unlocked with your active subscription'}
-                    </p>
-                  </div>
+            {/* Seller Contact Info / Pickup Details */}
+            <div className="mt-6">
+              <h3 className="font-bold text-emerald-800 mb-4 flex items-center">
+                <FaUserAlt className="mr-2 text-emerald-500" /> Seller Contact Info
+              </h3>
+              
+              <div className="p-6 bg-slate-50 border-2 border-slate-100 rounded-3xl space-y-4">
+                <div className="flex justify-between items-center border-b border-slate-200 pb-3">
+                  <span className="text-xs font-bold text-slate-400 uppercase">Seller Name</span>
+                  <p className="text-slate-900 font-bold">
+                    {request.fullAddress ? (request.customerName || 'Customer') : `${(request.customerName || 'Customer').substring(0, 2)}***`}
+                  </p>
                 </div>
-                
-                <div className="space-y-4">
-                  <div>
-                    <span className="text-[10px] font-bold text-indigo-400 uppercase">Exact Address</span>
-                    <p className="text-indigo-900 font-medium">{request.fullAddress}</p>
-                  </div>
-                  {request.phoneNumber && (
-                    <div className="flex items-center justify-between p-3 bg-white rounded-2xl border border-indigo-100">
-                      <div>
-                        <span className="text-[10px] font-bold text-indigo-400 uppercase">Contact Number</span>
-                        <p className="text-indigo-900 font-bold">{request.phoneNumber}</p>
-                      </div>
-                      <a 
-                        href={`tel:${request.phoneNumber}`}
-                        className="p-3 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition-all shadow-md"
-                      >
-                        <FaPhone />
-                      </a>
-                    </div>
-                  )}
+
+                <div className="flex justify-between items-center border-b border-slate-200 pb-3">
+                  <span className="text-xs font-bold text-slate-400 uppercase">Contact Number</span>
+                  <p className="text-slate-900 font-bold">
+                    {request.phoneNumber ? request.phoneNumber : '+91 981***'}
+                  </p>
                 </div>
+
+                <div className="flex flex-col gap-1">
+                  <span className="text-xs font-bold text-slate-400 uppercase">Pickup Address</span>
+                  <p className="text-slate-900 font-medium">
+                    {request.fullAddress ? request.fullAddress : `${request.location.city}, ${request.location.state}, ***`}
+                  </p>
+                </div>
+
+                {request.phoneNumber && (
+                  <div className="pt-2">
+                    <a 
+                      href={`tel:${request.phoneNumber}`}
+                      className="w-full flex items-center justify-center gap-2 bg-emerald-600 text-white py-3 rounded-2xl hover:bg-emerald-700 transition-all shadow-md font-bold"
+                    >
+                      <FaPhone /> Call Seller
+                    </a>
+                  </div>
+                )}
               </div>
-            )}
+            </div>
           </div>
         </div>
 
@@ -249,6 +269,51 @@ const MarketplaceRequestDetails = () => {
                     </p>
                   </>
                 )}
+              </div>
+            ) : !request.fullAddress ? (
+              /* Subscription Notice Section */
+              <div className="animate-in fade-in zoom-in duration-500">
+                <div className="bg-amber-50 border-2 border-amber-100 rounded-3xl p-6 relative overflow-hidden">
+                  <div className="absolute top-0 right-0 p-4 opacity-10">
+                    <FaLock size={80} className="text-amber-900" />
+                  </div>
+                  
+                  <div className="relative z-10">
+                    <div className="bg-amber-100 w-12 h-12 rounded-2xl flex items-center justify-center mb-4">
+                      <FaExclamationTriangle className="text-amber-600 text-xl" />
+                    </div>
+                    
+                    <h3 className="text-xl font-black text-amber-900 mb-2">Subscription Notice</h3>
+                    <p className="text-amber-800 text-sm font-medium mb-6 leading-relaxed">
+                      You currently have no active subscription. Please subscribe to a plan to unlock posts.
+                    </p>
+                    
+                    <div className="space-y-3 mb-8">
+                      <h4 className="text-[10px] font-black text-amber-900/50 uppercase tracking-widest">Premium Benefits:</h4>
+                      {[
+                        'View unlimited posts',
+                        'Access higher value items',
+                        'Priority support',
+                        'Exclusive features'
+                      ].map((benefit, i) => (
+                        <div key={i} className="flex items-center gap-3">
+                          <FaCheckCircle className="text-emerald-500 flex-shrink-0" />
+                          <span className="text-sm font-bold text-amber-900/80">{benefit}</span>
+                        </div>
+                      ))}
+                    </div>
+                    
+                    <button 
+                      onClick={() => navigate('/scrapper/subscription?type=general')}
+                      className="w-full bg-[#a35e31] hover:bg-[#8b4f29] text-white font-black py-4 rounded-2xl shadow-xl shadow-amber-900/20 transition-all flex items-center justify-center gap-3 active:scale-95 group"
+                    >
+                      <div className="w-6 h-6 bg-white/20 rounded-full flex items-center justify-center">
+                        <FaChevronRight className="text-[10px] group-hover:translate-x-0.5 transition-transform" />
+                      </div>
+                      VIEW PLANS & UPGRADE
+                    </button>
+                  </div>
+                </div>
               </div>
             ) : (request.myBid || hasJustBid) ? (
               <div className="text-center py-10 animate-in zoom-in duration-500">

@@ -1,13 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FaMapMarkerAlt, FaTag, FaBoxOpen, FaChevronRight, FaFilter, FaPhone } from 'react-icons/fa';
+import { FaMapMarkerAlt, FaTag, FaBoxOpen, FaChevronRight, FaFilter } from 'react-icons/fa';
 import { marketplaceAPI } from '../../../shared/utils/api';
 import toast from 'react-hot-toast';
 
 const MarketplacePage = () => {
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [isSubRequired, setIsSubRequired] = useState(false);
   const [filters, setFilters] = useState({
     city: '',
     category: ''
@@ -21,20 +20,13 @@ const MarketplacePage = () => {
   const fetchRequests = async () => {
     try {
       setLoading(true);
-      setIsSubRequired(false);
       const response = await marketplaceAPI.getRequests(filters);
       if (response.success) {
         setRequests(response.data);
-      } else if (response.status === 403) {
-        setIsSubRequired(true);
-      }
+      } 
     } catch (error) {
-      if (error.status === 403 || error.response?.status === 403) {
-        setIsSubRequired(true);
-      } else {
-        console.error('Failed to fetch marketplace requests:', error);
-        toast.error('Failed to load marketplace');
-      }
+      console.error('Failed to fetch marketplace requests:', error);
+      toast.error('Failed to load marketplace');
     } finally {
       setLoading(false);
     }
@@ -77,29 +69,6 @@ const MarketplacePage = () => {
         <div className="flex justify-center py-12">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600"></div>
         </div>
-      ) : isSubRequired ? (
-        <div className="bg-white rounded-3xl p-8 md:p-12 text-center border border-emerald-100 shadow-xl overflow-hidden relative">
-          {/* Decorative elements */}
-          <div className="absolute -top-10 -right-10 w-32 h-32 bg-emerald-50 rounded-full blur-3xl opacity-50"></div>
-          <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-emerald-50 rounded-full blur-3xl opacity-50"></div>
-          
-          <div className="relative z-10">
-            <div className="bg-emerald-100 w-24 h-24 rounded-2xl flex items-center justify-center mx-auto mb-6 rotate-3 shadow-inner">
-              <FaBoxOpen className="text-emerald-600 text-5xl" />
-            </div>
-            <h3 className="text-2xl font-black text-emerald-900 mb-3 uppercase tracking-tight">Marketplace Locked</h3>
-            <p className="text-emerald-600 mb-8 max-w-sm mx-auto font-medium">
-              You need an active subscription to browse the marketplace and place bids on high-value scrap requests.
-            </p>
-            <button 
-              onClick={() => navigate('/scrapper/subscription?type=general')}
-              className="bg-emerald-600 text-white px-8 py-4 rounded-2xl font-black text-lg shadow-lg shadow-emerald-600/30 hover:bg-emerald-700 transition-all active:scale-95 flex items-center gap-3 mx-auto"
-            >
-              Get Subscription Now
-              <FaChevronRight className="text-sm" />
-            </button>
-          </div>
-        </div>
       ) : requests.length > 0 ? (
         <div className="space-y-4">
           {requests.map((request) => (
@@ -127,9 +96,24 @@ const MarketplacePage = () => {
                 <div className="flex-grow">
                   <div className="flex justify-between items-start">
                     <h3 className="font-bold text-emerald-900 text-lg line-clamp-1">{request.title}</h3>
-                    <span className="bg-emerald-100 text-emerald-700 text-xs px-2 py-1 rounded-full font-semibold uppercase">
+                    <span className="bg-emerald-100 text-emerald-700 text-[10px] px-2 py-1 rounded-full font-bold uppercase tracking-wider">
                       {request.category}
                     </span>
+                  </div>
+
+                  <div className="mt-1 flex flex-wrap gap-2">
+                    {request.item && (
+                      <div className="flex items-center text-[11px] text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-lg border border-emerald-100/50">
+                        <FaTag className="mr-1 text-[9px]" />
+                        <span className="font-semibold">{request.item}</span>
+                      </div>
+                    )}
+                    {request.unit && (
+                      <div className="flex items-center text-[11px] text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-lg border border-indigo-100/50">
+                        <FaBoxOpen className="mr-1 text-[9px]" />
+                        <span className="font-semibold">{request.unit}</span>
+                      </div>
+                    )}
                   </div>
                   
                   <div className="mt-2 flex items-center text-emerald-600 text-sm">

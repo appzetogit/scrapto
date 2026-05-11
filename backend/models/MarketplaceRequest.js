@@ -31,6 +31,14 @@ const marketplaceRequestSchema = new mongoose.Schema({
     enum: Object.values(SCRAP_CATEGORIES),
     required: true
   },
+  item: {
+    type: String,
+    trim: true
+  },
+  unit: {
+    type: String,
+    trim: true
+  },
   images: [{
     url: String,
     publicId: String
