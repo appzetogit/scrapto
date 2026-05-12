@@ -727,52 +727,47 @@ const Hero = () => {
               </div>
               <div className="overflow-x-auto pb-4 scrollbar-hide">
                 <div
-                  className="flex flex-col gap-3 md:gap-4"
+                  className="grid grid-cols-3 md:flex md:flex-row gap-3 md:gap-4"
                   style={{ width: "max-content" }}>
-                  {/* Display dynamic categories in rows of 3 */}
-                  {Array.from({ length: Math.ceil(activeCategories.length / 3) }).map((_, rowIndex) => (
-                    <div key={rowIndex} className="flex gap-3 md:gap-4">
-                      {activeCategories.slice(rowIndex * 3, (rowIndex + 1) * 3).map((category, index) => (
-                        <motion.div
-                          key={category.name}
-                          initial={{ x: -20 }}
-                          animate={{ x: 0 }}
-                          transition={{
-                            duration: 0.5,
-                            delay: 0.7 + (rowIndex * 3 + index) * 0.1,
-                          }}
-                          className="flex-shrink-0 w-24 md:w-28 lg:w-32 cursor-pointer"
-                          onClick={() =>
-                            navigate("/add-scrap/category", {
-                              state: { preSelectedCategory: category.name },
-                            })
-                          }
-                          whileTap={{ scale: 0.95 }}>
-                          <div
-                            className="rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300"
-                            style={{ backgroundColor: "#ffffff" }}>
-                            <div
-                              className="aspect-square relative overflow-hidden bg-gray-100"
-                              style={{ width: "100%" }}>
-                              <img
-                                src={category.image}
-                                alt={category.name}
-                                className="w-full h-full object-cover"
-                                style={{ display: "block" }}
-                                loading="lazy"
-                              />
-                            </div>
-                            <div className="p-2 md:p-2.5">
-                              <p
-                                className="text-xs md:text-sm font-semibold text-center truncate"
-                                style={{ color: "#2d3748" }}>
-                                {category.name}
-                              </p>
-                            </div>
-                          </div>
-                        </motion.div>
-                      ))}
-                    </div>
+                  {activeCategories.map((category, index) => (
+                    <motion.div
+                      key={category.name}
+                      initial={{ x: -20, opacity: 0 }}
+                      animate={{ x: 0, opacity: 1 }}
+                      transition={{
+                        duration: 0.5,
+                        delay: 0.7 + index * 0.1,
+                      }}
+                      className="flex-shrink-0 w-24 md:w-28 lg:w-32 cursor-pointer"
+                      onClick={() =>
+                        navigate("/add-scrap/category", {
+                          state: { preSelectedCategory: category.name },
+                        })
+                      }
+                      whileTap={{ scale: 0.95 }}>
+                      <div
+                        className="rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300"
+                        style={{ backgroundColor: "#ffffff" }}>
+                        <div
+                          className="aspect-square relative overflow-hidden bg-gray-100"
+                          style={{ width: "100%" }}>
+                          <img
+                            src={category.image}
+                            alt={category.name}
+                            className="w-full h-full object-cover"
+                            style={{ display: "block" }}
+                            loading="lazy"
+                          />
+                        </div>
+                        <div className="p-2 md:p-2.5">
+                          <p
+                            className="text-xs md:text-sm font-semibold text-center truncate"
+                            style={{ color: "#2d3748" }}>
+                            {category.name}
+                          </p>
+                        </div>
+                      </div>
+                    </motion.div>
                   ))}
                 </div>
               </div>
