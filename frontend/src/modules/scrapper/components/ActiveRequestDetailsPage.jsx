@@ -10,16 +10,7 @@ import { walletService } from '../../shared/services/wallet.service';
 import ScrapperMap from './GoogleMaps/ScrapperMap';
 import { usePageTranslation } from '../../../hooks/usePageTranslation';
 
-// Load Razorpay Script
-const loadRazorpay = () => {
-  return new Promise((resolve) => {
-    const script = document.createElement('script');
-    script.src = 'https://checkout.razorpay.com/v1/checkout.js';
-    script.onload = () => resolve(true);
-    script.onerror = () => resolve(false);
-    document.body.appendChild(script);
-  });
-};
+import useRazorpay from '../../../hooks/useRazorpay';
 
 const ActiveRequestDetailsPage = () => {
   const staticTexts = [
@@ -79,6 +70,7 @@ const ActiveRequestDetailsPage = () => {
   const location = useLocation();
   const { requestId } = useParams();
   const { user } = useAuth();
+  const { initializePayment } = useRazorpay();
   const [requestData, setRequestData] = useState(null);
   const [scrapperLocation, setScrapperLocation] = useState(null);
   const [userLiveLocation, setUserLiveLocation] = useState(null);
@@ -471,11 +463,6 @@ const ActiveRequestDetailsPage = () => {
       // 2. Pay via Razorpay
       try {
         setIsProcessingPayment(true);
-        const res = await loadRazorpay();
-        if (!res) {
-          alert('Razorpay SDK failed to load');
-          return;
-        }
 
         // Create Order
         const orderData = await walletService.createRechargeOrder(amount); // Reusing logic for now
@@ -487,7 +474,18 @@ const ActiveRequestDetailsPage = () => {
           name: "Scraptox",
           description: "Order Payment to User",
           order_id: orderData.data.orderId,
-          handler: async function (response) {
+          prefill: {
+            name: "Scrapper",
+            contact: user?.phone
+          },
+          theme: {
+            color: "#22c55e"
+          }
+        };
+
+        await initializePayment(
+          options,
+          async function (response) {
             try {
               // Verify and Complete
               await walletService.verifyRecharge({
@@ -506,17 +504,12 @@ const ActiveRequestDetailsPage = () => {
               setIsProcessingPayment(false);
             }
           },
-          prefill: {
-            name: "Scrapper",
-            contact: user?.phone
-          },
-          theme: {
-            color: "#22c55e"
+          (error) => {
+            console.error('Razorpay payment error:', error);
+            alert(error.description || 'Payment failed. Please try again.');
+            setIsProcessingPayment(false);
           }
-        };
-
-        const paymentObject = new window.Razorpay(options);
-        paymentObject.open();
+        );
 
       } catch (error) {
         console.error(error);

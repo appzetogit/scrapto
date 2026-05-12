@@ -139,6 +139,9 @@ const UserWallet = () => {
                 theme: { color: "#10b981" }
             };
 
+            // Close the add money modal before opening Razorpay checkout
+            setShowAddMoney(false);
+
             await initializePayment(options, async (response) => {
                 // 3. Verify Payment
                 try {

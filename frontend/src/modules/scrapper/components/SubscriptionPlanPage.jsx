@@ -4,8 +4,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../shared/context/AuthContext';
 import { checkAndProcessMilestone } from '../../shared/utils/referralUtils';
 import { subscriptionAPI } from '../../shared/utils/api';
-import { usePageTranslation } from '../../../hooks/usePageTranslation';
-import toast from 'react-hot-toast';
+import useRazorpay from '../../../hooks/useRazorpay';
 
 const SubscriptionPlanPage = () => {
   const staticTexts = [
@@ -44,6 +43,7 @@ const SubscriptionPlanPage = () => {
   const { getTranslatedText } = usePageTranslation(staticTexts);
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { initializePayment } = useRazorpay();
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
   const initialType = 'general'; // Force general plan type, market price hidden
@@ -172,20 +172,6 @@ const SubscriptionPlanPage = () => {
     }
   };
 
-  const loadRazorpay = () => {
-    return new Promise((resolve, reject) => {
-      if (window.Razorpay) {
-        resolve(true);
-        return;
-      }
-      const script = document.createElement('script');
-      script.src = 'https://checkout.razorpay.com/v1/checkout.js';
-      script.onload = () => resolve(true);
-      script.onerror = () => reject(new Error('Failed to load Razorpay SDK'));
-      document.body.appendChild(script);
-    });
-  };
-
   const handleSubscribe = async (e) => {
     e.preventDefault();
     e.stopPropagation();
@@ -205,8 +191,6 @@ const SubscriptionPlanPage = () => {
     const scrapperUser = JSON.parse(localStorage.getItem('scrapperUser') || '{}');
 
     try {
-      await loadRazorpay();
-      
       // Pass coupon code if applied
       const createRes = await subscriptionAPI.subscribe(selectedPlan, appliedCoupon?.code);
 
@@ -228,7 +212,18 @@ const SubscriptionPlanPage = () => {
           email: scrapperUser.email || 'scrapper@example.com',
           contact: scrapperUser.phone || ''
         },
-        handler: async (response) => {
+        notes: {
+          plan: selectedPlanData.name,
+          entityType: 'subscription'
+        },
+        theme: {
+          color: '#64946e'
+        }
+      };
+
+      await initializePayment(
+        options,
+        async (response) => {
           try {
             // Use new subscription API for verification
             const verifyRes = await subscriptionAPI.verifyPayment({
@@ -272,24 +267,14 @@ const SubscriptionPlanPage = () => {
             setIsProcessing(false);
           }
         },
-        modal: {
-          ondismiss: () => {
-            setIsProcessing(false);
-          }
-        },
-        notes: {
-          plan: selectedPlanData.name,
-          entityType: 'subscription'
-        },
-        theme: {
-          color: '#64946e'
+        (error) => {
+          console.error('Subscription payment error:', error);
+          alert(error.description || getTranslatedText('Failed to initiate payment. Please try again.'));
+          setIsProcessing(false);
         }
-      };
-
-      const rzp = new window.Razorpay(options);
-      rzp.open();
+      );
     } catch (error) {
-      console.error('Subscription payment error:', error);
+      console.error('Subscription setup error:', error);
       alert(error.message || getTranslatedText('Failed to initiate payment. Please try again.'));
       setIsProcessing(false);
     }

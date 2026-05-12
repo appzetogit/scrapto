@@ -4,19 +4,12 @@ import { useNavigate } from 'react-router-dom';
 import { walletService } from '../../shared/services/wallet.service';
 import { useAuth } from '../../shared/context/AuthContext';
 
-const loadRazorpay = () => {
-    return new Promise((resolve) => {
-        const script = document.createElement('script');
-        script.src = 'https://checkout.razorpay.com/v1/checkout.js';
-        script.onload = () => resolve(true);
-        script.onerror = () => resolve(false);
-        document.body.appendChild(script);
-    });
-};
+import useRazorpay from '../../../hooks/useRazorpay';
 
 const WalletPage = () => {
     const navigate = useNavigate();
     const { user } = useAuth();
+    const { initializePayment } = useRazorpay();
     const [walletProfile, setWalletProfile] = useState(null);
     const [transactions, setTransactions] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -54,12 +47,6 @@ const WalletPage = () => {
 
         try {
             setProcessing(true);
-            const res = await loadRazorpay();
-            if (!res) {
-                alert('Razorpay SDK failed to load');
-                return;
-            }
-
             const orderData = await walletService.createRechargeOrder(Number(rechargeAmount));
 
             const options = {
@@ -69,20 +56,6 @@ const WalletPage = () => {
                 name: "Scraptox Wallet",
                 description: "Add Money to Wallet",
                 order_id: orderData.data.orderId,
-                handler: async function (response) {
-                    try {
-                        await walletService.verifyRecharge(response);
-                        alert('Wallet Recharged Successfully!');
-                        setShowAddMoneyModal(false);
-                        setRechargeAmount('');
-                        fetchWalletData(); // Refresh data
-                    } catch (err) {
-                        console.error(err);
-                        alert('Recharge Verification Failed');
-                    } finally {
-                        setProcessing(false);
-                    }
-                },
                 prefill: {
                     name: user?.name,
                     email: user?.email,
@@ -93,12 +66,30 @@ const WalletPage = () => {
                 }
             };
 
-            const paymentObject = new window.Razorpay(options);
-            paymentObject.open();
-            paymentObject.on('payment.failed', function (response) {
-                alert(response.error.description);
-                setProcessing(false);
-            });
+            // Close modal before opening Razorpay
+            setShowAddMoneyModal(false);
+
+            await initializePayment(
+                options,
+                async function (response) {
+                    try {
+                        await walletService.verifyRecharge(response);
+                        alert('Wallet Recharged Successfully!');
+                        setRechargeAmount('');
+                        fetchWalletData(); // Refresh data
+                    } catch (err) {
+                        console.error(err);
+                        alert('Recharge Verification Failed');
+                    } finally {
+                        setProcessing(false);
+                    }
+                },
+                function (error) {
+                    console.error('Razorpay Error:', error);
+                    alert(error.description || 'Payment failed. Please try again.');
+                    setProcessing(false);
+                }
+            );
 
         } catch (error) {
             console.error(error);
