@@ -16,6 +16,8 @@ class ErrorBoundary extends Component {
     return { hasError: true, error };
   }
 
+  
+
   componentDidCatch(error, errorInfo) {
     // Filter out browser extension errors
     if (error?.message?.includes('chrome-extension://') || 
