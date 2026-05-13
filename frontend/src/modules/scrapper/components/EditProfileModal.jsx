@@ -143,6 +143,25 @@ const EditProfileModal = ({ isOpen, onClose, initialData, onSuccess }) => {
                         coordinates: [longitude, latitude]
                     }
                 }));
+
+                // Reverse Geocode to get City name
+                if (window.google?.maps?.Geocoder) {
+                    const geocoder = new window.google.maps.Geocoder();
+                    geocoder.geocode({ location: { lat: latitude, lng: longitude } }, (results, status) => {
+                        if (status === "OK" && results[0]) {
+                            const cityComponent = results[0].address_components?.find(
+                                (c) => c.types.includes('locality') || c.types.includes('administrative_area_level_2')
+                            );
+                            if (cityComponent) {
+                                setFormData(prev => ({
+                                    ...prev,
+                                    city: cityComponent.long_name
+                                }));
+                            }
+                        }
+                    });
+                }
+
                 setFetchingLocation(false);
                 setLocationStatus(getTranslatedText("Location updated"));
                 setTimeout(() => setLocationStatus(''), 3000);
