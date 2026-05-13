@@ -90,15 +90,6 @@ const userSchema = new mongoose.Schema({
     fundAccountId: String, // Razorpay Fund Account ID
     contactId: String // Razorpay Contact ID
   },
-  // FCM Tokens
-  fcmTokens: {
-    type: [String],
-    default: []
-  },
-  fcmTokenApp: {
-    type: [String],
-    default: []
-  },
   // Referral System
   referralCode: {
     type: String,
@@ -110,6 +101,15 @@ const userSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
     default: null
+  },
+  // FCM Tokens
+  fcmTokens: {
+    type: [String],
+    default: []
+  },
+  fcmTokenApp: {
+    type: [String],
+    default: []
   }
 }, {
   timestamps: true

@@ -1,7 +1,7 @@
 import MarketplaceRequest from '../models/MarketplaceRequest.js';
 import Bid from '../models/Bid.js';
 import User from '../models/User.js';
-import Notification from '../models/Notification.js';
+import { sendNotificationToUser } from '../utils/pushNotificationHelper.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 import { sendSuccess, sendError } from '../utils/responseHandler.js';
 import { SCRAP_CATEGORIES } from '../config/constants.js';
@@ -284,28 +284,26 @@ export const placeBid = asyncHandler(async (req, res) => {
 
   // 1. Notify Admin
   if (request.adminId) {
-    await Notification.create({
-      recipient: request.adminId,
-      recipientModel: 'User',
-      title: notificationTitle,
-      message: notificationMessage,
-      type: 'marketplace_bid',
-      data: { requestId: request._id, bidId: bid._id }
+    sendNotificationToUser(request.adminId.toString(), {
+      title: 'New Bid Received 🎯',
+      body: `A scrapper has placed a bid of ${bidAmountFormatted} on "${request.title}"`,
+      data: {
+        requestId: request._id.toString(),
+        type: 'new_bid'
+      }
     });
-    notifyUser(request.adminId.toString(), 'notification', { title: notificationTitle, message: notificationMessage });
   }
 
   // 2. Notify User (if linked)
   if (request.userId && request.userId.toString() !== request.adminId?.toString()) {
-    await Notification.create({
-      recipient: request.userId,
-      recipientModel: 'User',
-      title: notificationTitle,
-      message: notificationMessage,
-      type: 'marketplace_bid',
-      data: { requestId: request._id, bidId: bid._id }
+    sendNotificationToUser(request.userId.toString(), {
+      title: 'New Bid Received 🎯',
+      body: `A scrapper has placed a bid of ${bidAmountFormatted} on your request: ${request.title}`,
+      data: {
+        requestId: request._id.toString(),
+        type: 'new_bid'
+      }
     });
-    notifyUser(request.userId.toString(), 'notification', { title: notificationTitle, message: notificationMessage });
   }
 
   sendSuccess(res, 'Bid placed successfully', bid);
@@ -344,18 +342,14 @@ export const acceptBid = asyncHandler(async (req, res) => {
   );
 
   // Send Notification to Scrapper
-  const scrapperNotificationTitle = 'Bid Accepted!';
-  const scrapperNotificationMessage = `Congratulations! Your bid on "${request.title}" has been accepted. You can now view the full details and contact the user.`;
-  
-  await Notification.create({
-    recipient: bid.scrapperId,
-    recipientModel: 'Scrapper',
-    title: scrapperNotificationTitle,
-    message: scrapperNotificationMessage,
-    type: 'bid_accepted',
-    data: { requestId: request._id, bidId: bid._id }
+  sendNotificationToUser(bid.scrapperId.toString(), {
+    title: 'Bid Accepted! 🎉',
+    body: `Congratulations! Your bid on "${request.title}" has been accepted.`,
+    data: {
+      requestId: request._id.toString(),
+      type: 'bid_accepted'
+    }
   });
-  notifyUser(bid.scrapperId.toString(), 'notification', { title: scrapperNotificationTitle, message: scrapperNotificationMessage });
 
   sendSuccess(res, 'Deal closed successfully. Contact details are now visible.', request);
 });

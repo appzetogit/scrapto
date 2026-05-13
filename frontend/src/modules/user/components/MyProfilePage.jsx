@@ -88,8 +88,7 @@ const MyProfilePage = () => {
     "View pickup history & status",
     "Chat",
     "Messages with scrappers",
-    "Notifications",
-    "Manage notification settings",
+    // Notifications removed
     "Help & Support",
     "FAQ, contact support",
     "Settings",
@@ -284,55 +283,7 @@ const MyProfilePage = () => {
     }
   }, [user]);
 
-  const handleTestNotification = async () => {
-    let token = localStorage.getItem('fcm_token_web');
-    
-    if (!token) {
-      setTestLoading(true);
-      try {
-        const { registerFCMToken } = await import('../../../services/pushNotificationService');
-        token = await registerFCMToken(true);
-        if (!token) {
-          alert('Could not enable notifications. Please check site permissions in your browser.');
-          setTestLoading(false);
-          return;
-        }
-      } catch (err) {
-        console.error('Failed to register FCM token during test:', err);
-        alert('Failed to enable notifications: ' + err.message);
-        setTestLoading(false);
-        return;
-      }
-    }
-
-    if (!token) {
-      alert('FCM Token not found. Please ensure notifications are enabled.');
-      return;
-    }
-
-    setTestLoading(true);
-    try {
-      const response = await apiRequest('/fcm-tokens/test-notification', {
-        method: 'POST',
-        body: JSON.stringify({
-          token: token,
-          title: 'Test Notification 🔔',
-          body: 'This is a test notification from your profile page!'
-        })
-      });
-
-      if (response.success) {
-        alert('Test notification sent successfully!');
-      } else {
-        alert('Failed to send test notification: ' + (response.error || 'Unknown error'));
-      }
-    } catch (error) {
-      console.error('Test notification error:', error);
-      alert('Error: ' + error.message);
-    } finally {
-      setTestLoading(false);
-    }
-  };
+  // handleTestNotification removed
 
   const handleSave = () => {
     console.log('Saving profile:', formData);
@@ -375,13 +326,7 @@ const MyProfilePage = () => {
       action: () => navigate("/chats"),
       color: "#10b981"
     },
-    {
-      icon: <FaBell />,
-      title: getTranslatedText("Notifications"),
-      desc: getTranslatedText("Manage notification settings"),
-      action: () => navigate("/notifications"),
-      color: "#10b981"
-    },
+    // Notifications removed
     {
       icon: <FaQuestionCircle />,
       title: getTranslatedText("Help & Support"),
@@ -396,14 +341,7 @@ const MyProfilePage = () => {
       action: () => navigate("/terms"),
       color: "#10b981"
     },
-    {
-      icon: <FaBell />,
-      title: testLoading ? "Sending..." : "Test Push",
-      desc: "Send a test notification",
-      action: handleTestNotification,
-      color: "#f59e0b",
-      isTest: true
-    }
+    // Test Push removed
   ];
 
   return (

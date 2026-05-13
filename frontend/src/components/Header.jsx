@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { usePageTranslation } from '../hooks/usePageTranslation';
 import { IoLanguageOutline, IoChevronDownOutline } from 'react-icons/io5';
-import NotificationBell from '../modules/shared/components/NotificationBell';
+// import NotificationBell from '../modules/shared/components/NotificationBell';
 
 const Header = () => {
   const [isLangOpen, setIsLangOpen] = useState(false);
@@ -84,7 +84,7 @@ const Header = () => {
             </AnimatePresence>
           </div>
 
-          <NotificationBell userType="user" />
+          {/* NotificationBell removed */}
         </div>
       </div>
     </motion.header>

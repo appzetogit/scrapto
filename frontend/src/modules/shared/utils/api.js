@@ -802,3 +802,20 @@ export const publicAPI = {
   },
 };
 
+// FCM API
+export const fcmAPI = {
+  saveToken: async (token, platform = 'web') => {
+    return apiRequest('/fcm-tokens/save', {
+      method: 'POST',
+      body: JSON.stringify({ token, platform }),
+    });
+  },
+  removeToken: async (token) => {
+    return apiRequest('/fcm-tokens/remove', {
+      method: 'POST',
+      body: JSON.stringify({ token }),
+    });
+  },
+};
+
+

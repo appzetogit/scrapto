@@ -30,8 +30,8 @@ export const AdminAuthProvider = ({ children }) => {
       localStorage.setItem('adminToken', token);
       localStorage.setItem('token', token); // Mirror to compatible key
     }
-    // Register FCM Token
-    registerFCMToken(true).catch(err => console.error('FCM registration failed', err));
+    // Register FCM token
+    registerFCMToken(true);
   };
 
   const logout = () => {

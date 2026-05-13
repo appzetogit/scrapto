@@ -143,12 +143,7 @@ export const createOrder = asyncHandler(async (req, res) => {
         });
 
         // B. Send Push Notification
-        // We reuse the helper which handles fetching tokens again, 
-        // passing the ID is enough as the helper fetches the user/scrapper model.
-        // Optimization: The helper fetches the model again. 
-        // Since we already found them, we could optimize, but using the helper 
-        // ensures consistency with how tokens are handled (web vs mobile).
-        await sendNotificationToUser(scrapper._id.toString(), notificationPayload, 'scrapper');
+        sendNotificationToUser(scrapper._id.toString(), notificationPayload);
       }));
 
       logger.info(`Notified ${onlineScrappers.length} online scrappers for Order ${order._id}`);
@@ -160,16 +155,15 @@ export const createOrder = asyncHandler(async (req, res) => {
     // Do not fail the request if notification fails
   }
 
-  // --- NOTIFY USER: Order placed confirmation ---
-  try {
-    await sendNotificationToUser(userId, {
-      title: 'Order Placed ✅',
-      body: 'Your scrap pickup request has been placed successfully!',
-      data: { type: 'order_placed', orderId: order._id.toString() }
-    }, 'user');
-  } catch (e) {
-    logger.error('Failed to notify user on order placed:', e);
-  }
+  // --- NOTIFY USER ---
+  sendNotificationToUser(userId, {
+    title: 'Order Created 📦',
+    body: `Your pickup request #${order._id.toString().slice(-6)} has been created successfully.`,
+    data: {
+      orderId: order._id.toString(),
+      type: 'order_created'
+    }
+  });
 
   sendSuccess(res, 'Order created successfully', { order }, 201);
 });
@@ -404,16 +398,15 @@ export const acceptOrder = asyncHandler(async (req, res) => {
 
   logger.info(`Order ${id} accepted by scrapper ${scrapperId}`);
 
-  // --- NOTIFY USER: Scrapper accepted their order ---
-  try {
-    await sendNotificationToUser(order.user.toString(), {
-      title: 'Order Accepted 🎉',
-      body: 'A scrapper has accepted your pickup request and is on the way!',
-      data: { type: 'order_accepted', orderId: order._id.toString() }
-    }, 'user');
-  } catch (e) {
-    logger.error('Failed to notify user on order accepted:', e);
-  }
+  // --- NOTIFY USER ---
+  sendNotificationToUser(order.user._id.toString(), {
+    title: 'Order Accepted 🤝',
+    body: `Scrapper ${scrapper.name} has accepted your order.`,
+    data: {
+      orderId: order._id.toString(),
+      type: 'order_accepted'
+    }
+  });
 
   sendSuccess(res, 'Order accepted successfully', { order });
 });
@@ -599,27 +592,24 @@ export const updateOrderStatus = asyncHandler(async (req, res) => {
 
   // --- NOTIFY on Order Completion ---
   if (status === ORDER_STATUS.COMPLETED) {
-    // Notify User
-    try {
-      await sendNotificationToUser(order.user.toString(), {
-        title: 'Order Completed ✅',
-        body: 'Your scrap pickup order has been completed successfully!',
-        data: { type: 'order_completed', orderId: order._id.toString() }
-      }, 'user');
-    } catch (e) {
-      logger.error('Failed to notify user on order completed:', e);
-    }
-    // Notify Scrapper
-    if (order.scrapper) {
-      try {
-        await sendNotificationToUser(order.scrapper.toString(), {
-          title: 'Order Completed ✅',
-          body: 'Great job! You have successfully completed the pickup.',
-          data: { type: 'order_completed', orderId: order._id.toString() }
-        }, 'scrapper');
-      } catch (e) {
-        logger.error('Failed to notify scrapper on order completed:', e);
+    sendNotificationToUser(order.user.toString(), {
+      title: 'Order Completed ✅',
+      body: `Your order #${order._id.toString().slice(-6)} has been completed. Thank you!`,
+      data: {
+        orderId: order._id.toString(),
+        type: 'order_completed'
       }
+    });
+    
+    if (order.scrapper) {
+      sendNotificationToUser(order.scrapper.toString(), {
+        title: 'Order Completed ✅',
+        body: `Pickup #${order._id.toString().slice(-6)} completed successfully.`,
+        data: {
+          orderId: order._id.toString(),
+          type: 'order_completed'
+        }
+      });
     }
   }
 

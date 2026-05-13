@@ -32,7 +32,6 @@ import referralRoutes from "./routes/referralRoutes.js";
 import walletRoutes from "./routes/walletRoutes.js";
 import translationRoutes from "./routes/translateRoutes.js";
 import fcmTokenRoutes from "./routes/fcmTokenRoutes.js";
-import notificationRoutes from "./routes/notificationRoutes.js";
 import marketplaceRoutes from "./routes/marketplaceRoutes.js";
 import { initializeSocket } from "./services/socketService.js";
 
@@ -205,7 +204,6 @@ v1Router.use("/admin/referral-system", referralRoutes);
 v1Router.use("/wallet", walletRoutes);
 v1Router.use("/translate", translationRoutes);
 v1Router.use("/fcm-tokens", fcmTokenRoutes);
-v1Router.use("/notifications", notificationRoutes);
 v1Router.use("/marketplace", marketplaceRoutes);
 
 // Mount versioned routes

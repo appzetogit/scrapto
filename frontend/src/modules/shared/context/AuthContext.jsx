@@ -47,6 +47,8 @@ export const AuthProvider = ({ children }) => {
           if (response.success) {
             setUser(response.data.user);
             setIsAuthenticated(true);
+            // Register FCM token
+            registerFCMToken();
           } else {
             // Token invalid, clear storage
             logout();
@@ -88,12 +90,8 @@ export const AuthProvider = ({ children }) => {
         tokenLength: token.length,
         tokenPreview: `${token.substring(0, 20)}...`
       });
-      // Register FCM Token
-      try {
-        await registerFCMToken(true);
-      } catch (err) {
-        console.error('FCM registration failed', err);
-      }
+      // Register FCM token
+      registerFCMToken(true);
     } else {
       console.warn('⚠️ No token provided to login function');
     }

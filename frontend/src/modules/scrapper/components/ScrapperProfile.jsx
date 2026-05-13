@@ -64,55 +64,7 @@ const ScrapperProfile = () => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [testLoading, setTestLoading] = useState(false);
 
-  const handleTestNotification = async () => {
-    let token = localStorage.getItem('fcm_token_web');
-    
-    if (!token) {
-      setTestLoading(true);
-      try {
-        const { registerFCMToken } = await import('../../../services/pushNotificationService');
-        token = await registerFCMToken(true);
-        if (!token) {
-          alert('Could not enable notifications. Please check site permissions in your browser.');
-          setTestLoading(false);
-          return;
-        }
-      } catch (err) {
-        console.error('Failed to register FCM token during test:', err);
-        alert('Failed to enable notifications: ' + err.message);
-        setTestLoading(false);
-        return;
-      }
-    }
-
-    if (!token) {
-      alert('FCM Token not found. Please ensure notifications are enabled.');
-      return;
-    }
-
-    setTestLoading(true);
-    try {
-      const response = await apiRequest('/fcm-tokens/test-notification', {
-        method: 'POST',
-        body: JSON.stringify({
-          token: token,
-          title: 'Scrapper Test Notification 🔔',
-          body: 'This is a test notification for scrapper!'
-        })
-      });
-
-      if (response.success) {
-        alert('Test notification sent successfully!');
-      } else {
-        alert('Failed to send test notification: ' + (response.error || 'Unknown error'));
-      }
-    } catch (error) {
-      console.error('Test notification error:', error);
-      alert('Error: ' + error.message);
-    } finally {
-      setTestLoading(false);
-    }
-  };
+  // handleTestNotification removed
 
   const handleProfileUpdate = (updatedScrapper) => {
     // 1. Update local state
@@ -623,25 +575,7 @@ const ScrapperProfile = () => {
               </span>
             </button>
 
-            <button
-              type="button"
-              onClick={handleTestNotification}
-              disabled={testLoading}
-              className="w-full flex items-center justify-between px-3 md:px-4 py-3 md:py-3.5 text-left hover:bg-orange-50 transition-colors rounded-b-2xl"
-              style={{ backgroundColor: 'rgba(245, 158, 11, 0.05)' }}
-            >
-              <div>
-                <p className="text-xs md:text-sm font-semibold text-orange-700">
-                  {testLoading ? "Sending Test..." : "Test Push Notification"}
-                </p>
-                <p className="text-[11px] md:text-xs text-orange-600/70">
-                  Verify if your push notifications are working
-                </p>
-              </div>
-              <span className="text-sm text-orange-400">
-                🔔
-              </span>
-            </button>
+            {/* Test Push removed */}
           </div>
         </div>
       </div>

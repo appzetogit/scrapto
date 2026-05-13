@@ -1,73 +1,75 @@
-import { sendPushNotification } from '../services/firebaseAdmin.js';
 import User from '../models/User.js';
 import Scrapper from '../models/Scrapper.js';
-import Notification from '../models/Notification.js';
-import { notifyUser } from '../services/socketService.js';
+import { sendPushNotification } from '../services/firebaseService.js';
+import logger from './logger.js';
 
 /**
- * Send notification to a specific user or scrapper
- * @param {string} userId - User or Scrapper ID
- * @param {object} payload - { title, body, data }
- * @param {string} role - 'user' or 'scrapper', default 'user'
- * @param {boolean} includeMobile - whether to include mobile tokens
+ * Send notification to a specific user (can be USER, SCRAPPER, or ADMIN)
+ * @param {string} userId - User ID
+ * @param {Object} payload - Notification payload { title, body, data }
+ * @param {boolean} includeApp - Whether to include app tokens
  */
-export async function sendNotificationToUser(userId, payload, role = 'user', includeMobile = true) {
+export const sendNotificationToUser = async (userId, payload, includeApp = true) => {
     try {
-        let user;
+        // Try to find in User model first
+        let user = await User.findById(userId);
+        let scrapper = null;
 
-        if (role === 'scrapper') {
-            user = await Scrapper.findById(userId);
-        } else {
-            user = await User.findById(userId);
+        // If user not found or is a scrapper, also check Scrapper model for tokens
+        if (user && user.role === 'scrapper') {
+            scrapper = await Scrapper.findById(userId);
+        } else if (!user) {
+            // Might be a scrapper ID directly
+            scrapper = await Scrapper.findById(userId);
         }
 
-        if (!user) {
-            console.warn(`User/Scrapper with ID ${userId} not found for notification`);
-            return;
-        }
-
-        // Collect tokens
         let tokens = [];
-        if (user.fcmTokens && user.fcmTokens.length > 0) {
-            tokens = [...tokens, ...user.fcmTokens];
-        }
-        if (includeMobile && user.fcmTokenApp && user.fcmTokenApp.length > 0) {
-            tokens = [...tokens, ...user.fcmTokenApp];
+
+        if (user) {
+            if (user.fcmTokens && user.fcmTokens.length > 0) {
+                tokens = [...tokens, ...user.fcmTokens];
+            }
+            if (includeApp && user.fcmTokenApp && user.fcmTokenApp.length > 0) {
+                tokens = [...tokens, ...user.fcmTokenApp];
+            }
         }
 
-        // Remove duplicates
-        const uniqueTokens = [...new Set(tokens)];
+        if (scrapper) {
+            if (scrapper.fcmTokens && scrapper.fcmTokens.length > 0) {
+                tokens = [...tokens, ...scrapper.fcmTokens];
+            }
+            if (includeApp && scrapper.fcmTokenApp && scrapper.fcmTokenApp.length > 0) {
+                tokens = [...tokens, ...scrapper.fcmTokenApp];
+            }
+        }
+
+        // Remove duplicates and empty tokens
+        const uniqueTokens = [...new Set(tokens)].filter(t => t);
 
         if (uniqueTokens.length === 0) {
-            return;
+            logger.info(`No FCM tokens found for user ${userId}`);
+            return null;
         }
 
-        // Create notification in database for persistence (Notification Center)
-        try {
-            await Notification.create({
-                recipient: userId,
-                recipientModel: role === 'scrapper' ? 'Scrapper' : 'User',
-                title: payload.title,
-                message: payload.body,
-                type: payload.data?.type || 'system',
-                data: payload.data || {}
-            });
-
-            // Notify via Socket for real-time UI update if online
-            notifyUser(userId, 'new_notification', {
-                title: payload.title,
-                message: payload.body,
-                type: payload.data?.type || 'system',
-                data: payload.data || {},
-                createdAt: new Date().toISOString()
-            });
-        } catch (dbError) {
-            console.error('Error saving notification to DB:', dbError);
-        }
-
-        // Send push notification via FCM
-        await sendPushNotification(uniqueTokens, payload);
+        return await sendPushNotification(uniqueTokens, payload);
     } catch (error) {
-        console.error('Error sending notification helper:', error);
+        logger.error(`Error sending notification to user ${userId}:`, error.message);
+        // Don't throw, notifications are non-critical
+        return null;
     }
-}
+};
+
+/**
+ * Send notification to multiple users
+ * @param {string[]} userIds - Array of User IDs
+ * @param {Object} payload - Notification payload
+ */
+export const sendNotificationToMultipleUsers = async (userIds, payload) => {
+    try {
+        const promises = userIds.map(userId => sendNotificationToUser(userId, payload));
+        return await Promise.all(promises);
+    } catch (error) {
+        logger.error('Error sending multiple notifications:', error.message);
+        return null;
+    }
+};

@@ -3,7 +3,7 @@ import { useEffect } from 'react';
 import UserModule from './modules/user';
 import AdminModule from './modules/admin';
 import ScrapperModule from './modules/scrapper';
-import { initializePushNotifications, setupForegroundNotificationHandler } from './services/pushNotificationService';
+import { setupForegroundNotificationHandler } from './services/pushNotificationService';
 import './App.css';
 
 // Shared Public Pages
@@ -16,10 +16,11 @@ import { Toaster } from 'react-hot-toast';
 
 function App() {
   useEffect(() => {
-    initializePushNotifications();
-    setupForegroundNotificationHandler((payload) => {
-      console.log('Foreground notification:', payload);
-    });
+    // Setup foreground notification handler
+    const unsubscribe = setupForegroundNotificationHandler();
+    return () => {
+      if (unsubscribe && typeof unsubscribe === 'function') unsubscribe();
+    };
   }, []);
 
   return (

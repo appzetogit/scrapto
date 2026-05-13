@@ -6,6 +6,7 @@ import Scrapper from '../models/Scrapper.js';
 import { sendOTP, sendWelcomeSMS } from '../utils/otpService.js';
 import logger from '../utils/logger.js';
 import { USER_ROLES } from '../config/constants.js';
+import { sendNotificationToUser } from '../utils/pushNotificationHelper.js';
 
 // User test numbers
 const userBypassList = new Set(['9685974247', '9876543210', '9999999999', '7610416911', '6260491554']);
@@ -185,6 +186,15 @@ export const login = asyncHandler(async (req, res) => {
 
   // Generate token
   const token = generateToken(user._id, user.role);
+
+  // Send Push Notification
+  sendNotificationToUser(user._id.toString(), {
+    title: 'Login Successful 🚀',
+    body: `Welcome back, ${user.name}! You have successfully logged in.`,
+    data: {
+      type: 'login_success'
+    }
+  });
 
   sendSuccess(res, 'Login successful', {
     user,
@@ -374,6 +384,15 @@ export const verifyOTP = asyncHandler(async (req, res) => {
   }
 
   const token = generateToken(user._id, tokenRole);
+
+  // Send Push Notification
+  sendNotificationToUser(user._id.toString(), {
+    title: 'Login Successful 🚀',
+    body: `Welcome back, ${user.name}! You have successfully logged in.`,
+    data: {
+      type: 'login_success'
+    }
+  });
 
   // Log token generation for debugging
   logger.info('🔑 Token generated in verifyOTP:', {

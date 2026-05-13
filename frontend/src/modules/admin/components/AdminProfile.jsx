@@ -95,55 +95,7 @@ const AdminProfile = () => {
     }
   }, [admin]);
 
-  const handleTestNotification = async () => {
-    let token = localStorage.getItem('fcm_token_web');
-    
-    if (!token) {
-      setTestLoading(true);
-      try {
-        const { registerFCMToken } = await import('../../../services/pushNotificationService');
-        token = await registerFCMToken(true);
-        if (!token) {
-          alert('Could not enable notifications. Please check site permissions in your browser.');
-           setTestLoading(false);
-          return;
-        }
-      } catch (err) {
-        console.error('Failed to register FCM token during test:', err);
-        alert('Failed to enable notifications: ' + err.message);
-        setTestLoading(false);
-        return;
-      }
-    }
-
-    if (!token) {
-      alert('FCM Token not found. Please ensure notifications are enabled.');
-      return;
-    }
-
-    setTestLoading(true);
-    try {
-      const response = await apiRequest('/fcm-tokens/test-notification', {
-        method: 'POST',
-        body: JSON.stringify({
-          token: token,
-          title: 'Admin Test Notification 🔔',
-          body: 'This is a test notification from Admin Profile!'
-        })
-      });
-
-      if (response.success) {
-        alert('Test notification sent successfully!');
-      } else {
-        alert('Failed to send test notification: ' + (response.error || 'Unknown error'));
-      }
-    } catch (error) {
-      console.error('Test notification error:', error);
-      alert('Error: ' + error.message);
-    } finally {
-      setTestLoading(false);
-    }
-  };
+  // handleTestNotification removed
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -616,27 +568,7 @@ const AdminProfile = () => {
                 </div>
               ))}
 
-              {/* Test Push Notification Button */}
-              <div className="pt-4 border-t border-slate-100">
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={handleTestNotification}
-                  disabled={testLoading}
-                  className="w-full py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-all shadow-sm"
-                  style={{
-                    backgroundColor: testLoading ? '#fef3c7' : '#fffbeb',
-                    color: '#d97706',
-                    border: '1px solid #fde68a'
-                  }}
-                >
-                  <FaBell className={testLoading ? "animate-bounce" : ""} />
-                  {testLoading ? "Sending Test..." : "Test Push Notification"}
-                </motion.button>
-                <p className="text-[10px] text-center mt-2" style={{ color: '#94a3b8' }}>
-                  Verify if your push notifications are working
-                </p>
-              </div>
+              {/* Test Push removed */}
             </div>
           </motion.div>
 
