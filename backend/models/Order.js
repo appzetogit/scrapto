@@ -81,6 +81,17 @@ const orderSchema = new mongoose.Schema({
     coordinates: {
       lat: Number,
       lng: Number
+    },
+    location: {
+      type: {
+        type: String,
+        enum: ['Point'],
+        default: 'Point'
+      },
+      coordinates: {
+        type: [Number], // [longitude, latitude]
+        default: [0, 0]
+      }
     }
   },
   preferredTime: {
@@ -140,6 +151,7 @@ orderSchema.index({ user: 1, createdAt: -1 });
 orderSchema.index({ scrapper: 1, createdAt: -1 });
 orderSchema.index({ status: 1 });
 orderSchema.index({ paymentStatus: 1 });
+orderSchema.index({ location: '2dsphere' });
 orderSchema.index({ orderType: 1 });
 
 const Order = mongoose.model('Order', orderSchema);

@@ -81,6 +81,14 @@ export const createOrder = asyncHandler(async (req, res) => {
   if (serviceDetails) orderPayload.serviceDetails = serviceDetails;
   if (serviceFee) orderPayload.serviceFee = serviceFee;
 
+  // Set GeoJSON location for distance-based queries (25km radius)
+  if (pickupAddress && pickupAddress.coordinates && pickupAddress.coordinates.lat && pickupAddress.coordinates.lng) {
+    orderPayload.location = {
+      type: 'Point',
+      coordinates: [pickupAddress.coordinates.lng, pickupAddress.coordinates.lat]
+    };
+  }
+
   const order = await Order.create(orderPayload);
 
   // Populate user details
@@ -90,12 +98,27 @@ export const createOrder = asyncHandler(async (req, res) => {
 
   // --- NOTIFY ONLINE SCRAPPERS ---
   try {
-    // 1. Find Scrappers who are Online, Active, and Verified
-    const onlineScrappers = await Scrapper.find({
+    // 1. Find Scrappers who are Online, Active, Verified, and within 25km Radius
+    const scrapperQuery = {
       isOnline: true,
       status: 'active',
       'kyc.status': 'verified'
-    }).select('_id fcmTokens fcmTokenApp');
+    };
+
+    // Apply distance filter if order has valid coordinates
+    if (order.location && order.location.coordinates[0] !== 0) {
+      scrapperQuery.liveLocation = {
+        $nearSphere: {
+          $geometry: {
+            type: 'Point',
+            coordinates: order.location.coordinates
+          },
+          $maxDistance: 25000 // 25,000 meters = 25km
+        }
+      };
+    }
+
+    const onlineScrappers = await Scrapper.find(scrapperQuery).select('_id fcmTokens fcmTokenApp');
 
     if (onlineScrappers.length > 0) {
       const notificationPayload = {
@@ -225,10 +248,27 @@ export const getAvailableOrders = asyncHandler(async (req, res) => {
   // Apply filter
   query.orderType = { $in: allowedOrderTypes };
 
-  const orders = await Order.find(query)
-    .populate('user', 'name phone')
-    .sort({ createdAt: -1 })
-    .limit(20);
+  // Apply location filter (Strict 25km radius)
+  if (scrapper.liveLocation && scrapper.liveLocation.coordinates && scrapper.liveLocation.coordinates[0] !== 0) {
+    query.location = {
+      $nearSphere: {
+        $geometry: {
+          type: 'Point',
+          coordinates: scrapper.liveLocation.coordinates
+        },
+        $maxDistance: 25000 // 25km
+      }
+    };
+  }
+
+  let dbQuery = Order.find(query).populate('user', 'name phone');
+
+  // If no location filter, sort by newest first
+  if (!query.location) {
+    dbQuery = dbQuery.sort({ createdAt: -1 });
+  }
+
+  const orders = await dbQuery.limit(20);
 
   sendSuccess(res, 'Available orders retrieved successfully', { orders });
 });
@@ -672,7 +712,16 @@ export const updateOrder = asyncHandler(async (req, res) => {
     order.totalAmount = totalAmount;
   }
 
-  if (pickupAddress) order.pickupAddress = pickupAddress;
+  if (pickupAddress) {
+    order.pickupAddress = pickupAddress;
+    // Sync GeoJSON location for radius filtering
+    if (pickupAddress.coordinates && pickupAddress.coordinates.lat && pickupAddress.coordinates.lng) {
+      order.location = {
+        type: 'Point',
+        coordinates: [pickupAddress.coordinates.lng, pickupAddress.coordinates.lat]
+      };
+    }
+  }
   if (preferredTime) order.preferredTime = preferredTime;
   if (pickupSlot) order.pickupSlot = pickupSlot;
   if (images) order.images = images;
