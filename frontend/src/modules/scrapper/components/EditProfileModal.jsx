@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { IoLocateOutline, IoLocationOutline } from 'react-icons/io5';
 import { usePageTranslation } from '../../../hooks/usePageTranslation';
 import { scrapperProfileAPI } from '../../shared/utils/api';
 import { useAuth } from '../../shared/context/AuthContext';
@@ -21,7 +22,13 @@ const EditProfileModal = ({ isOpen, onClose, initialData, onSuccess }) => {
         "Other",
         "Profile updated successfully",
         "Failed to update profile",
-        "Enter valid vehicle number"
+        "Enter valid vehicle number",
+        "City",
+        "Location",
+        "Get Current Location",
+        "Location updated",
+        "Failed to get location",
+        "Updating location..."
     ];
     const { getTranslatedText } = usePageTranslation(staticTexts);
     const { user } = useAuth();
@@ -29,23 +36,126 @@ const EditProfileModal = ({ isOpen, onClose, initialData, onSuccess }) => {
     const [formData, setFormData] = useState({
         name: '',
         vehicleType: 'bike',
-        vehicleNumber: ''
+        vehicleNumber: '',
+        city: '',
+        liveLocation: null
     });
     const [loading, setLoading] = useState(false);
+    const [fetchingLocation, setFetchingLocation] = useState(false);
+    const [locationStatus, setLocationStatus] = useState('');
     const [error, setError] = useState('');
+
+    const cityInputRef = useRef(null);
+    const autocompleteRef = useRef(null);
 
     // vehicle types options
     const vehicleTypes = ['bike', 'truck'];
 
+    const initAutocomplete = useCallback(() => {
+        if (!cityInputRef.current || !window.google?.maps?.places) return;
+        if (autocompleteRef.current) return;
+
+        const autocomplete = new window.google.maps.places.Autocomplete(cityInputRef.current, {
+            types: ['(cities)'],
+            componentRestrictions: { country: 'in' },
+            fields: ['address_components', 'geometry', 'name'],
+        });
+
+        autocomplete.addListener('place_changed', () => {
+            const place = autocomplete.getPlace();
+            const cityComponent = place.address_components?.find(
+                (c) => c.types.includes('locality') || c.types.includes('administrative_area_level_2')
+            );
+            const selectedCity = cityComponent?.long_name || place.name || '';
+            
+            const lat = place.geometry?.location?.lat();
+            const lng = place.geometry?.location?.lng();
+
+            setFormData(prev => ({
+                ...prev,
+                city: selectedCity,
+                liveLocation: lat && lng ? {
+                    type: 'Point',
+                    coordinates: [lng, lat]
+                } : prev.liveLocation
+            }));
+
+            if (lat && lng) {
+                setLocationStatus(getTranslatedText("Location updated from city"));
+                setTimeout(() => setLocationStatus(''), 3000);
+            }
+        });
+
+        autocompleteRef.current = autocomplete;
+    }, [getTranslatedText]);
+
     useEffect(() => {
-        if (initialData) {
+        if (isOpen) {
+            if (window.google?.maps?.places) {
+                initAutocomplete();
+            } else {
+                const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+                if (apiKey) {
+                    const existingScript = document.querySelector('script[src*="maps.googleapis.com"]');
+                    if (!existingScript) {
+                        const script = document.createElement('script');
+                        script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places`;
+                        script.async = true;
+                        script.onload = initAutocomplete;
+                        document.head.appendChild(script);
+                    } else {
+                        existingScript.addEventListener('load', initAutocomplete);
+                    }
+                }
+            }
+        }
+    }, [isOpen, initAutocomplete]);
+
+    useEffect(() => {
+        if (initialData && isOpen) {
             setFormData({
                 name: initialData.name || '',
                 vehicleType: initialData.vehicleInfo?.type || 'bike',
-                vehicleNumber: initialData.vehicleInfo?.number || ''
+                vehicleNumber: initialData.vehicleInfo?.number || '',
+                city: initialData.city || '',
+                liveLocation: initialData.liveLocation || null
             });
+            setLocationStatus('');
         }
     }, [initialData, isOpen]);
+
+    const handleFetchLocation = () => {
+        if (!navigator.geolocation) {
+            setError(getTranslatedText("Geolocation is not supported by your browser"));
+            return;
+        }
+
+        setFetchingLocation(true);
+        setLocationStatus(getTranslatedText("Updating location..."));
+
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                const { latitude, longitude } = position.coords;
+                setFormData(prev => ({
+                    ...prev,
+                    liveLocation: {
+                        type: 'Point',
+                        coordinates: [longitude, latitude]
+                    }
+                }));
+                setFetchingLocation(false);
+                setLocationStatus(getTranslatedText("Location updated"));
+                setTimeout(() => setLocationStatus(''), 3000);
+            },
+            (err) => {
+                console.error("Location error:", err);
+                setFetchingLocation(false);
+                setLocationStatus('');
+                setError(getTranslatedText("Failed to get location"));
+            },
+            { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+        );
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -70,7 +180,9 @@ const EditProfileModal = ({ isOpen, onClose, initialData, onSuccess }) => {
                 vehicleInfo: {
                     type: formData.vehicleType,
                     number: formData.vehicleNumber.toUpperCase() // Standardize to uppercase
-                }
+                },
+                city: formData.city,
+                liveLocation: formData.liveLocation
             };
 
             const response = await scrapperProfileAPI.updateMyProfile(payload);
@@ -108,7 +220,7 @@ const EditProfileModal = ({ isOpen, onClose, initialData, onSuccess }) => {
                             animate={{ scale: 1, opacity: 1, y: 0 }}
                             exit={{ scale: 0.95, opacity: 0, y: 20 }}
                             onClick={(e) => e.stopPropagation()}
-                            className="bg-white w-full max-w-md rounded-2xl shadow-xl overflow-hidden"
+                            className="bg-white w-full max-w-md rounded-2xl shadow-xl overflow-y-auto max-h-[90vh]"
                         >
                             {/* Header */}
                             <div className="px-6 py-4 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
@@ -182,6 +294,56 @@ const EditProfileModal = ({ isOpen, onClose, initialData, onSuccess }) => {
                                         className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 outline-none transition-all text-slate-800 uppercase"
                                         placeholder="UP14 AB 1234"
                                     />
+                                </div>
+
+                                {/* City */}
+                                <div className="space-y-1.5">
+                                    <label className="text-sm font-medium text-slate-700 block">
+                                        {getTranslatedText("City")}
+                                    </label>
+                                    <input
+                                        ref={cityInputRef}
+                                        type="text"
+                                        value={formData.city}
+                                        onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+                                        className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 outline-none transition-all text-slate-800"
+                                        placeholder="Enter your city"
+                                    />
+                                </div>
+
+                                {/* Location */}
+                                <div className="space-y-1.5">
+                                    <label className="text-sm font-medium text-slate-700 block">
+                                        {getTranslatedText("Location")}
+                                    </label>
+                                    <div className="flex flex-col gap-2">
+                                        <button
+                                            type="button"
+                                            onClick={handleFetchLocation}
+                                            disabled={fetchingLocation}
+                                            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-emerald-200 bg-emerald-50 text-emerald-700 font-medium hover:bg-emerald-100 transition-all disabled:opacity-50"
+                                        >
+                                            {fetchingLocation ? (
+                                                <div className="w-4 h-4 border-2 border-emerald-600 border-t-transparent rounded-full animate-spin" />
+                                            ) : (
+                                                <IoLocateOutline size={18} />
+                                            )}
+                                            {getTranslatedText("Get Current Location")}
+                                        </button>
+                                        
+                                        {locationStatus && (
+                                            <p className={`text-[10px] font-medium text-center ${locationStatus === getTranslatedText("Location updated") ? 'text-emerald-600' : 'text-slate-500'}`}>
+                                                {locationStatus}
+                                            </p>
+                                        )}
+                                        
+                                        {formData.liveLocation && (
+                                            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-50 border border-slate-100 text-[10px] text-slate-500">
+                                                <IoLocationOutline size={12} className="text-emerald-500" />
+                                                <span>Lat: {formData.liveLocation.coordinates[1].toFixed(4)}, Lng: {formData.liveLocation.coordinates[0].toFixed(4)}</span>
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
 
                                 {/* Footer Actions */}

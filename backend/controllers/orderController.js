@@ -95,7 +95,7 @@ export const createOrder = asyncHandler(async (req, res) => {
       isOnline: true,
       status: 'active',
       'kyc.status': 'verified'
-    }).select('_id fcmTokens fcmTokenMobile');
+    }).select('_id fcmTokens fcmTokenApp');
 
     if (onlineScrappers.length > 0) {
       const notificationPayload = {

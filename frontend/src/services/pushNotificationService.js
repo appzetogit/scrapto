@@ -81,7 +81,7 @@ export async function registerFCMToken(forceUpdate = false) {
 
         // Detect platform
         const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-        const platformType = isMobile ? 'mobile' : 'web';
+        const platformType = isMobile ? 'app' : 'web';
 
         // Save to backend
         // Assuming apiRequest handles Authorization header automatically via localStorage

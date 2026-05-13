@@ -31,8 +31,8 @@ export async function sendNotificationToUser(userId, payload, role = 'user', inc
         if (user.fcmTokens && user.fcmTokens.length > 0) {
             tokens = [...tokens, ...user.fcmTokens];
         }
-        if (includeMobile && user.fcmTokenMobile && user.fcmTokenMobile.length > 0) {
-            tokens = [...tokens, ...user.fcmTokenMobile];
+        if (includeMobile && user.fcmTokenApp && user.fcmTokenApp.length > 0) {
+            tokens = [...tokens, ...user.fcmTokenApp];
         }
 
         // Remove duplicates

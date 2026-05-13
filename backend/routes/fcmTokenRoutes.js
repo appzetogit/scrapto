@@ -27,11 +27,11 @@ router.post('/save', protect, async (req, res) => {
                 // Limit to 10
                 if (user.fcmTokens.length > 10) user.fcmTokens = user.fcmTokens.slice(-10);
             }
-        } else if (platform === 'mobile') {
-            if (!user.fcmTokenMobile) user.fcmTokenMobile = [];
-            if (!user.fcmTokenMobile.includes(token)) {
-                user.fcmTokenMobile.push(token);
-                if (user.fcmTokenMobile.length > 10) user.fcmTokenMobile = user.fcmTokenMobile.slice(-10);
+        } else if (platform === 'app') {
+            if (!user.fcmTokenApp) user.fcmTokenApp = [];
+            if (!user.fcmTokenApp.includes(token)) {
+                user.fcmTokenApp.push(token);
+                if (user.fcmTokenApp.length > 10) user.fcmTokenApp = user.fcmTokenApp.slice(-10);
             }
         }
 
@@ -48,11 +48,11 @@ router.post('/save', protect, async (req, res) => {
                             scrapper.fcmTokens.push(token);
                             if (scrapper.fcmTokens.length > 10) scrapper.fcmTokens = scrapper.fcmTokens.slice(-10);
                         }
-                    } else if (platform === 'mobile') {
-                        if (!scrapper.fcmTokenMobile) scrapper.fcmTokenMobile = [];
-                        if (!scrapper.fcmTokenMobile.includes(token)) {
-                            scrapper.fcmTokenMobile.push(token);
-                            if (scrapper.fcmTokenMobile.length > 10) scrapper.fcmTokenMobile = scrapper.fcmTokenMobile.slice(-10);
+                    } else if (platform === 'app') {
+                        if (!scrapper.fcmTokenApp) scrapper.fcmTokenApp = [];
+                        if (!scrapper.fcmTokenApp.includes(token)) {
+                            scrapper.fcmTokenApp.push(token);
+                            if (scrapper.fcmTokenApp.length > 10) scrapper.fcmTokenApp = scrapper.fcmTokenApp.slice(-10);
                         }
                     }
                     await scrapper.save();
@@ -95,8 +95,8 @@ router.delete('/remove', protect, async (req, res) => {
         if (user) {
             if (platform === 'web' && user.fcmTokens) {
                 user.fcmTokens = user.fcmTokens.filter(t => t !== token);
-            } else if (platform === 'mobile' && user.fcmTokenMobile) {
-                user.fcmTokenMobile = user.fcmTokenMobile.filter(t => t !== token);
+            } else if (platform === 'app' && user.fcmTokenApp) {
+                user.fcmTokenApp = user.fcmTokenApp.filter(t => t !== token);
             }
             await user.save();
         }
@@ -107,8 +107,8 @@ router.delete('/remove', protect, async (req, res) => {
                 if (scrapper) {
                     if (platform === 'web' && scrapper.fcmTokens) {
                         scrapper.fcmTokens = scrapper.fcmTokens.filter(t => t !== token);
-                    } else if (platform === 'mobile' && scrapper.fcmTokenMobile) {
-                        scrapper.fcmTokenMobile = scrapper.fcmTokenMobile.filter(t => t !== token);
+                    } else if (platform === 'app' && scrapper.fcmTokenApp) {
+                        scrapper.fcmTokenApp = scrapper.fcmTokenApp.filter(t => t !== token);
                     }
                     await scrapper.save();
                 }

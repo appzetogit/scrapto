@@ -309,7 +309,7 @@ const scrapperSchema = new mongoose.Schema({
     type: [String],
     default: []
   },
-  fcmTokenMobile: {
+  fcmTokenApp: {
     type: [String],
     default: []
   }

@@ -29,6 +29,7 @@ const ScrapperProfile = () => {
     "Name",
     "Phone",
     "Vehicle",
+    "City",
     "Not provided",
     "Heard about Scraptox",
     "Profile editing will be available soon.",
@@ -408,6 +409,10 @@ const ScrapperProfile = () => {
                 {scrapperUser?.vehicleInfo
                   ? <span className="capitalize">{scrapperUser.vehicleInfo.type} • {scrapperUser.vehicleInfo.number}</span>
                   : getTranslatedText('Not provided')}
+              </span>
+              <span>{getTranslatedText("City")}</span>
+              <span className="font-semibold text-right text-slate-900">
+                {scrapperUser?.city || getTranslatedText('Not provided')}
               </span>
               {scrapperUser?.heardFrom && (
                 <>

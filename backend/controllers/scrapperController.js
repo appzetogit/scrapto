@@ -38,7 +38,7 @@ export const getMyProfile = asyncHandler(async (req, res) => {
 });
 
 export const updateMyProfile = asyncHandler(async (req, res) => {
-    const { name, vehicleInfo, availability, isOnline, city } = req.body;
+    const { name, vehicleInfo, availability, isOnline, city, liveLocation } = req.body;
     const userId = req.user.id || req.user._id;
 
     // 1. Update Scrapper Document
@@ -53,7 +53,8 @@ export const updateMyProfile = asyncHandler(async (req, res) => {
                 phone: user.phone,
                 name: user.name || name || 'Scrapper',
                 email: user.email,
-                vehicleInfo: vehicleInfo || { type: 'bike', number: 'NA', capacity: 0 }
+                vehicleInfo: vehicleInfo || { type: 'bike', number: 'NA', capacity: 0 },
+                liveLocation: liveLocation || { type: 'Point', coordinates: [0, 0] }
             });
         } else {
             return sendError(res, 'Scrapper profile not found', 404);
@@ -62,6 +63,7 @@ export const updateMyProfile = asyncHandler(async (req, res) => {
         if (name) scrapper.name = name;
         if (vehicleInfo) scrapper.vehicleInfo = { ...scrapper.vehicleInfo, ...vehicleInfo };
         if (city !== undefined && city !== null) scrapper.city = city.trim() || null;
+        if (liveLocation) scrapper.liveLocation = liveLocation;
 
         // Update Online Status
         if (availability !== undefined || isOnline !== undefined) {
@@ -128,12 +130,11 @@ export const updateFcmToken = asyncHandler(async (req, res) => {
             scrapper.fcmTokens.push(token);
             if (scrapper.fcmTokens.length > 10) scrapper.fcmTokens = scrapper.fcmTokens.slice(-10);
         }
-    } else {
-        // mobile
-        if (!scrapper.fcmTokenMobile) scrapper.fcmTokenMobile = [];
-        if (!scrapper.fcmTokenMobile.includes(token)) {
-            scrapper.fcmTokenMobile.push(token);
-            if (scrapper.fcmTokenMobile.length > 10) scrapper.fcmTokenMobile = scrapper.fcmTokenMobile.slice(-10);
+    } else if (platform === 'app') {
+        if (!scrapper.fcmTokenApp) scrapper.fcmTokenApp = [];
+        if (!scrapper.fcmTokenApp.includes(token)) {
+            scrapper.fcmTokenApp.push(token);
+            if (scrapper.fcmTokenApp.length > 10) scrapper.fcmTokenApp = scrapper.fcmTokenApp.slice(-10);
         }
     }
     await scrapper.save();
@@ -148,11 +149,11 @@ export const updateFcmToken = asyncHandler(async (req, res) => {
                     user.fcmTokens.push(token);
                     if (user.fcmTokens.length > 10) user.fcmTokens = user.fcmTokens.slice(-10);
                 }
-            } else {
-                if (!user.fcmTokenMobile) user.fcmTokenMobile = [];
-                if (!user.fcmTokenMobile.includes(token)) {
-                    user.fcmTokenMobile.push(token);
-                    if (user.fcmTokenMobile.length > 10) user.fcmTokenMobile = user.fcmTokenMobile.slice(-10);
+            } else if (platform === 'app') {
+                if (!user.fcmTokenApp) user.fcmTokenApp = [];
+                if (!user.fcmTokenApp.includes(token)) {
+                    user.fcmTokenApp.push(token);
+                    if (user.fcmTokenApp.length > 10) user.fcmTokenApp = user.fcmTokenApp.slice(-10);
                 }
             }
             await user.save();
