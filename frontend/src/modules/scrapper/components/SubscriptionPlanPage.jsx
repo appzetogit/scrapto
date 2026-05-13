@@ -5,6 +5,8 @@ import { useAuth } from '../../shared/context/AuthContext';
 import { checkAndProcessMilestone } from '../../shared/utils/referralUtils';
 import { subscriptionAPI } from '../../shared/utils/api';
 import useRazorpay from '../../../hooks/useRazorpay';
+import { usePageTranslation } from '../../../hooks/usePageTranslation';
+import toast from 'react-hot-toast';
 
 const SubscriptionPlanPage = () => {
   const staticTexts = [

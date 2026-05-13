@@ -9,8 +9,7 @@ import {
   processMonthlyTierBonus
 } from '../../shared/utils/referralUtils';
 import QRCodeGenerator from '../../shared/components/QRCodeGenerator';
-import usePageTranslation from '../../../hooks/usePageTranslation';
-// Trigger rebuild for ReferenceError: usePageTranslation
+import { usePageTranslation } from '../../../hooks/usePageTranslation';
 import {
   FaGift,
   FaCopy,
