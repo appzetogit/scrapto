@@ -804,10 +804,10 @@ export const publicAPI = {
 
 // FCM API
 export const fcmAPI = {
-  saveToken: async (token, platform = 'web') => {
+  saveToken: async (token, platform = 'web', isNewLogin = false) => {
     return apiRequest('/fcm-tokens/save', {
       method: 'POST',
-      body: JSON.stringify({ token, platform }),
+      body: JSON.stringify({ token, platform, isNewLogin }),
     });
   },
   removeToken: async (token) => {

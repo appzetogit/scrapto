@@ -130,10 +130,11 @@ export const createOrder = asyncHandler(async (req, res) => {
         }
       };
 
-      // Loop through scrappers to send notifications
-      // We use Promise.allSettled to ensure one failure doesn't stop others
-      await Promise.allSettled(onlineScrappers.map(async (scrapper) => {
-        // A. Send Socket Event
+      // Batch send notifications to all online scrappers
+      const scrapperIds = onlineScrappers.map(s => s._id.toString());
+      
+      // A. Send Socket Events (Individual)
+      onlineScrappers.forEach(scrapper => {
         notifyUser(scrapper._id.toString(), 'new_order_request', {
           orderId: order._id,
           pickupAddress: order.pickupAddress,
@@ -141,10 +142,11 @@ export const createOrder = asyncHandler(async (req, res) => {
           totalAmount: order.totalAmount,
           message: 'New pickup request available!'
         });
+      });
 
-        // B. Send Push Notification
-        sendNotificationToUser(scrapper._id.toString(), notificationPayload);
-      }));
+      // B. Send Batch Push Notifications
+      const { sendNotificationToMultipleUsers } = await import('../utils/pushNotificationHelper.js');
+      sendNotificationToMultipleUsers(scrapperIds, notificationPayload);
 
       logger.info(`Notified ${onlineScrappers.length} online scrappers for Order ${order._id}`);
     } else {
@@ -590,6 +592,21 @@ export const updateOrderStatus = asyncHandler(async (req, res) => {
 
   logger.info(`Order ${id} status updated to ${status} (Payment: ${order.paymentStatus}) by ${userRole} ${userId}`);
 
+  // --- NOTIFY on Status Change ---
+  if (status === ORDER_STATUS.CONFIRMED) {
+    sendNotificationToUser(order.user.toString(), {
+      title: 'Order Confirmed! ✅',
+      body: `Your order #${order._id.toString().slice(-6)} has been confirmed for pickup.`,
+      data: { orderId: order._id.toString(), type: 'order_status' }
+    });
+  } else if (status === ORDER_STATUS.IN_PROGRESS) {
+    sendNotificationToUser(order.user.toString(), {
+      title: 'Scrapper is on the way! 🚚',
+      body: `Your pickup #${order._id.toString().slice(-6)} is now in progress.`,
+      data: { orderId: order._id.toString(), type: 'order_status' }
+    });
+  }
+
   // --- NOTIFY on Order Completion ---
   if (status === ORDER_STATUS.COMPLETED) {
     sendNotificationToUser(order.user.toString(), {
@@ -660,6 +677,23 @@ export const cancelOrder = asyncHandler(async (req, res) => {
   await order.save();
 
   logger.info(`Order ${id} cancelled by ${userRole} ${userId}`);
+
+  // --- NOTIFY other party on Cancellation ---
+  if (userRole === 'user' && order.scrapper) {
+    // Notify Scrapper if User cancels
+    sendNotificationToUser(order.scrapper.toString(), {
+      title: 'Order Cancelled ⚠️',
+      body: `Order #${order._id.toString().slice(-6)} has been cancelled by the customer.`,
+      data: { orderId: order._id.toString(), type: 'order_cancelled' }
+    });
+  } else if (userRole === 'scrapper') {
+    // Notify User if Scrapper cancels
+    sendNotificationToUser(order.user.toString(), {
+      title: 'Order Cancelled ⚠️',
+      body: `The scrapper has cancelled your pickup #${order._id.toString().slice(-6)}. It is now available for other scrappers.`,
+      data: { orderId: order._id.toString(), type: 'order_cancelled' }
+    });
+  }
 
   sendSuccess(res, 'Order cancelled successfully', { order });
 });

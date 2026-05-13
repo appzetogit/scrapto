@@ -75,7 +75,7 @@ async function registerFCMToken(forceUpdate = false) {
         }
         
         // Save to backend
-        const response = await fcmAPI.saveToken(token, 'web');
+        const response = await fcmAPI.saveToken(token, 'web', forceUpdate);
         
         if (response.success) {
             localStorage.setItem('fcm_token_registered', token);

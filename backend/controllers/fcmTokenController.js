@@ -63,6 +63,17 @@ export const saveFcmToken = asyncHandler(async (req, res) => {
     }
 
     sendSuccess(res, 'FCM token saved successfully');
+
+    // Optional: Send a welcome/login notification if this is a fresh login session
+    // This solves the race condition where the backend tries to notify before the token is saved.
+    if (req.body.isNewLogin) {
+        const { sendNotificationToUser } = await import('../utils/pushNotificationHelper.js');
+        sendNotificationToUser(userId, {
+            title: 'Login Successful 🚀',
+            body: `Welcome back! Your notifications are now active.`,
+            data: { type: 'login_success' }
+        });
+    }
 });
 
 /**

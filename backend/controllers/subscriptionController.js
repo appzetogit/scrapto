@@ -356,6 +356,14 @@ export const verifyPayment = asyncHandler(async (req, res) => {
     // Activate subscription
     const subscriptionResult = await activateSubscription(scrapperId, payment._id);
 
+    // --- NOTIFY SCRAPPER ---
+    const { sendNotificationToUser } = await import('../utils/pushNotificationHelper.js');
+    sendNotificationToUser(scrapperId, {
+      title: 'Subscription Active! 🚀',
+      body: `Your ${subscriptionResult.plan?.name || 'subscription'} is now active until ${new Date(subscriptionResult.subscription.expiryDate).toLocaleDateString()}.`,
+      data: { type: 'subscription_active' }
+    });
+
     // If coupon was used, record usage (for non-free plans)
     if (payment.couponCode) {
       const coupon = await Coupon.findOne({ code: payment.couponCode.toUpperCase() });

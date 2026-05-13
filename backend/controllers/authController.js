@@ -187,15 +187,7 @@ export const login = asyncHandler(async (req, res) => {
   // Generate token
   const token = generateToken(user._id, user.role);
 
-  // Send Push Notification
-  sendNotificationToUser(user._id.toString(), {
-    title: 'Login Successful 🚀',
-    body: `Welcome back, ${user.name}! You have successfully logged in.`,
-    data: {
-      type: 'login_success'
-    }
-  });
-
+  // Send Success Response
   sendSuccess(res, 'Login successful', {
     user,
     token
@@ -385,15 +377,7 @@ export const verifyOTP = asyncHandler(async (req, res) => {
 
   const token = generateToken(user._id, tokenRole);
 
-  // Send Push Notification
-  sendNotificationToUser(user._id.toString(), {
-    title: 'Login Successful 🚀',
-    body: `Welcome back, ${user.name}! You have successfully logged in.`,
-    data: {
-      type: 'login_success'
-    }
-  });
-
+  // Send Success Response
   // Log token generation for debugging
   logger.info('🔑 Token generated in verifyOTP:', {
     userId: user._id,

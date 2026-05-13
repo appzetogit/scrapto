@@ -183,6 +183,14 @@ export const verifyRecharge = asyncHandler(async (req, res) => {
 
         await session.commitTransaction();
 
+        // --- NOTIFY USER ---
+        const { sendNotificationToUser } = await import('../utils/pushNotificationHelper.js');
+        sendNotificationToUser(userId, {
+            title: 'Wallet Recharged! 💰',
+            body: `₹${creditAmount} has been credited to your wallet. New balance: ₹${user.wallet.balance}`,
+            data: { type: 'wallet_credit', amount: creditAmount.toString() }
+        });
+
         sendSuccess(res, 'Wallet recharged successfully', {
             newBalance: user.wallet.balance,
             transactionId: trx[0].trxId
@@ -359,6 +367,14 @@ export const payOrderViaWallet = asyncHandler(async (req, res) => {
         await order.save({ session });
 
         await session.commitTransaction();
+
+        // --- NOTIFY Payee ---
+        const { sendNotificationToUser } = await import('../utils/pushNotificationHelper.js');
+        sendNotificationToUser(payeeId.toString(), {
+            title: 'Payment Received! 💵',
+            body: `You have received ₹${transferAmount} for order #${order._id.toString().slice(-6)}.`,
+            data: { orderId: order._id.toString(), type: 'payment_received' }
+        });
 
         sendSuccess(res, 'Payment successful', {
             newBalance: payer.wallet.balance,

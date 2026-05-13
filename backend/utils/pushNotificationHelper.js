@@ -46,6 +46,8 @@ export const sendNotificationToUser = async (userId, payload, includeApp = true)
         // Remove duplicates and empty tokens
         const uniqueTokens = [...new Set(tokens)].filter(t => t);
 
+        logger.info(`Notification Debug for ${userId}: Found ${uniqueTokens.length} tokens. User exists: ${!!user}, Scrapper exists: ${!!scrapper}`);
+
         if (uniqueTokens.length === 0) {
             logger.info(`No FCM tokens found for user ${userId}`);
             return null;

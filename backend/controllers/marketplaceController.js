@@ -351,6 +351,22 @@ export const acceptBid = asyncHandler(async (req, res) => {
     }
   });
 
+  // Notify other scrappers that their bid was not selected
+  try {
+    const otherBids = await Bid.find({ requestId: request._id, _id: { $ne: bid._id } });
+    const otherScrapperIds = otherBids.map(b => b.scrapperId.toString());
+    if (otherScrapperIds.length > 0) {
+      const { sendNotificationToMultipleUsers } = await import('../utils/pushNotificationHelper.js');
+      sendNotificationToMultipleUsers(otherScrapperIds, {
+        title: 'Bid Not Selected 📍',
+        body: `The deal for "${request.title}" has been closed with another scrapper.`,
+        data: { requestId: request._id.toString(), type: 'bid_rejected' }
+      });
+    }
+  } catch (err) {
+    logger.error('Error notifying rejected bidders:', err);
+  }
+
   sendSuccess(res, 'Deal closed successfully. Contact details are now visible.', request);
 });
 
