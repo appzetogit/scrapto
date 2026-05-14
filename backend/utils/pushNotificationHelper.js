@@ -24,23 +24,18 @@ export const sendNotificationToUser = async (userId, payload, includeApp = true)
         }
 
         let tokens = [];
+        const getSafeTokens = (model) => {
+            const webTokens = Array.isArray(model.fcmTokens) ? model.fcmTokens : [];
+            const appTokens = Array.isArray(model.fcmTokenApp) ? model.fcmTokenApp : [];
+            return [...webTokens, ...appTokens];
+        };
 
         if (user) {
-            if (user.fcmTokens && user.fcmTokens.length > 0) {
-                tokens = [...tokens, ...user.fcmTokens];
-            }
-            if (includeApp && user.fcmTokenApp && user.fcmTokenApp.length > 0) {
-                tokens = [...tokens, ...user.fcmTokenApp];
-            }
+            tokens = [...tokens, ...getSafeTokens(user)];
         }
 
         if (scrapper) {
-            if (scrapper.fcmTokens && scrapper.fcmTokens.length > 0) {
-                tokens = [...tokens, ...scrapper.fcmTokens];
-            }
-            if (includeApp && scrapper.fcmTokenApp && scrapper.fcmTokenApp.length > 0) {
-                tokens = [...tokens, ...scrapper.fcmTokenApp];
-            }
+            tokens = [...tokens, ...getSafeTokens(scrapper)];
         }
 
         // Remove duplicates and empty tokens

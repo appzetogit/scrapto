@@ -31,6 +31,7 @@ import CouponsList from './components/CouponsList';
 import WithdrawalRequests from './components/WithdrawalRequests';
 import SystemSettings from './components/SystemSettings';
 import MarketplaceManager from './components/MarketplaceManager';
+import BroadcastNotification from './components/BroadcastNotification';
 import { usePageTranslation } from '../../hooks/usePageTranslation';
 
 // Protected Route Component
@@ -110,6 +111,8 @@ const AdminModuleRoutes = () => {
         <Route path="help-support" element={<HelpSupport />} />
         {/* System Settings */}
         <Route path="settings" element={<SystemSettings />} />
+        {/* Broadcast Notifications */}
+        <Route path="broadcast" element={<BroadcastNotification />} />
         {/* Profile */}
         <Route path="profile" element={<AdminProfile />} />
         {/* Placeholder routes for future pages */}

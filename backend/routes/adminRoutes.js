@@ -49,7 +49,10 @@ import {
 
   // Settings Management
   getSystemSettings,
-  updateSystemSetting
+  updateSystemSetting,
+  
+  // Notification & Broadcast
+  broadcastNotification
 } from '../controllers/adminController.js';
 
 import { getScrapperEarningsForAdmin } from '../controllers/earningsController.js';
@@ -181,5 +184,10 @@ router.delete('/coupons/:id', deleteCoupon);
 // ============================================
 router.get('/settings', getSystemSettings);
 router.put('/settings/:key', updateSystemSetting);
+
+// ============================================
+// NOTIFICATION & BROADCAST
+// ============================================
+router.post('/broadcast', broadcastNotification);
 
 export default router;

@@ -13,6 +13,8 @@ import mongoose from 'mongoose';
 import { createContact, createFundAccount, initiatePayout } from '../services/payoutService.js';
 import WithdrawalRequest from '../models/WithdrawalRequest.js';
 import SystemSetting from '../models/SystemSetting.js';
+import { getIO } from '../services/socketService.js';
+import { sendPushNotification } from '../services/firebaseService.js';
 
 // ============================================
 // DASHBOARD & ANALYTICS
@@ -1611,5 +1613,114 @@ export const updateSystemSetting = asyncHandler(async (req, res) => {
   } catch (error) {
     logger.error('[Admin] Error updating setting:', error);
     sendError(res, 'Failed to update setting', 500);
+  }
+});
+
+// ============================================
+// NOTIFICATION & BROADCAST
+// ============================================
+
+// @desc    Broadcast notification to users and scrappers
+// @route   POST /api/admin/broadcast
+// @access  Private (Admin)
+export const broadcastNotification = asyncHandler(async (req, res) => {
+  const { title, body, target, data = {} } = req.body;
+
+  if (!title || !body || !target) {
+    return sendError(res, 'Title, body and target are required', 400);
+  }
+
+  try {
+    let query = { isActive: true };
+
+    if (target === 'users') {
+      query.role = USER_ROLES.USER;
+    } else if (target === 'scrappers') {
+      query.role = USER_ROLES.SCRAPPER;
+    } else if (target === 'all') {
+      query.role = { $in: [USER_ROLES.USER, USER_ROLES.SCRAPPER] };
+    } else {
+      return sendError(res, 'Invalid target. Must be users, scrappers, or all', 400);
+    }
+
+    // Fetch users with tokens from User model
+    const usersWithTokens = await User.find(query).select('fcmTokens fcmTokenApp role');
+    
+    let allTokens = [];
+    let userTokensCount = 0;
+    let scrapperTokensCount = 0;
+
+    usersWithTokens.forEach(u => {
+      const webTokens = Array.isArray(u.fcmTokens) ? u.fcmTokens : [];
+      const appTokens = Array.isArray(u.fcmTokenApp) ? u.fcmTokenApp : [];
+      const tokens = [...webTokens, ...appTokens];
+      
+      if (u.role === USER_ROLES.USER) userTokensCount += tokens.length;
+      if (u.role === USER_ROLES.SCRAPPER) scrapperTokensCount += tokens.length;
+      allTokens = [...allTokens, ...tokens];
+    });
+
+    // Also fetch from Scrapper model if target is scrappers or all
+    if (target === 'scrappers' || target === 'all') {
+      const scrappersWithTokens = await Scrapper.find({ status: 'active' }).select('fcmTokens fcmTokenApp');
+      scrappersWithTokens.forEach(s => {
+        const webTokens = Array.isArray(s.fcmTokens) ? s.fcmTokens : [];
+        const appTokens = Array.isArray(s.fcmTokenApp) ? s.fcmTokenApp : [];
+        const tokens = [...webTokens, ...appTokens];
+        scrapperTokensCount += tokens.length;
+        allTokens = [...allTokens, ...tokens];
+      });
+    }
+
+    // Remove duplicates and empty strings
+    const uniqueTokens = [...new Set(allTokens)].filter(t => t && typeof t === 'string');
+
+    logger.info(`[Admin] Broadcast Debug - Target: ${target}, Users Found: ${usersWithTokens.length}, Total Tokens: ${uniqueTokens.length}`);
+    logger.info(`[Admin] Token Breakdown - User Tokens: ${userTokensCount}, Scrapper Tokens: ${scrapperTokensCount}`);
+
+    // Send Push Notifications in batches of 500 (Firebase limit)
+    const batchSize = 500;
+    const sendPromises = [];
+    for (let i = 0; i < uniqueTokens.length; i += batchSize) {
+      const batch = uniqueTokens.slice(i, i + batchSize);
+      sendPromises.push(sendPushNotification(batch, { 
+        title, 
+        body, 
+        data: { ...data, type: 'broadcast', title, body } 
+      }));
+    }
+
+    // Send via Socket.io for real-time in-app notification
+    try {
+      const io = getIO();
+      const socketEvent = 'broadcast_notification';
+      const socketData = { 
+        title, 
+        body, 
+        data: { ...data, type: 'broadcast' }, 
+        target,
+        timestamp: new Date() 
+      };
+
+      // Emit to everyone
+      io.emit(socketEvent, socketData);
+      logger.info(`[Admin] Broadcast emitted via Socket.io: ${title}`);
+    } catch (socketError) {
+      logger.error('[Admin] Socket broadcast failed:', socketError.message);
+      // Don't fail the whole request if socket fails
+    }
+
+    // Wait for all push notification batches to complete
+    if (sendPromises.length > 0) {
+      await Promise.allSettled(sendPromises);
+    }
+
+    sendSuccess(res, `Broadcast sent successfully to ${uniqueTokens.length} devices`, {
+      target,
+      tokenCount: uniqueTokens.length
+    });
+  } catch (error) {
+    logger.error('[Admin] Broadcast failed:', error);
+    sendError(res, 'Failed to send broadcast notification: ' + error.message, 500);
   }
 });

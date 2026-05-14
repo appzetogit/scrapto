@@ -13,6 +13,7 @@ import AboutUs from './modules/shared/pages/AboutUs';
 import ContactUs from './modules/shared/pages/ContactUs';
 import SharedTerms from './modules/shared/pages/SharedTerms';
 import { Toaster } from 'react-hot-toast';
+import BroadcastListener from './modules/shared/components/BroadcastListener';
 
 function App() {
   useEffect(() => {
@@ -26,6 +27,7 @@ function App() {
   return (
     <BrowserRouter>
       <Toaster position="top-center" reverseOrder={false} />
+      <BroadcastListener />
       <div className="flex flex-col min-h-screen">
         <main className="flex-grow">
           <Routes>

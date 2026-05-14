@@ -66,6 +66,7 @@ export const API_ENDPOINTS = {
     subscriptionsAll: '/admin/subscriptions/all',
     subscriptionPlans: '/admin/subscriptions/plans',
     subscriptionPlanById: (id) => `/admin/subscriptions/plans/${id}`,
+    broadcast: '/admin/broadcast',
   },
   scrappers: {
     stats: '/scrappers/stats',

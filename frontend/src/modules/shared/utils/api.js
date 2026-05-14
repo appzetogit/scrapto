@@ -605,6 +605,13 @@ export const adminAPI = {
       role: 'admin'
     });
   },
+  broadcastNotification: async (broadcastData) => {
+    return apiRequest(API_ENDPOINTS.admin.broadcast, {
+      method: 'POST',
+      body: JSON.stringify(broadcastData),
+      role: 'admin'
+    });
+  },
   request: (endpoint, options) => apiRequest(endpoint, options),
 };
 

@@ -19,7 +19,8 @@ import {
   FaTimes,
   FaGift,
   FaBullhorn,
-  FaTag
+  FaTag,
+  FaBroadcastTower
 } from 'react-icons/fa';
 import siteLogo from '../../../assets/scraptox-removebg-preview.png';
 
@@ -53,7 +54,8 @@ const AdminLayout = () => {
     "Scraptox",
     "Logout",
     "Administrator",
-    "System Settings"
+    "System Settings",
+    "Broadcast"
   ];
   const { getTranslatedText } = usePageTranslation(staticTexts);
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -104,6 +106,7 @@ const AdminLayout = () => {
     { icon: FaGift, label: getTranslatedText('Coupons'), path: '/admin/coupons' },
     { icon: FaChartBar, label: getTranslatedText('Reports'), path: '/admin/reports' },
     { icon: FaBullhorn, label: getTranslatedText('Ad Banners'), path: '/admin/banners' },
+    { icon: FaBroadcastTower, label: getTranslatedText('Broadcast'), path: '/admin/broadcast' },
     { icon: FaCog, label: getTranslatedText('Help & Support'), path: '/admin/help-support' },
     { icon: FaCog, label: getTranslatedText('System Settings'), path: '/admin/settings' }
   ];

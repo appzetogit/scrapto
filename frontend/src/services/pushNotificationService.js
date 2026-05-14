@@ -75,11 +75,21 @@ async function registerFCMToken(forceUpdate = false) {
         }
         
         // Save to backend
-        const response = await fcmAPI.saveToken(token, 'web', forceUpdate);
+        // Detect platform (simplified detection for WebView/Mobile)
+        const isMobileApp = /Mobi|Android|iPhone/i.test(navigator.userAgent) && 
+                          (window.location.protocol === 'file:' || 
+                           window.navigator.standalone || 
+                           window.cordova || 
+                           window.Capacitor);
+        
+        const platform = isMobileApp ? 'app' : 'web';
+        
+        const response = await fcmAPI.saveToken(token, platform, forceUpdate);
         
         if (response.success) {
-            localStorage.setItem('fcm_token_registered', token);
-            console.log('✅ FCM token registered successfully');
+            localStorage.setItem('fcmTokenRegistered', token);
+            localStorage.setItem('fcmTokenPlatform', platform);
+            console.log(`✅ FCM token registered successfully for platform: ${platform}`);
             return token;
         }
         return null;

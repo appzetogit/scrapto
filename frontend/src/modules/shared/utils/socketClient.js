@@ -305,6 +305,30 @@ class SocketClient {
   }
 
   /**
+   * Listen for broadcast notifications
+   * @param {Function} callback - Callback function
+   */
+  onBroadcast(callback) {
+    if (this.socket) {
+      const listener = (data) => {
+        callback(data);
+      };
+      this.socket.on('broadcast_notification', listener);
+      this.listeners.set('broadcast_notification', listener);
+    }
+  }
+
+  /**
+   * Remove broadcast notification listener
+   */
+  offBroadcast() {
+    if (this.socket) {
+      this.socket.off('broadcast_notification');
+      this.listeners.delete('broadcast_notification');
+    }
+  }
+
+  /**
    * Get connection status
    * @returns {boolean} Connection status
    */
