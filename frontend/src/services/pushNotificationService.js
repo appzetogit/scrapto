@@ -100,12 +100,18 @@ async function registerFCMToken(forceUpdate = false) {
 }
 
 // Setup foreground notification handler
-function setupForegroundNotificationHandler() {
+function setupForegroundNotificationHandler(callback) {
     return onMessage(messaging, (payload) => {
         console.log('📬 Foreground message received:', payload);
         
-        // If the app is in focus, we might want to show a toast instead of a browser notification
-        // or just show the browser notification anyway
+        // If a callback is provided, let the React app handle the custom UI (e.g. react-hot-toast)
+        // and skip the standard native browser notification.
+        if (callback && typeof callback === 'function') {
+            callback(payload);
+            return;
+        }
+        
+        // Fallback: If no callback is provided, show the native browser notification
         if (Notification.permission === 'granted') {
             const { title, body, icon } = payload.notification;
             new Notification(title, {

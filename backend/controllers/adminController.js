@@ -1690,25 +1690,7 @@ export const broadcastNotification = asyncHandler(async (req, res) => {
       }));
     }
 
-    // Send via Socket.io for real-time in-app notification
-    try {
-      const io = getIO();
-      const socketEvent = 'broadcast_notification';
-      const socketData = { 
-        title, 
-        body, 
-        data: { ...data, type: 'broadcast' }, 
-        target,
-        timestamp: new Date() 
-      };
-
-      // Emit to everyone
-      io.emit(socketEvent, socketData);
-      logger.info(`[Admin] Broadcast emitted via Socket.io: ${title}`);
-    } catch (socketError) {
-      logger.error('[Admin] Socket broadcast failed:', socketError.message);
-      // Don't fail the whole request if socket fails
-    }
+    // Socket.io emission removed to prevent duplicate notifications since Firebase handles foreground UI toasts.
 
     // Wait for all push notification batches to complete
     if (sendPromises.length > 0) {
