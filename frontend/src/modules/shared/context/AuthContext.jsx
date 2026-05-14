@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import { authAPI } from '../utils/api';
 import { registerFCMToken } from '../../../services/pushNotificationService';
+import socketClient from '../utils/socketClient';
 
 const AuthContext = createContext();
 
@@ -33,6 +34,8 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('token');
     localStorage.removeItem('userToken');
     localStorage.removeItem('scrapperToken');
+    // Disconnect Socket Globally
+    socketClient.disconnect();
   }, []);
 
   // Verify token on mount
@@ -49,6 +52,8 @@ export const AuthProvider = ({ children }) => {
             setIsAuthenticated(true);
             // Register FCM token
             registerFCMToken();
+            // Connect Socket Globally
+            socketClient.connect(token);
           } else {
             // Token invalid, clear storage
             logout();
@@ -92,6 +97,8 @@ export const AuthProvider = ({ children }) => {
       });
       // Register FCM token
       registerFCMToken(true);
+      // Connect Socket Globally
+      socketClient.connect(token);
     } else {
       console.warn('⚠️ No token provided to login function');
     }
