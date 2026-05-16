@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
   FaArrowLeft, FaTruck, FaPhone, FaIdCard, FaStar, FaRupeeSign,
-  FaCheckCircle, FaTimesCircle, FaClock, FaUserTimes, FaCar, FaCreditCard, FaChartLine, FaTrashAlt
+  FaCheckCircle, FaTimesCircle, FaClock, FaUserTimes, FaCar, FaCreditCard, FaChartLine, FaTrashAlt, FaMapMarkerAlt
 } from 'react-icons/fa';
 import { adminAPI, earningsAPI } from '../../shared/utils/api';
 import { usePageTranslation } from '../../../hooks/usePageTranslation';
@@ -128,6 +128,7 @@ const ScrapperDetail = () => {
           ? `${backendScrapper.vehicleInfo.type || ''} - ${backendScrapper.vehicleInfo.number || ''}`
           : getTranslatedText('Not provided'),
         joinedAt: backendScrapper.createdAt || new Date().toISOString(),
+        city: backendScrapper.city || getTranslatedText('Not provided'),
         earnings: earningsData,
         status: backendScrapper.status || 'active'
       };
@@ -359,6 +360,13 @@ const ScrapperDetail = () => {
                 <div>
                   <p className="text-xs" style={{ color: '#718096' }}>{getTranslatedText("Vehicle")}</p>
                   <p className="font-semibold" style={{ color: '#2d3748' }}>{getTranslatedText(scrapper.vehicleInfo)}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <FaMapMarkerAlt style={{ color: '#64946e' }} />
+                <div>
+                  <p className="text-xs" style={{ color: '#718096' }}>{getTranslatedText("City")}</p>
+                  <p className="font-semibold text-emerald-600" style={{ color: '#059669' }}>{scrapper.city}</p>
                 </div>
               </div>
             </div>

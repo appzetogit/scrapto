@@ -89,6 +89,7 @@ const ScrappersList = () => {
           rating: scrapper.rating || 0,
           totalPickups: scrapper.totalPickups || 0,
           totalEarnings: scrapper.earnings?.total || 0,
+          city: scrapper.city || getTranslatedText('Not provided'),
           vehicleInfo: scrapper.vehicleInfo ?
             `${scrapper.vehicleInfo.type || ''} - ${scrapper.vehicleInfo.number || ''}` :
             getTranslatedText('Not provided'),
@@ -405,9 +406,14 @@ const ScrappersList = () => {
                               <span>₹{scrapper.totalEarnings.toLocaleString()}</span>
                             </div>
                           </div>
-                          <p className="text-xs mt-1 md:mt-2" style={{ color: '#718096' }}>
-                            🚗 {scrapper.vehicleInfo}
-                          </p>
+                          <div className="flex items-center gap-1.5 md:gap-2 mt-1 md:mt-2 text-xs md:text-sm" style={{ color: '#718096' }}>
+                            <div className="bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-md font-medium">
+                              📍 {scrapper.city}
+                            </div>
+                            <div className="bg-gray-50 text-gray-700 px-2 py-0.5 rounded-md font-medium">
+                              🚗 {scrapper.vehicleInfo}
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </div>
