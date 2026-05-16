@@ -273,14 +273,36 @@ const ScrapperDashboard = () => {
   const handleAvailabilityToggle = async () => {
     const newAvailability = !isAvailable;
 
-    // Check subscription if trying to go online
+    // Check subscription and city if trying to go online
     if (newAvailability) {
+      // 1. Check subscription
       const isSubActive = subscriptionData?.isPlatformActive;
       if (!isSubActive) {
-        // Show notification/alert and redirect
         alert(getTranslatedText('Active subscription required to go online. Please subscribe first.'));
         navigate('/scrapper/subscription?type=general');
         return;
+      }
+
+      // 2. Check City (from latest profile)
+      try {
+        const profileRes = await scrapperProfileAPI.getMyProfile();
+        if (profileRes.success && profileRes.data?.scrapper) {
+          const scrapper = profileRes.data.scrapper;
+          if (!scrapper.city || scrapper.city.trim() === '') {
+            alert(getTranslatedText('Please set your city in profile before going online.'));
+            navigate('/scrapper/profile');
+            return;
+          }
+        }
+      } catch (error) {
+        console.error('Failed to verify city status:', error);
+        // If API fails, check localStorage as fallback
+        const storedScrapper = JSON.parse(localStorage.getItem('scrapperUser') || '{}');
+        if (!storedScrapper.city) {
+          alert(getTranslatedText('Please set your city in profile before going online.'));
+          navigate('/scrapper/profile');
+          return;
+        }
       }
     }
 

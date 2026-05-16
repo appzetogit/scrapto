@@ -187,6 +187,11 @@ const EditProfileModal = ({ isOpen, onClose, initialData, onSuccess }) => {
             setLoading(false);
             return;
         }
+        if (!formData.city.trim()) {
+            setError(getTranslatedText("City is required"));
+            setLoading(false);
+            return;
+        }
         if (!formData.vehicleNumber.trim()) {
             setError(getTranslatedText("Enter valid vehicle number"));
             setLoading(false);
@@ -318,7 +323,7 @@ const EditProfileModal = ({ isOpen, onClose, initialData, onSuccess }) => {
                                 {/* City */}
                                 <div className="space-y-1.5">
                                     <label className="text-sm font-medium text-slate-700 block">
-                                        {getTranslatedText("City")}
+                                        {getTranslatedText("City")} <span className="text-red-500">*</span>
                                     </label>
                                     <input
                                         ref={cityInputRef}

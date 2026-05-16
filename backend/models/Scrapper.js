@@ -23,8 +23,8 @@ const scrapperSchema = new mongoose.Schema({
   },
   city: {
     type: String,
-    trim: true,
-    default: null
+    required: [true, 'City is required'],
+    trim: true
   },
   profilePic: {
     type: String,

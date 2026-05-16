@@ -62,7 +62,18 @@ export const updateMyProfile = asyncHandler(async (req, res) => {
     } else {
         if (name) scrapper.name = name;
         if (vehicleInfo) scrapper.vehicleInfo = { ...scrapper.vehicleInfo, ...vehicleInfo };
-        if (city !== undefined && city !== null) scrapper.city = city.trim() || null;
+        if (city !== undefined) {
+            if (city === null || city.trim() === "") {
+                // If they are online, they CANNOT clear the city
+                if (scrapper.isOnline) {
+                    return sendError(res, 'City is mandatory while you are online.', 400);
+                }
+                scrapper.city = null;
+            } else {
+                scrapper.city = city.trim();
+            }
+        }
+        
         if (liveLocation) scrapper.liveLocation = liveLocation;
 
         // Update Online Status
@@ -70,6 +81,7 @@ export const updateMyProfile = asyncHandler(async (req, res) => {
             const requestedOnline = availability === true || isOnline === true;
 
             if (requestedOnline) {
+                // 1. Subscription Check
                 const now = new Date();
                 const isSubscribed = scrapper.subscription &&
                     scrapper.subscription.status === 'active' &&
@@ -77,6 +89,11 @@ export const updateMyProfile = asyncHandler(async (req, res) => {
 
                 if (!isSubscribed) {
                     return sendError(res, 'Active subscription required to go online. Please subscribe first.', 403);
+                }
+
+                // 2. MANDATORY City Check
+                if (!scrapper.city || scrapper.city.trim() === "") {
+                    return sendError(res, 'Please set your city in profile before going online. This is mandatory for city-wise requests.', 400);
                 }
             }
 

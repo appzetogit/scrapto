@@ -164,10 +164,13 @@ export const getMarketplaceRequests = asyncHandler(async (req, res) => {
     if (category) query.category = category;
 
     // STRICT city filter: scrapper only sees their own city
-    if (scrapper.city) {
-      query['location.city'] = new RegExp(`^${scrapper.city}$`, 'i');
+    if (scrapper.city && scrapper.city.trim() !== "") {
+      query['location.city'] = new RegExp(`^${scrapper.city.trim()}$`, 'i');
+    } else {
+      // If no city set, don't show any requests to be strict
+      logger.warn(`[Marketplace] Scrapper ${scrapperId} has no city set. Returning empty list.`);
+      return sendSuccess(res, 'Please set your city in profile to view marketplace requests', []);
     }
-    // If scrapper has no city set, show all (backward compatible for existing scrappers)
 
     let dbQuery = MarketplaceRequest.find(query)
       .sort({ createdAt: -1 });
