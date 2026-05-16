@@ -187,9 +187,18 @@ export const login = asyncHandler(async (req, res) => {
   // Generate token
   const token = generateToken(user._id, user.role);
 
+  // If scrapper, fetch scrapper profile to include city/details
+  let userData = user.toObject();
+  if (user.role === USER_ROLES.SCRAPPER) {
+    const scrapper = await Scrapper.findById(user._id);
+    if (scrapper) {
+      userData.scrapperProfile = scrapper;
+    }
+  }
+
   // Send Success Response
   sendSuccess(res, 'Login successful', {
-    user,
+    user: userData,
     token
   });
 });
@@ -199,7 +208,17 @@ export const login = asyncHandler(async (req, res) => {
 // @access  Private
 export const getMe = asyncHandler(async (req, res) => {
   const user = await User.findById(req.user.id);
-  sendSuccess(res, 'User retrieved successfully', { user });
+  if (!user) return sendError(res, 'User not found', 404);
+
+  let userData = user.toObject();
+  if (user.role === USER_ROLES.SCRAPPER) {
+    const scrapper = await Scrapper.findById(user._id);
+    if (scrapper) {
+      userData.scrapperProfile = scrapper;
+    }
+  }
+
+  sendSuccess(res, 'User retrieved successfully', { user: userData });
 });
 
 // @desc    Update user profile
@@ -387,8 +406,17 @@ export const verifyOTP = asyncHandler(async (req, res) => {
     userRoleInDB: user.role
   });
 
+  // If scrapper, fetch profile
+  let userData = user.toObject();
+  if (user.role === USER_ROLES.SCRAPPER) {
+    const scrapperProfile = await Scrapper.findById(user._id);
+    if (scrapperProfile) {
+      userData.scrapperProfile = scrapperProfile;
+    }
+  }
+
   sendSuccess(res, 'OTP verified successfully', {
-    user,
+    user: userData,
     token
   });
 });

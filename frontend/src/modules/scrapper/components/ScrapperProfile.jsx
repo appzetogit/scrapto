@@ -53,7 +53,7 @@ const ScrapperProfile = () => {
   ];
   const { getTranslatedText } = usePageTranslation(staticTexts);
   const navigate = useNavigate();
-  const { user, logout } = useAuth();
+  const { user, logout, updateUser } = useAuth();
   const [kycStatus, setKycStatus] = useState('not_submitted');
   const [platformSubscription, setPlatformSubscription] = useState(null);
   const [marketSubscription, setMarketSubscription] = useState(null);
@@ -67,21 +67,18 @@ const ScrapperProfile = () => {
   // handleTestNotification removed
 
   const handleProfileUpdate = (updatedScrapper) => {
-    // 1. Update local state
+    // 1. Update global AuthContext (which also updates localStorage)
+    // We update scrapperProfile and also sync the top-level name if it changed
+    updateUser({ 
+      scrapperProfile: updatedScrapper,
+      name: updatedScrapper.name || user.name 
+    });
+
+    // 2. Update local state for immediate UI feedback in this component
     setScrapperUser(prev => ({
       ...prev,
       ...updatedScrapper
     }));
-
-    // 2. Update LocalStorage (so Navbar/Header updates immediately on refresh/reload)
-    // Merge with existing user data in storage to avoid losing irrelevant keys
-    try {
-      const storedUser = JSON.parse(localStorage.getItem('scrapperUser') || '{}');
-      const newStoredUser = { ...storedUser, ...updatedScrapper };
-      localStorage.setItem('scrapperUser', JSON.stringify(newStoredUser));
-    } catch (e) {
-      console.error("Local storage update error", e);
-    }
 
     // 3. Close Modal
     setIsEditModalOpen(false);
