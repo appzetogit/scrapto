@@ -69,7 +69,10 @@ const ScrapperDetail = () => {
     "Delete Scrapper",
     "Are you sure you want to delete this scrapper? This action cannot be undone.",
     "Scrapper deleted successfully!",
-    "Failed to delete scrapper"
+    "Failed to delete scrapper",
+    "Purchased On",
+    "Marketplace Subscription",
+    "No active market subscription"
   ];
   const { getTranslatedText } = usePageTranslation(staticTexts);
 
@@ -129,6 +132,16 @@ const ScrapperDetail = () => {
           : getTranslatedText('Not provided'),
         joinedAt: backendScrapper.createdAt || new Date().toISOString(),
         city: backendScrapper.city || getTranslatedText('Not provided'),
+        subscription: backendScrapper.subscription ? {
+          ...backendScrapper.subscription,
+          planName: backendScrapper.subscription.planId?.name || backendScrapper.subscription.plan || getTranslatedText('N/A'),
+          price: backendScrapper.subscription.planId?.price || backendScrapper.subscription.price || 0
+        } : null,
+        marketSubscription: backendScrapper.marketSubscription ? {
+          ...backendScrapper.marketSubscription,
+          planName: backendScrapper.marketSubscription.planId?.name || getTranslatedText('N/A'),
+          price: backendScrapper.marketSubscription.planId?.price || 0
+        } : null,
         earnings: earningsData,
         status: backendScrapper.status || 'active'
       };
@@ -523,7 +536,7 @@ const ScrapperDetail = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <p className="text-xs mb-1" style={{ color: '#718096' }}>{getTranslatedText("Plan")}</p>
-              <p className="font-semibold" style={{ color: '#2d3748' }}>{scrapper.subscription.plan}</p>
+              <p className="font-semibold" style={{ color: '#2d3748' }}>{scrapper.subscription.planName}</p>
             </div>
             <div>
               <p className="text-xs mb-1" style={{ color: '#718096' }}>{getTranslatedText("Status")}</p>
@@ -539,12 +552,63 @@ const ScrapperDetail = () => {
             <div>
               <p className="text-xs mb-1" style={{ color: '#718096' }}>{getTranslatedText("Expires On")}</p>
               <p className="font-semibold" style={{ color: '#2d3748' }}>
-                {new Date(scrapper.subscription.expiryDate).toLocaleDateString()}
+                {scrapper.subscription.expiryDate ? new Date(scrapper.subscription.expiryDate).toLocaleDateString() : getTranslatedText('N/A')}
               </p>
             </div>
+            {scrapper.subscription.startDate && (
+              <div>
+                <p className="text-xs mb-1" style={{ color: '#718096' }}>{getTranslatedText("Purchased On")}</p>
+                <p className="font-semibold" style={{ color: '#2d3748' }}>
+                  {new Date(scrapper.subscription.startDate).toLocaleDateString()}
+                </p>
+              </div>
+            )}
           </div>
         </motion.div>
       )}
+
+      {/* Market Subscription Information */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.45 }}
+        className="bg-white rounded-2xl shadow-lg p-6"
+      >
+        <h2 className="text-xl font-bold mb-4" style={{ color: '#2d3748' }}>
+          {getTranslatedText("Marketplace Subscription")}
+        </h2>
+        {scrapper.marketSubscription && scrapper.marketSubscription.status !== 'none' ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <p className="text-xs mb-1" style={{ color: '#718096' }}>{getTranslatedText("Plan")}</p>
+              <p className="font-semibold" style={{ color: '#2d3748' }}>{scrapper.marketSubscription.planName}</p>
+            </div>
+            <div>
+              <p className="text-xs mb-1" style={{ color: '#718096' }}>{getTranslatedText("Status")}</p>
+              <span className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold inline-block ${scrapper.marketSubscription.status === 'active' ? 'bg-emerald-100 text-emerald-600' : 'bg-red-100 text-red-600'}`}>
+                {scrapper.marketSubscription.status === 'active' ? <FaCheckCircle className="text-xs" /> : <FaTimesCircle className="text-xs" />}
+                {getTranslatedText(scrapper.marketSubscription.status.charAt(0).toUpperCase() + scrapper.marketSubscription.status.slice(1))}
+              </span>
+            </div>
+            <div>
+              <p className="text-xs mb-1" style={{ color: '#718096' }}>{getTranslatedText("Expires On")}</p>
+              <p className="font-semibold" style={{ color: '#2d3748' }}>
+                {scrapper.marketSubscription.expiryDate ? new Date(scrapper.marketSubscription.expiryDate).toLocaleDateString() : getTranslatedText('N/A')}
+              </p>
+            </div>
+            {scrapper.marketSubscription.startDate && (
+              <div>
+                <p className="text-xs mb-1" style={{ color: '#718096' }}>{getTranslatedText("Purchased On")}</p>
+                <p className="font-semibold" style={{ color: '#2d3748' }}>
+                  {new Date(scrapper.marketSubscription.startDate).toLocaleDateString()}
+                </p>
+              </div>
+            )}
+          </div>
+        ) : (
+          <p className="text-sm italic text-gray-500">{getTranslatedText("No active market subscription")}</p>
+        )}
+      </motion.div>
 
       {/* Order History */}
       <motion.div
