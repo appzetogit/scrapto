@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
   FaArrowLeft, FaPhone, FaEnvelope, FaMapMarkerAlt, FaCalendarAlt,
-  FaShoppingBag, FaHistory, FaBan, FaCheckCircle, FaExclamationCircle
+  FaShoppingBag, FaHistory, FaBan, FaCheckCircle, FaExclamationCircle, FaTrashAlt
 } from 'react-icons/fa';
 import { adminAPI, adminOrdersAPI } from '../../shared/utils/api';
 import { usePageTranslation } from '../../../hooks/usePageTranslation';
@@ -56,7 +56,11 @@ const UserDetail = () => {
     "No orders found for this user",
     "Mixed Scrap",
     "Unknown",
-    "Unassigned"
+    "Unassigned",
+    "Delete User",
+    "Are you sure you want to delete this user? This action cannot be undone.",
+    "User deleted successfully!",
+    "Failed to delete user"
   ];
   const { getTranslatedText } = usePageTranslation(staticTexts);
 
@@ -115,6 +119,26 @@ const UserDetail = () => {
     } catch (err) {
       console.error(`Error ${action}ing user:`, err);
       alert(err.message || getTranslatedText("Failed to {action} user", { action: actionText }));
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleDeleteUser = async () => {
+    if (!window.confirm(getTranslatedText("Are you sure you want to delete this user? This action cannot be undone."))) return;
+
+    setActionLoading(true);
+    try {
+      const response = await adminAPI.deleteUser(userId);
+      if (response.success) {
+        alert(getTranslatedText("User deleted successfully!"));
+        navigate('/admin/users');
+      } else {
+        throw new Error(response.message || getTranslatedText("Failed to delete user"));
+      }
+    } catch (err) {
+      console.error('Error deleting user:', err);
+      alert(err.message || getTranslatedText("Failed to delete user"));
     } finally {
       setActionLoading(false);
     }
@@ -224,6 +248,15 @@ const UserDetail = () => {
                 >
                   <FaBan />
                   {user.isActive ? getTranslatedText('Block User') : getTranslatedText('Unblock User')}
+                </button>
+
+                <button
+                  onClick={handleDeleteUser}
+                  disabled={actionLoading}
+                  className="px-3 py-1.5 rounded-lg text-sm font-semibold flex items-center gap-1.5 transition-colors bg-red-100 text-red-600 hover:bg-red-200"
+                >
+                  <FaTrashAlt />
+                  {getTranslatedText('Delete User')}
                 </button>
               </div>
             </div>

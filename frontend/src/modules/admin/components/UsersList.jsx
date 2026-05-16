@@ -1,7 +1,7 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FaUsers, FaSearch, FaFilter, FaUserCheck, FaUserTimes, FaEye, FaPhone, FaMapMarkerAlt, FaRupeeSign } from 'react-icons/fa';
+import { FaUsers, FaSearch, FaFilter, FaUserCheck, FaUserTimes, FaEye, FaPhone, FaMapMarkerAlt, FaRupeeSign, FaTrashAlt } from 'react-icons/fa';
 import { adminAPI } from '../../shared/utils/api';
 import { usePageTranslation } from '../../../hooks/usePageTranslation';
 
@@ -47,7 +47,12 @@ const UsersList = () => {
     "Last active: {time}",
     "View",
     "Block",
-    "Unblock"
+    "Unblock",
+    "Delete",
+    "Delete User",
+    "Are you sure you want to delete this user? This action cannot be undone.",
+    "User deleted successfully!",
+    "Failed to delete user"
   ];
   const { getTranslatedText } = usePageTranslation(staticTexts);
 
@@ -116,15 +121,12 @@ const UsersList = () => {
   };
 
   const handleToggleBlock = async (userId, currentStatus) => {
-    const newStatus = currentStatus === 'blocked' ? 'active' : 'blocked';
     const actionText = currentStatus === 'blocked' ? getTranslatedText('unblock') : getTranslatedText('block');
     if (window.confirm(
       getTranslatedText('Are you sure you want to {action} this user?', { action: actionText })
     )) {
       try {
         if (currentStatus === 'blocked') {
-          // Unblock user (backend should handle this via updateUser or a separate endpoint)
-          // For now, we'll use updateUser to set isActive: true
           const response = await adminAPI.updateUser(userId, { isActive: true });
           if (response.success) {
             setUsers(prev => prev.map(user =>
@@ -137,7 +139,6 @@ const UsersList = () => {
             throw new Error(response.message || getTranslatedText('Failed to unblock user'));
           }
         } else {
-          // Block user
           const response = await adminAPI.blockUser(userId);
           if (response.success) {
             setUsers(prev => prev.map(user =>
@@ -158,6 +159,25 @@ const UsersList = () => {
       } catch (error) {
         console.error('Error toggling user block status:', error);
         alert(error.message || getTranslatedText('Failed to update user status. Please try again.'));
+      }
+    }
+  };
+
+  const handleDeleteUser = async (userId, name) => {
+    if (window.confirm(
+      getTranslatedText('Are you sure you want to delete this user? This action cannot be undone.')
+    )) {
+      try {
+        const response = await adminAPI.deleteUser(userId);
+        if (response.success) {
+          setUsers(prev => prev.filter(user => user.id !== userId));
+          alert(getTranslatedText('User deleted successfully!'));
+        } else {
+          throw new Error(response.message || getTranslatedText('Failed to delete user'));
+        }
+      } catch (error) {
+        console.error('Error deleting user:', error);
+        alert(error.message || getTranslatedText('Failed to delete user'));
       }
     }
   };
@@ -429,6 +449,17 @@ const UsersList = () => {
                           <span className="hidden sm:inline">{getTranslatedText("Unblock")}</span>
                         </motion.button>
                       )}
+                      
+                      {/* Delete Button */}
+                      <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => handleDeleteUser(user.id, user.name)}
+                        className="px-3 py-1.5 md:px-4 md:py-2 rounded-lg md:rounded-xl font-semibold text-xs md:text-sm flex items-center gap-1.5 md:gap-2 transition-all bg-red-100 text-red-600 hover:bg-red-200"
+                      >
+                        <FaTrashAlt className="text-xs md:text-sm" />
+                        <span className="hidden sm:inline">{getTranslatedText("Delete")}</span>
+                      </motion.button>
                     </div>
                   </div>
                 </motion.div>

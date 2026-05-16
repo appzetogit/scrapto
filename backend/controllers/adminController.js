@@ -307,14 +307,23 @@ export const deleteUser = asyncHandler(async (req, res) => {
       return sendError(res, 'User not found', 404);
     }
 
-    // Check if user has orders
-    const ordersCount = await Order.countDocuments({ user: userId });
+    // Check if user has orders (either as user or scrapper)
+    const ordersCount = await Order.countDocuments({ 
+      $or: [{ user: userId }, { scrapper: userId }] 
+    });
+    
     if (ordersCount > 0) {
-      return sendError(res, 'Cannot delete user with existing orders', 400);
+      return sendError(res, 'Cannot delete user with existing orders. Please cancel or complete them first.', 400);
+    }
+
+    // If user is a scrapper, delete scrapper profile too
+    if (user.role === USER_ROLES.SCRAPPER || user.role === 'scrapper') {
+      await Scrapper.findByIdAndDelete(userId);
     }
 
     await User.findByIdAndDelete(userId);
 
+    logger.info(`[Admin] User ${userId} (${user.name}) deleted by admin`);
     sendSuccess(res, 'User deleted successfully', {});
   } catch (error) {
     logger.error('[Admin] Error deleting user:', error);
@@ -576,12 +585,17 @@ export const deleteScrapper = asyncHandler(async (req, res) => {
     // Check if scrapper has orders
     const ordersCount = await Order.countDocuments({ scrapper: scrapperId });
     if (ordersCount > 0) {
-      return sendError(res, 'Cannot delete scrapper with existing orders', 400);
+      return sendError(res, 'Cannot delete scrapper with existing orders. Please reassign or complete them first.', 400);
     }
 
+    // Delete scrapper profile
     await Scrapper.findByIdAndDelete(scrapperId);
+    
+    // Also delete associated user record for authentication
+    await User.findByIdAndDelete(scrapperId);
 
-    sendSuccess(res, 'Scrapper deleted successfully', {});
+    logger.info(`[Admin] Scrapper ${scrapperId} (${scrapper.name}) deleted by admin`);
+    sendSuccess(res, 'Scrapper and associated user account deleted successfully', {});
   } catch (error) {
     logger.error('[Admin] Error deleting scrapper:', error);
     sendError(res, 'Failed to delete scrapper', 500);

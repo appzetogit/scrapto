@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
   FaArrowLeft, FaTruck, FaPhone, FaIdCard, FaStar, FaRupeeSign,
-  FaCheckCircle, FaTimesCircle, FaClock, FaUserTimes, FaCar, FaCreditCard, FaChartLine
+  FaCheckCircle, FaTimesCircle, FaClock, FaUserTimes, FaCar, FaCreditCard, FaChartLine, FaTrashAlt
 } from 'react-icons/fa';
 import { adminAPI, earningsAPI } from '../../shared/utils/api';
 import { usePageTranslation } from '../../../hooks/usePageTranslation';
@@ -65,7 +65,11 @@ const ScrapperDetail = () => {
     "Location: ",
     "Completed: ",
     "N/A",
-    "User"
+    "User",
+    "Delete Scrapper",
+    "Are you sure you want to delete this scrapper? This action cannot be undone.",
+    "Scrapper deleted successfully!",
+    "Failed to delete scrapper"
   ];
   const { getTranslatedText } = usePageTranslation(staticTexts);
 
@@ -194,6 +198,26 @@ const ScrapperDetail = () => {
     }
   };
 
+  const handleDeleteScrapper = async () => {
+    if (!window.confirm(getTranslatedText("Are you sure you want to delete this scrapper? This action cannot be undone."))) return;
+
+    setActionLoading(true);
+    try {
+      const response = await adminAPI.deleteScrapper(scrapperId);
+      if (response.success) {
+        alert(getTranslatedText("Scrapper deleted successfully!"));
+        navigate('/admin/scrappers');
+      } else {
+        throw new Error(response.message || getTranslatedText("Failed to delete scrapper"));
+      }
+    } catch (err) {
+      console.error('Error deleting scrapper:', err);
+      alert(err.message || getTranslatedText("Failed to delete scrapper"));
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
   const getKYCStatusBadge = (status) => {
     if (status === 'verified') {
       return (
@@ -291,6 +315,15 @@ const ScrapperDetail = () => {
                 {scrapper.name}
               </h1>
               {getKYCStatusBadge(scrapper.kycStatus)}
+              
+              <button
+                onClick={handleDeleteScrapper}
+                disabled={actionLoading}
+                className="ml-auto px-3 py-1.5 rounded-lg text-sm font-semibold flex items-center gap-1.5 transition-colors bg-red-100 text-red-600 hover:bg-red-200"
+              >
+                <FaTrashAlt />
+                <span className="hidden sm:inline">{getTranslatedText('Delete Scrapper')}</span>
+              </button>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">

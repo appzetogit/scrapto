@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   FaTruck, FaSearch, FaUserCheck, FaUserTimes, FaEye, FaPhone,
-  FaIdCard, FaStar, FaRupeeSign, FaCheckCircle, FaClock, FaTimesCircle
+  FaIdCard, FaStar, FaRupeeSign, FaCheckCircle, FaClock, FaTimesCircle, FaBan, FaTrashAlt
 } from 'react-icons/fa';
 import { adminAPI } from '../../shared/utils/api';
 import { usePageTranslation } from '../../../hooks/usePageTranslation';
@@ -49,7 +49,13 @@ const ScrappersList = () => {
     "Scrapper {status} successfully!",
     "Failed to update scrapper status",
     "Failed to update scrapper status. Please try again.",
-    "Not provided"
+    "Not provided",
+    "Deactivate",
+    "Activate",
+    "Delete",
+    "Are you sure you want to delete this scrapper? This action cannot be undone.",
+    "Scrapper deleted successfully!",
+    "Failed to delete scrapper"
   ];
   const { getTranslatedText } = usePageTranslation(staticTexts);
 
@@ -101,6 +107,48 @@ const ScrappersList = () => {
       setScrappers([]);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleToggleStatus = async (scrapperId, currentStatus) => {
+    const newStatus = currentStatus === 'active' ? 'inactive' : 'active';
+    const actionText = currentStatus === 'active' ? getTranslatedText('deactivate') : getTranslatedText('activate');
+    if (window.confirm(
+      getTranslatedText('Are you sure you want to {action} this scrapper?', { action: actionText })
+    )) {
+      try {
+        const response = await adminAPI.updateScrapperStatus(scrapperId, newStatus);
+        if (response.success) {
+          setScrappers(prev => prev.map(s =>
+            s.id === scrapperId ? { ...s, status: newStatus } : s
+          ));
+          alert(getTranslatedText('Scrapper {action}d successfully!', { action: actionText }));
+        } else {
+          throw new Error(response.message || getTranslatedText('Failed to update status'));
+        }
+      } catch (error) {
+        console.error('Error updating status:', error);
+        alert(error.message || getTranslatedText('Failed to update status. Please try again.'));
+      }
+    }
+  };
+
+  const handleDeleteScrapper = async (scrapperId) => {
+    if (window.confirm(
+      getTranslatedText('Are you sure you want to delete this scrapper? This action cannot be undone.')
+    )) {
+      try {
+        const response = await adminAPI.deleteScrapper(scrapperId);
+        if (response.success) {
+          setScrappers(prev => prev.filter(s => s.id !== scrapperId));
+          alert(getTranslatedText('Scrapper deleted successfully!'));
+        } else {
+          throw new Error(response.message || getTranslatedText('Failed to delete scrapper'));
+        }
+      } catch (error) {
+        console.error('Error deleting scrapper:', error);
+        alert(error.message || getTranslatedText('Failed to delete scrapper'));
+      }
     }
   };
 
@@ -365,55 +413,24 @@ const ScrappersList = () => {
                     </div>
 
                     {/* Actions */}
-                    <div className="flex gap-2">
+                    <div className="flex items-center gap-2">
                       <motion.button
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
                         onClick={() => handleViewDetails(scrapper.id)}
-                        className="px-3 py-1.5 md:px-4 md:py-2 rounded-lg md:rounded-xl font-semibold text-xs md:text-sm flex items-center gap-1.5 md:gap-2 transition-all"
-                        style={{ backgroundColor: '#64946e', color: '#ffffff' }}
+                        className="px-3 py-1.5 md:px-4 md:py-2 rounded-lg md:rounded-xl font-semibold text-xs md:text-sm flex items-center gap-1.5 md:gap-2 transition-all bg-gray-100 text-gray-700 hover:bg-gray-200"
                       >
                         <FaEye className="text-xs md:text-sm" />
                         <span className="hidden sm:inline">{getTranslatedText("View")}</span>
                       </motion.button>
+                      
                       <motion.button
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
-                        onClick={async () => {
-                          const nextStatus = scrapper.status === 'blocked' ? 'active' : 'blocked';
-                          const actionText = scrapper.status === 'blocked' ? getTranslatedText('unblock') : getTranslatedText('block');
-                          if (
-                            window.confirm(
-                              getTranslatedText('Are you sure you want to {action} this scrapper?', { action: actionText })
-                            )
-                          ) {
-                            try {
-                              const response = await adminAPI.updateScrapperStatus(scrapper.id, nextStatus);
-                              if (response.success) {
-                                // Update local state list
-                                setScrappers((prev) =>
-                                  prev.map((s) =>
-                                    s.id === scrapper.id
-                                      ? {
-                                        ...s,
-                                        status: nextStatus
-                                      }
-                                      : s
-                                  )
-                                );
-                                alert(getTranslatedText(`Scrapper {status} successfully!`, { status: nextStatus === 'blocked' ? getTranslatedText('blocked') : getTranslatedText('unblocked') }));
-                              } else {
-                                throw new Error(response.message || getTranslatedText('Failed to update scrapper status'));
-                              }
-                            } catch (error) {
-                              console.error('Error updating scrapper status:', error);
-                              alert(error.message || getTranslatedText('Failed to update scrapper status. Please try again.'));
-                            }
-                          }
-                        }}
+                        onClick={() => handleToggleStatus(scrapper.id, scrapper.status)}
                         className="px-3 py-1.5 md:px-4 md:py-2 rounded-lg md:rounded-xl font-semibold text-xs md:text-sm flex items-center gap-1.5 md:gap-2 transition-all"
                         style={{
-                          backgroundColor: scrapper.status === 'blocked' ? '#dcfce7' : '#fee2e2',
+                          backgroundColor: scrapper.status === 'blocked' ? '#d1fae5' : '#fee2e2',
                           color: scrapper.status === 'blocked' ? '#166534' : '#b91c1c'
                         }}
                       >
@@ -425,6 +442,16 @@ const ScrappersList = () => {
                         <span className="hidden sm:inline">
                           {scrapper.status === 'blocked' ? getTranslatedText('Unblock') : getTranslatedText('Block')}
                         </span>
+                      </motion.button>
+                      
+                      <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => handleDeleteScrapper(scrapper.id)}
+                        className="px-3 py-1.5 md:px-4 md:py-2 rounded-lg md:rounded-xl font-semibold text-xs md:text-sm flex items-center gap-1.5 md:gap-2 transition-all bg-red-100 text-red-600 hover:bg-red-200"
+                      >
+                        <FaTrashAlt className="text-xs md:text-sm" />
+                        <span className="hidden sm:inline">{getTranslatedText("Delete")}</span>
                       </motion.button>
                     </div>
                   </div>
